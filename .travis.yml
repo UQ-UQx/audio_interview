@@ -1,0 +1,16 @@
+language: node_js
+# ensure .nvmrc exists with the node version
+
+script:
+  - yarn
+  - yarn lint
+  - yarn build
+#  - yarn test
+
+# enable once tests are in place
+# after_success: "sbt coveralls"
+
+# Customize when the notification emails are sent.
+notifications:
+  on_success: never
+  on_failure: always
