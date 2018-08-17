@@ -56,6 +56,6 @@
         console.log("works ", $LTI_courseID);
 	</script>
     <div id="app"></div>
-        <!-- <script type="text/javascript" src="./build/bundle.js"></script> -->
+    <script type="text/javascript" src="./dist/bundle.js"></script>
     </body>
 </html>
