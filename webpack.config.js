@@ -1,3 +1,6 @@
+var webpack = require("webpack");
+var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
+
 module.exports = {
     entry: {
       bundle: './src/index.js',
@@ -15,6 +18,15 @@ module.exports = {
         //jquery : 'jquery',
         _ : 'lodash'
       }),
+
+      new BrowserSyncPlugin({
+        host: 'localhost',
+        port: 3000,
+        proxy: 'http://localhost:80/',
+        files: [
+          './public/**/*'
+        ]
+      })
 
     ],
     module: {
