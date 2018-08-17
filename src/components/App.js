@@ -1,11 +1,12 @@
 import React from 'react';
+import styled from 'styled-components';
 
-// class App extends Component {
-//     render() {
-//         return <div>Hello React!</div>;
-//     }
-// }
+const AppContainer = styled.div`
+    border: 1px solid lightgrey;
+    padding: 50px;
+    height: 100px;
+`;
 
-const App = () => <div>Hello React!</div>;
+const App = () => <AppContainer>Hello React App!</AppContainer>;
 
 export default App;
