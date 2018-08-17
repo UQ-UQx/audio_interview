@@ -1,0 +1,9 @@
+{
+  "name": "react-php-lti",
+  "version": "1.0.0",
+  "description": "LTI app powered by react",
+  "main": "index.js",
+  "author": "Ankith Konda",
+  "license": "MIT",
+  "private": true
+}
