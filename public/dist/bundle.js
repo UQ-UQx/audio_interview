@@ -86,6 +86,17 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./src/data.json":
+/*!***********************!*\
+  !*** ./src/data.json ***!
+  \***********************/
+/*! exports provided: itemA, itemB, itemC, default */
+/***/ (function(module) {
+
+eval("module.exports = {\"itemA\":\"my Item A\",\"itemB\":false,\"itemC\":54};\n\n//# sourceURL=webpack:///./src/data.json?");
+
+/***/ }),
+
 /***/ "./src/index.js":
 /*!**********************!*\
   !*** ./src/index.js ***!
@@ -94,7 +105,7 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("\n\nvar items = [\"item\", \"item\", \"item\"];\nitems.map(function (item, index) {\n  return console.log(item + \" \" + index);\n});\n\n//# sourceURL=webpack:///./src/index.js?");
+eval("\n\nvar _data = __webpack_require__(/*! ./data.json */ \"./src/data.json\");\n\nvar _data2 = _interopRequireDefault(_data);\n\nfunction _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n\nvar items = [\"item\", \"item\", \"item\"];\nitems.map(function (item, index) {\n  return console.log(item + \" \" + index + \" + \" + _data2.default.itemB);\n});\n\n//# sourceURL=webpack:///./src/index.js?");
 
 /***/ })
 
