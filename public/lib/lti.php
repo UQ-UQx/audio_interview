@@ -162,7 +162,7 @@ class Lti {
 			'lti_version' => 'LTI-1p0',
 			'oauth_nonce' => '106095563246583917761495495665',
 			'resource_link_id' => 'courses.edx.org-aa766098b5a94a738b54e89caf3a8972_4_5',
-			'context_id' => 'course-v1:UQx+COURSECODE_4x+2T2017',
+			'context_id' => "course-v1:UQx+COURSECOD'E_4x+2T2017",
 			'oauth_signature_method' => 'HMAC-SHA1',
 			'oauth_version' => '1.0',
 			'oauth_signature' => 'iFUDZD4AYMhKKgHLf/LeXpNZcSA=',

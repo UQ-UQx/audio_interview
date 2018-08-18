@@ -12,7 +12,6 @@
             'database'=>'DB',
             'charset'=>'utf8mb4'
         ),
-        'authenticator' => 'verify_LTI_JWT',
         'jwt_key' => 'JWT_SECRET',
     );
 ?>

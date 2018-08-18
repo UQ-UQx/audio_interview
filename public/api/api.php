@@ -9,6 +9,7 @@ class MyApi
 	private $request;
 	private $db;
 	private $config;
+	private $jwt_decoded;
 
 	public function __construct($database, $config)
 	{
@@ -28,12 +29,6 @@ class MyApi
 	 */
 	private function _processRequest()
 	{
-		// prevent unauthenticated access to API
-		$this->_secureBackend();
-
-
-
-
 		// get the request
 		if (!empty($_REQUEST)) {
 			// convert to object for consistency
@@ -42,6 +37,9 @@ class MyApi
 			// already object
 			$this->request = json_decode(file_get_contents('php://input'));
 		}
+
+		// prevent unauthenticated access to API
+		$this->_secureBackend();
 
 		//check if an action is sent through
 		if(!isset($this->request->action)){
@@ -96,7 +94,16 @@ class MyApi
 	 */
 	private function _isAuthenticated()
 	{
-		return true;
+		try {
+			$jwt_decoded = JWT::decode($this->request->jwt_token, $this->config['jwt_key']);
+			$this->jwt_decoded = $jwt_decoded;
+			return true;
+		}
+		catch(UnexpectedValueException $e) {
+			$this->lti_jwt = false;
+			error_log('UnexpectedValueException: ' . $e->getMessage());
+			return false;
+		}
 	}
 
 	/**
@@ -132,6 +139,8 @@ class MyApi
 
 require_once('../lib/db.php');
 require_once('../config.php');
+require_once('../lib/jwt.php');
+
 
 // if(isset($config['use_db']) && $config['use_db']) {
 // 	Db::config( 'driver',   'mysql' );

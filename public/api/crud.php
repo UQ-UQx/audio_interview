@@ -2134,7 +2134,7 @@ class PHP_CRUD_API {
 		return file_get_contents('php://input');
 	}
 
-	public function __construct($config) {
+	public function __construct($config, $jwt_key) {
 		extract($config);
 
 		// initialize
@@ -2164,6 +2164,8 @@ class PHP_CRUD_API {
 		$get = isset($get)?$get:null;
 		$post = isset($post)?$post:null;
 		$origin = isset($origin)?$origin:null;
+
+		$jwt_key = isset($jwt_key)?$jwt_key:null;
 
 		// defaults
 		if (!$dbengine) {
@@ -2209,7 +2211,7 @@ class PHP_CRUD_API {
 		}
 
 		$this->db = $db;
-		$this->settings = compact('method', 'request', 'get', 'post', 'origin', 'database', 'table_authorizer', 'record_filter', 'column_authorizer', 'tenancy_function', 'input_sanitizer', 'input_validator', 'before', 'after', 'auto_include', 'allow_origin');
+		$this->settings = compact('method', 'request', 'get', 'post', 'origin', 'database', 'table_authorizer', 'record_filter', 'column_authorizer', 'tenancy_function', 'input_sanitizer', 'input_validator', 'before', 'after', 'auto_include', 'allow_origin', 'jwt_key');
 	}
 
 	public static function php_crud_api_transform(&$tables) {
@@ -2658,7 +2660,22 @@ class PHP_CRUD_API {
 		}
 	}
 
+	protected function verifyJWT(){
+		try {
+			$jwt_decoded = JWT::decode($this->settings['get']['jwt_token'], $this->settings['jwt_key']);
+			$this->jwt_decoded = $jwt_decoded;
+		}
+		catch(UnexpectedValueException $e) {
+			$this->lti_jwt = false;
+			error_log('UnexpectedValueException: ' . $e->getMessage());
+			header("HTTP/1.1 401 Unauthorized");
+			exit();	
+		}
+	}
+
 	public function executeCommand() {
+		$this->verifyJWT();
+
 		if ($this->settings['origin']) {
 			$this->allowOrigin($this->settings['origin'],$this->settings['allow_origin']);
 		}
@@ -2714,8 +2731,9 @@ class PHP_CRUD_API {
 // uncomment the lines below when running in stand-alone mode:
 
 include_once("../config.php");
+require_once('../lib/jwt.php');
 
-$api = new PHP_CRUD_API($config["db"]);
+$api = new PHP_CRUD_API($config['db'], $config['jwt_key']);
 
 $api->executeCommand();
 

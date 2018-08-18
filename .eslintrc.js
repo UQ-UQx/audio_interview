@@ -32,13 +32,7 @@ module.exports = {
         "prettier"
     ],
     "globals": {
-        "$LTI_courseID":false,
-        "$LTI_resourceID":false,
-        "$LTI_userID":false,
-        "$LTI_user_roles":false,
-        "$LTI_grade_url":false,
-        "$LTI_consumer_key":false,
-        "$LTI_result_sourcedid":false,
-        "$LTI_CALL_DATA":false,
+        "$LTI":false,
+        "$JWT_TOKEN":false,
     }
 };
