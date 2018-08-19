@@ -1,6 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import store from './store';
 import App from './components/App';
+
+const renderApp = () => (
+    <Provider store={store}>
+        <App />
+    </Provider>
+);
 
 /* Disable Activity when in studio view 
 (edX studio view sets userID as 'student') 
@@ -17,5 +25,5 @@ if ($LTI.userID === 'student') {
         document.getElementById('app')
     );
 } else {
-    ReactDOM.render(<App />, document.getElementById('app'));
+    ReactDOM.render(renderApp(), document.getElementById('app'));
 }

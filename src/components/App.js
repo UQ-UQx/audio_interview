@@ -2,16 +2,18 @@ import React from 'react';
 import styled from 'styled-components';
 
 import axios from 'axios';
+import Counter from './Counter';
 
 const AppContainer = styled.div`
     border: 1px solid lightgrey;
     padding: 50px;
-    height: 100px;
 `;
 
 const App = () => (
     <AppContainer>
-        <h3>Hello React App!</h3>
+        <h2>Hello LTI React App!</h2>
+        <p>Open Developer Tools to see log outputs on state change</p>
+
         <button
             type="button"
             onClick={() => {
@@ -48,12 +50,12 @@ const App = () => (
                     .catch(error => {
                         console.log(error);
                     });
-
-                console.log('wow');
             }}
         >
             Test API
         </button>
+        <h4>Redux Example</h4>
+        <Counter />
     </AppContainer>
 );
 
