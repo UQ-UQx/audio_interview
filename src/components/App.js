@@ -2,6 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import axios from 'axios';
+import { withRouter } from 'react-router-dom';
+
 import Counter from './Counter';
 
 const AppContainer = styled.div`
@@ -59,4 +61,4 @@ const App = () => (
     </AppContainer>
 );
 
-export default App;
+export default withRouter(App);

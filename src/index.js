@@ -1,12 +1,31 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
+import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import store from './store';
 import App from './components/App';
+import Admin from './admin';
+import AppMenu from './AppMenu';
 
 const renderApp = () => (
     <Provider store={store}>
-        <App />
+        <Router>
+            <Fragment>
+                {$LTI.user_role === 'Instructor' ||
+                $LTI.user_role === 'Administrator' ? (
+                    <AppMenu />
+                ) : (
+                    ''
+                )}
+                <Switch>
+                    <Route
+                        path="/edit"
+                        render={props => <Admin {...props} />}
+                    />
+                    <Route path="/" render={props => <App {...props} />} />
+                </Switch>
+            </Fragment>
+        </Router>
     </Provider>
 );
 
