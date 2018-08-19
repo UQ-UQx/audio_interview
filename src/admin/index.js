@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { setCountDefault } from '../actions';
+import { setCountDefault, setSaveFalse } from '../actions';
 
 const Container = styled.div`
     padding: 20px;
@@ -25,6 +25,11 @@ class Admin extends Component {
         this.save = this.save.bind(this);
     }
 
+    componentDidMount() {
+        const { setSaveFalse } = this.props;
+        setSaveFalse();
+    }
+
     componentDidUpdate() {
         const { save } = this.props;
         if (save) this.save();
@@ -33,6 +38,7 @@ class Admin extends Component {
     save() {
         const { setCountDefault, history } = this.props;
         const { defaultCount } = this.state;
+
         setCountDefault(parseInt(defaultCount, 10));
         history.push('/');
     }
@@ -62,13 +68,14 @@ export default withRouter(
             save: state.save,
             defaultCount: state.defaultCount,
         }),
-        { setCountDefault }
+        { setCountDefault, setSaveFalse }
     )(Admin)
 );
 
 Admin.propTypes = {
     save: PropTypes.bool.isRequired,
     defaultCount: PropTypes.number.isRequired,
+    setSaveFalse: PropTypes.func.isRequired,
     setCountDefault: PropTypes.func.isRequired,
     history: PropTypes.shape({}).isRequired,
 };

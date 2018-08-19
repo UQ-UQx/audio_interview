@@ -14,7 +14,7 @@ const AppContainer = styled.div`
 const App = () => (
     <AppContainer>
         <h2>Hello LTI React App!</h2>
-        <p>Open Developer Tools to see log outputs on state change</p>
+        <p>Open Developer Tools to see log outputs on s tate change</p>
 
         <button
             type="button"
