@@ -8,12 +8,13 @@
   "private": true,
   "scripts": {
     "start": "webpack --watch --mode development",
-    "build": "webpack --mode production",
+    "build": "BABEL_ENV=production webpack --mode production --config ./webpack.config.prod.js",
     "lint": "./node_modules/.bin/eslint ./src --ext .js"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
+    "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "browser-sync": "^2.24.6",
@@ -28,6 +29,7 @@
     "eslint-plugin-react": "^7.11.1",
     "file-loader": "^1.1.11",
     "prettier": "^1.14.2",
+    "progress-bar-webpack-plugin": "^1.11.0",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.22.1",
     "webpack": "^4.16.5",

@@ -1,5 +1,6 @@
 var webpack = require("webpack");
 var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
+var ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -10,7 +11,8 @@ module.exports = {
       path: __dirname + '/public/dist'
     },
     plugins:[
-
+      new ProgressBarPlugin(),
+    
       // Automatically load modules instead of having to import or require them everywhere.
       new webpack.ProvidePlugin({
         //jQuery : 'jquery',
