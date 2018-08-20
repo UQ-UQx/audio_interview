@@ -90,6 +90,17 @@ return {
               }
             }
           ]
+        },
+        {
+          test: /\.(svg|woff|woff2|eot|ttf|otf)$/,
+          use: [
+            {
+              loader: 'url-loader',
+              options: {
+                name: 'fonts/[name].[ext]',
+              }
+            }
+          ]
         }
       ]
     }

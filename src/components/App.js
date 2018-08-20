@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
-
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
 import Counter from './Counter';
 
 const AppContainer = styled.div`
@@ -13,10 +13,16 @@ const AppContainer = styled.div`
 
 const App = () => (
     <AppContainer>
-        <h2>Hello LTI React App!</h2>
-        <p>Open Developer Tools to see log outputs on s tate change</p>
+        <Typography variant="display2" gutterBottom>
+            Hello LTI React App!
+        </Typography>
+        <Typography variant="subheading" gutterBottom>
+            Open Developer Tools to see log outputs on s tate change
+        </Typography>
 
-        <button
+        <Button
+            variant="contained"
+            color="primary"
             type="button"
             onClick={() => {
                 axios({
@@ -55,7 +61,7 @@ const App = () => (
             }}
         >
             Test API
-        </button>
+        </Button>
         <h4>Redux Example</h4>
         <Counter />
     </AppContainer>
