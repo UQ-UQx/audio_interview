@@ -40,21 +40,22 @@
     "webpack-cli": "^3.1.0"
   },
   "dependencies": {
-    "@material-ui/core": "^1.5.1",
     "axios": "^0.18.0",
+    "bootstrap": "4.1.1",
     "lodash": "^4.17.10",
+    "normalize.css": "^8.0.0",
     "polished": "^1.9.3",
     "prop-types": "^15.6.2",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
     "react-redux": "^5.0.7",
     "react-router-dom": "^4.3.1",
+    "reactstrap": "^6.4.0",
     "redux": "^4.0.0",
     "redux-axios-middleware": "^4.0.0",
     "redux-logger": "^3.0.6",
     "redux-promise-middleware": "^5.1.1",
     "redux-thunk": "^2.3.0",
-    "styled-components": "^3.4.2",
-    "typeface-roboto": "^0.0.54"
+    "styled-components": "^3.4.2"
   }
 }

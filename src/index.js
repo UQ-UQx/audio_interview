@@ -1,22 +1,20 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
+
 import store from './store';
 import App from './components/App';
 import Admin from './admin';
 import AppMenu from './AppMenu';
 
-const theme = createMuiTheme();
+import 'normalize.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const renderApp = () => (
     <Provider store={store}>
         <Router>
-            <MuiThemeProvider theme={theme}>
-                <CssBaseline />
-
+            <Fragment>
                 {$LTI.user_role === 'Instructor' ||
                 $LTI.user_role === 'Administrator' ? (
                     <AppMenu />
@@ -30,7 +28,7 @@ const renderApp = () => (
                     />
                     <Route path="/" render={props => <App {...props} />} />
                 </Switch>
-            </MuiThemeProvider>
+            </Fragment>
         </Router>
     </Provider>
 );

@@ -50,7 +50,7 @@
 		<style>
 			body{
 				margin:0;
-				padding:20px !important;
+				/* padding:20px !important; */
 			}
 		</style>
     </head>
