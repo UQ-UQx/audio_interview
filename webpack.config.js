@@ -1,8 +1,34 @@
 var webpack = require("webpack");
 var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 var ProgressBarPlugin = require('progress-bar-webpack-plugin');
+var figlet = require('figlet');
+var chalk = require('chalk');
 
-module.exports = {
+function showMessage(chalkMessage){
+
+  figlet('UQx  /  UQ2U', function(err, data) {
+      if (err) {
+          console.log('UQx  /  UQ2U');
+          return;
+      }
+      console.log(data)
+      console.log(chalk.blue(chalkMessage+' - UQx/CDD Learning Tools Team'));
+  
+  });
+}
+
+module.exports = (env, argv) => {
+
+  var chalkMessage = 'Happy Coding! 😄';
+  if(argv.mode === "production") chalkMessage = "🎉  Woo! ready for production 🎉 "
+ 
+
+
+    showMessage(chalkMessage);
+
+
+
+return {  
     entry: {
       bundle: './src/index.js',
     },
@@ -67,4 +93,5 @@ module.exports = {
         }
       ]
     }
+}
 };
