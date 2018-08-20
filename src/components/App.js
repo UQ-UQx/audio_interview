@@ -3,40 +3,36 @@ import styled from 'styled-components';
 // import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 
-import { Row, Col } from 'reactstrap';
+// import { Row, Col } from 'reactstrap';
 // import ApiTestButtons from './ApiTestButtons';
 
-import Webcam from './Webcam';
+import InterviewCam from './InterviewCam';
 
 const AppContainer = styled.div``;
 
-const MediaVisualsContainer = styled.div``;
-
-const SCol = styled(Col)`
-    padding: 0 !important;
+const MediaVisualsContainer = styled.div`
+    display: flex;
+    flex-wrap: wrap;
 `;
 
 const WebcamContainer = styled.div`
-    background-color: red;
+    background-color: black;
 `;
 
 const AudioContainer = styled.div`
     background-color: blue;
+    min-width: 300px;
+    flex: 1 auto;
 `;
 
 const App = () => (
     <AppContainer>
         <MediaVisualsContainer>
-            <Row>
-                <SCol xs="5">
-                    <WebcamContainer>
-                        <Webcam />
-                    </WebcamContainer>
-                </SCol>
-                <SCol xs="7">
-                    <AudioContainer>Audio container</AudioContainer>
-                </SCol>
-            </Row>
+            <WebcamContainer>
+                <InterviewCam />
+            </WebcamContainer>
+
+            <AudioContainer>Audio container</AudioContainer>
         </MediaVisualsContainer>
     </AppContainer>
 );
