@@ -44,7 +44,7 @@ return {
         //jQuery : 'jquery',
         //$ : 'jquery',
         //jquery : 'jquery',
-        _ : 'lodash'
+        //_ : 'lodash'
       }),
 
       new BrowserSyncPlugin({
