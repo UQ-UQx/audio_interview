@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Webcam from 'react-webcam';
+import { connect } from 'react-redux';
+import { getScreenshot } from '../actions';
 
 const Container = styled.div``;
 
@@ -9,12 +11,29 @@ class InterviewCam extends Component {
     constructor(props) {
         super(props);
 
-        this.captureImage = this.captureImage.bind(this);
+        this.state = {
+            interval: null,
+        };
+        this.screenshotInterval = this.screenshotInterval.bind(this);
     }
 
-    captureImage() {
-        const { getImage } = this.props;
-        return getImage(this.webcam.getScreenshot());
+    componentWillMount() {
+        const { interval } = this.state;
+        clearInterval(interval);
+    }
+
+    componentDidMount() {
+        const { screenshotStreamInterval } = this.props;
+        const interval = setInterval(
+            this.screenshotInterval,
+            screenshotStreamInterval
+        );
+        this.setState({ interval });
+    }
+
+    screenshotInterval() {
+        const { record, getScreenshot } = this.props;
+        if (record) getScreenshot(this.webcam.getScreenshot());
     }
 
     render() {
@@ -40,11 +59,22 @@ class InterviewCam extends Component {
 }
 
 InterviewCam.propTypes = {
-    getImage: PropTypes.func,
+    /**
+     * Interval in milliseconds
+     *
+     */
+    screenshotStreamInterval: PropTypes.number,
+    getScreenshot: PropTypes.func.isRequired,
+    record: PropTypes.bool.isRequired,
 };
 
 InterviewCam.defaultProps = {
-    getImage: () => {},
+    screenshotStreamInterval: 10000,
 };
 
-export default InterviewCam;
+export default connect(
+    state => ({
+        record: state.record,
+    }),
+    { getScreenshot }
+)(InterviewCam);

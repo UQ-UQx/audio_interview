@@ -2,7 +2,17 @@ import { combineReducers } from 'redux';
 
 import { Actions } from '../actions';
 
+const screenshotsReducer = (state = [], action) => {
+    switch (action.type) {
+        case Actions.GET_SCREENSHOT:
+            return [...state, action.payload.screenshot];
+        default:
+            return state;
+    }
+};
+
 const recordReducer = (state = false, action) => {
+    console.log(action);
     switch (action.type) {
         case Actions.START_RECORDING:
             return true;
@@ -24,6 +34,7 @@ const saveReducer = (state = false, action) => {
 };
 
 export default combineReducers({
+    screenshots: screenshotsReducer,
     record: recordReducer,
     save: saveReducer,
 });

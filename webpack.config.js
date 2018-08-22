@@ -1,6 +1,8 @@
 var webpack = require("webpack");
 var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 var ProgressBarPlugin = require('progress-bar-webpack-plugin');
+var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
 var figlet = require('figlet');
 var chalk = require('chalk');
 
@@ -46,6 +48,8 @@ return {
         //jquery : 'jquery',
         //_ : 'lodash'
       }),
+
+     // new BundleAnalyzerPlugin(),
 
       new BrowserSyncPlugin({
         host: 'localhost',

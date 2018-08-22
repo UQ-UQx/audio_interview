@@ -35,17 +35,31 @@ class App extends Component {
     }
 
     render() {
-        const { startRecording, stopRecording, record } = this.props;
-        console.log(record);
+        const {
+            startRecording,
+            stopRecording,
+            record,
+            screenshots,
+        } = this.props;
+        console.log(record, screenshots);
+
         return (
             <AppContainer>
                 <MediaVisualsContainer>
                     <WebcamContainer>
-                        <InterviewCam />
+                        <InterviewCam screenshotStreamInterval={5000} />
                     </WebcamContainer>
 
                     <AudioContainer>Audio container</AudioContainer>
                 </MediaVisualsContainer>
+                {screenshots.map((screenshot, index) => (
+                    <img
+                        key={screenshot}
+                        width="100px"
+                        src={screenshot}
+                        alt={`user face screenshot ${index}`}
+                    />
+                ))}
                 <Button
                     onClick={() => {
                         startRecording();
@@ -69,12 +83,18 @@ App.propTypes = {
     startRecording: PropTypes.func.isRequired,
     stopRecording: PropTypes.func.isRequired,
     record: PropTypes.bool.isRequired,
+    screenshots: PropTypes.arrayOf(PropTypes.string),
+};
+
+App.defaultProps = {
+    screenshots: [],
 };
 
 export default withRouter(
     connect(
         state => ({
             record: state.record,
+            screenshots: state.screenshots,
         }),
         {
             startRecording,
