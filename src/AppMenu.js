@@ -3,36 +3,56 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { withRouter, Link } from 'react-router-dom';
+import { Button } from 'reactstrap';
 import { setSaveTrue } from './actions';
 
 const Container = styled.div`
-    padding: 20px;
+    margin-bottom: 10px;
     text-align: right;
 `;
 
+const StyledLink = styled(Link)`
+    text-decoration: none;
+
+    &:focus,
+    &:hover,
+    &:visited,
+    &:link,
+    &:active {
+        text-decoration: none;
+    }
+`;
+
 const AdminPageOptionsContainer = styled.div``;
+
+const CancelButton = styled(Button)``;
+const SaveButton = styled(Button)`
+    margin-left: 5px;
+`;
 
 const AdminPageOptions = props => {
     const { setSaveTrue, history } = props;
 
     return (
         <AdminPageOptionsContainer>
-            <button
+            <CancelButton
+                color="danger"
                 type="button"
                 onClick={() => {
                     history.push('/');
                 }}
             >
                 Cancel
-            </button>
-            <button
+            </CancelButton>
+            <SaveButton
+                color="primary"
                 type="button"
                 onClick={() => {
                     setSaveTrue();
                 }}
             >
-                Save
-            </button>
+                Save Changes
+            </SaveButton>
         </AdminPageOptionsContainer>
     );
 };
@@ -44,10 +64,13 @@ const AppMenu = props => {
             {location.pathname === '/edit' ? (
                 <AdminPageOptions {...props} />
             ) : (
-                <Link to="/edit">
-                    <button type="button">Edit LTI App</button>
-                </Link>
+                <StyledLink to="/edit">
+                    <Button color="primary" type="button">
+                        Edit LTI App
+                    </Button>
+                </StyledLink>
             )}
+            <hr />
         </Container>
     );
 };

@@ -1,6 +1,8 @@
 var webpack = require("webpack");
 var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 var ProgressBarPlugin = require('progress-bar-webpack-plugin');
+var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
 var figlet = require('figlet');
 var chalk = require('chalk');
 
@@ -44,8 +46,10 @@ return {
         //jQuery : 'jquery',
         //$ : 'jquery',
         //jquery : 'jquery',
-        _ : 'lodash'
+        //_ : 'lodash'
       }),
+
+     // new BundleAnalyzerPlugin(),
 
       new BrowserSyncPlugin({
         host: 'localhost',
@@ -72,9 +76,7 @@ return {
             { loader: 'style-loader' },
             {
               loader: 'css-loader',
-              options: {
-                modules: true
-              }
+              
             },
             { loader: 'sass-loader' }
           ]
@@ -87,6 +89,17 @@ return {
               options: {
                 name: '[path][name].[ext]',
                 publicPath: 'assets/'
+              }
+            }
+          ]
+        },
+        {
+          test: /\.(svg|woff|woff2|eot|ttf|otf)$/,
+          use: [
+            {
+              loader: 'url-loader',
+              options: {
+                name: 'fonts/[name].[ext]',
               }
             }
           ]

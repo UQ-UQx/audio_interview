@@ -45,10 +45,12 @@
 			*/
 			
 		?>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+
 		<style>
 			body{
 				margin:0;
-				padding:20px !important;
+				/* padding:20px !important; */
 			}
 		</style>
     </head>

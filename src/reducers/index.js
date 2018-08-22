@@ -2,28 +2,26 @@ import { combineReducers } from 'redux';
 
 import { Actions } from '../actions';
 
-const defaultCountReducer = (state = 0, action) => {
+const screenshotsReducer = (state = [], action) => {
     switch (action.type) {
-        case Actions.SET_DEFAULT_COUNT:
-            return action.payload.value;
+        case Actions.GET_SCREENSHOT:
+            return [...state, action.payload.screenshot];
         default:
             return state;
     }
 };
 
-const countReducer = (state = 0, action) => {
+const recordReducer = (state = false, action) => {
+    console.log(action);
     switch (action.type) {
-        case Actions.INCREASE_COUNT:
-            return state + action.payload.value;
-        case Actions.DECREASE_COUNT:
-            return state - action.payload.value;
-        case Actions.RESET_COUNT:
-            return action.payload.value;
+        case Actions.START_RECORDING:
+            return true;
+        case Actions.STOP_RECORDING:
+            return false;
         default:
             return state;
     }
 };
-
 const saveReducer = (state = false, action) => {
     switch (action.type) {
         case Actions.SET_SAVE_TRUE:
@@ -36,7 +34,7 @@ const saveReducer = (state = false, action) => {
 };
 
 export default combineReducers({
-    count: countReducer,
-    defaultCount: defaultCountReducer,
+    screenshots: screenshotsReducer,
+    record: recordReducer,
     save: saveReducer,
 });

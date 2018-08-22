@@ -2,10 +2,14 @@ import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+
 import store from './store';
 import App from './components/App';
 import Admin from './admin';
 import AppMenu from './AppMenu';
+
+import 'normalize.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const renderApp = () => (
     <Provider store={store}>
