@@ -1,11 +1,21 @@
 {
-    "presets": ["env", "react"],
+    "presets": [
+        "env",
+        "react"
+    ],
     "env": {
         "production": {
             "plugins": [
-                ["transform-remove-console", {
-                    "exclude": ["error", "warn"]
-                }]
+                [
+                    "transform-remove-console",
+                    {
+                        "exclude": [
+                            "error",
+                            "warn"
+                        ]
+                    }
+                ],
+                "babel-plugin-styled-components"
             ]
         }
     }
