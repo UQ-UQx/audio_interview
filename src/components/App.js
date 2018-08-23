@@ -5,26 +5,37 @@ import styled from 'styled-components';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
-import { startRecording, stopRecording } from '../actions';
+import {
+    startRecording,
+    stopRecording,
+    askQuestion,
+    clearQuestion,
+} from '../actions';
 // import { Row, Col } from 'reactstrap';
 // import ApiTestButtons from './ApiTestButtons';
 import InterviewCam from './InterviewCam';
+import TypedQuestion from './TypedQuestion';
+
+const mediaContainerHeight = 400;
 
 const AppContainer = styled.div``;
 
 const MediaVisualsContainer = styled.div`
+    height: ${props => (props.Height ? props.Height : '400')}px;
+    margin-bottom: 10px;
     display: flex;
     flex-wrap: wrap;
 `;
 
 const WebcamContainer = styled.div`
-    background-color: black;
+    flex: 1;
+    text-align: center;
 `;
 
-const AudioContainer = styled.div`
-    background-color: blue;
-    min-width: 300px;
-    flex: 1 auto;
+const QuestionContainer = styled.div`
+    min-width: 600px;
+    flex: 1;
+    flex-flow: column;
 `;
 
 class App extends Component {
@@ -38,21 +49,30 @@ class App extends Component {
         const {
             startRecording,
             stopRecording,
-            record,
             screenshots,
+            question,
+            askQuestion,
+            clearQuestion,
         } = this.props;
-        console.log(record, screenshots);
 
         return (
             <AppContainer>
-                <MediaVisualsContainer>
+                <MediaVisualsContainer Height={mediaContainerHeight}>
                     <WebcamContainer>
-                        <InterviewCam screenshotStreamInterval={5000} />
+                        <InterviewCam
+                            Height={mediaContainerHeight}
+                            screenshotStreamInterval={5000}
+                        />
                     </WebcamContainer>
 
-                    <AudioContainer>Audio container</AudioContainer>
+                    <QuestionContainer>
+                        <TypedQuestion
+                            Height={mediaContainerHeight}
+                            question={question}
+                        />
+                    </QuestionContainer>
                 </MediaVisualsContainer>
-                {screenshots.map((screenshot, index) => (
+                {[...screenshots].reverse().map((screenshot, index) => (
                     <img
                         key={screenshot}
                         width="100px"
@@ -63,6 +83,7 @@ class App extends Component {
                 <Button
                     onClick={() => {
                         startRecording();
+                        askQuestion('This is a new question');
                     }}
                 >
                     Start
@@ -70,6 +91,7 @@ class App extends Component {
                 <Button
                     onClick={() => {
                         stopRecording();
+                        clearQuestion();
                     }}
                 >
                     Stop
@@ -82,23 +104,29 @@ class App extends Component {
 App.propTypes = {
     startRecording: PropTypes.func.isRequired,
     stopRecording: PropTypes.func.isRequired,
-    record: PropTypes.bool.isRequired,
+    question: PropTypes.string,
+    askQuestion: PropTypes.func.isRequired,
+    clearQuestion: PropTypes.func.isRequired,
     screenshots: PropTypes.arrayOf(PropTypes.string),
 };
 
 App.defaultProps = {
     screenshots: [],
+    question: '',
 };
 
 export default withRouter(
     connect(
         state => ({
             record: state.record,
+            question: state.question,
             screenshots: state.screenshots,
         }),
         {
             startRecording,
             stopRecording,
+            askQuestion,
+            clearQuestion,
         }
     )(App)
 );

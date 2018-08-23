@@ -5,7 +5,11 @@ import Webcam from 'react-webcam';
 import { connect } from 'react-redux';
 import { getScreenshot } from '../actions';
 
-const Container = styled.div``;
+const Container = styled.div`
+    height: ${props => (props.Height ? props.Height : 400)}px;
+    width: 100%;
+    background-color: black;
+`;
 
 class InterviewCam extends Component {
     constructor(props) {
@@ -37,15 +41,17 @@ class InterviewCam extends Component {
     }
 
     render() {
+        const { Height } = this.props;
         const videoConstraints = {
-            width: 1280,
-            height: 720,
+            // width: 1280,
+            // height: 720,
             facingMode: 'user',
         };
 
         return (
-            <Container>
+            <Container Height={Height}>
                 <Webcam
+                    height={Height}
                     audio={false}
                     ref={webcam => {
                         this.webcam = webcam;
@@ -66,10 +72,12 @@ InterviewCam.propTypes = {
     screenshotStreamInterval: PropTypes.number,
     getScreenshot: PropTypes.func.isRequired,
     record: PropTypes.bool.isRequired,
+    Height: PropTypes.number,
 };
 
 InterviewCam.defaultProps = {
     screenshotStreamInterval: 10000,
+    Height: 400,
 };
 
 export default connect(

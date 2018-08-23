@@ -14,6 +14,7 @@
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
+    "babel-plugin-styled-components": "^1.5.1",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
@@ -58,6 +59,7 @@
     "redux-logger": "^3.0.6",
     "redux-promise-middleware": "^5.1.1",
     "redux-thunk": "^2.3.0",
-    "styled-components": "^3.4.2"
+    "styled-components": "^3.4.2",
+    "typed.js": "^2.0.9"
   }
 }
