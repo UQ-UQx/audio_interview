@@ -42,7 +42,10 @@ const GroupAdmin = props => {
     return (
         <Fragment>
             <GroupTopBar>
-                <Button color="danger">
+                <Button
+                    color="danger"
+                    onClick={() => onChangeHandler(id, 'removeGroup')}
+                >
                     <Icon name="trash" /> Remove Group
                 </Button>
             </GroupTopBar>
