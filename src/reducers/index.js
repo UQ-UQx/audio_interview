@@ -47,7 +47,6 @@ const saveReducer = (state = false, action) => {
 
 export default combineReducers({
     question: questionReducer,
-
     screenshots: screenshotsReducer,
     record: recordReducer,
     save: saveReducer,
