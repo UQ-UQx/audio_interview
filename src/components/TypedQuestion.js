@@ -45,7 +45,7 @@ class TypedQuestion extends Component {
     componentWillUnmount() {
         // Make sure to destroy Typed instance on unmounting
         // to prevent memory leaks
-        this.typed.destroy();
+        if (this.typed) this.typed.destroy();
     }
 
     render() {

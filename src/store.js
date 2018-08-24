@@ -12,13 +12,13 @@ const logger = createLogger({});
 const clients = {
     default: {
         client: axios.create({
-            baseURL: '../public/api/crud.php/',
+            baseURL: '../public/api/crud.php',
             responseType: 'json',
         }),
     },
     activityAPI: {
         client: axios.create({
-            baseURL: '../public/api/api.php/',
+            baseURL: '../public/api/api.php',
             responseType: 'json',
         }),
     },

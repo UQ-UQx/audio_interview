@@ -7,8 +7,8 @@ import { Button } from 'reactstrap';
 import { setSaveTrue } from './actions';
 
 const Container = styled.div`
-    margin-bottom: 10px;
     text-align: right;
+    border-bottom: 1px solid ${props => (props.admin ? 'lightblue' : 'black')};
 `;
 
 const StyledLink = styled(Link)`
@@ -25,7 +25,9 @@ const StyledLink = styled(Link)`
 
 const AdminPageOptionsContainer = styled.div``;
 
-const CancelButton = styled(Button)``;
+const CancelButton = styled(Button)`
+    color: red !important;
+`;
 const SaveButton = styled(Button)`
     margin-left: 5px;
 `;
@@ -36,7 +38,7 @@ const AdminPageOptions = props => {
     return (
         <AdminPageOptionsContainer>
             <CancelButton
-                color="danger"
+                color="link danger"
                 type="button"
                 onClick={() => {
                     history.push('/');
@@ -45,7 +47,7 @@ const AdminPageOptions = props => {
                 Cancel
             </CancelButton>
             <SaveButton
-                color="primary"
+                color="link"
                 type="button"
                 onClick={() => {
                     setSaveTrue();
@@ -59,18 +61,18 @@ const AdminPageOptions = props => {
 
 const AppMenu = props => {
     const { location } = props;
+    const admin = location.pathname === '/edit';
     return (
-        <Container>
-            {location.pathname === '/edit' ? (
+        <Container admin={admin}>
+            {admin ? (
                 <AdminPageOptions {...props} />
             ) : (
                 <StyledLink to="/edit">
-                    <Button color="primary" type="button">
+                    <Button color="link" type="button">
                         Edit LTI App
                     </Button>
                 </StyledLink>
             )}
-            <hr />
         </Container>
     );
 };

@@ -11,6 +11,18 @@ export const Actions = {
     SET_SAVE_FALSE: 'SET_SAVE_FALSE',
 };
 
+export const Tables = {
+    QUESTIONS: 'questions',
+    CATEGORIES: 'categories',
+};
+
+const setQuestions = questions => ({
+    type: Actions.SET_QUESTIONS,
+    payload: {
+        questions,
+    },
+});
+
 const askQuestion = question => ({
     type: Actions.ASK_QUESTION,
     payload: {
@@ -64,6 +76,7 @@ const setSaveFalse = () => ({
 
 // function are ordered as above
 export {
+    setQuestions,
     askQuestion,
     clearQuestion,
     startRecording,

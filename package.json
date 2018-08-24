@@ -18,6 +18,7 @@
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-3": "^6.24.1",
     "browser-sync": "^2.24.6",
     "browser-sync-webpack-plugin": "^2.2.2",
     "chalk": "^2.4.1",
@@ -29,6 +30,7 @@
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-prettier": "^2.6.2",
     "eslint-plugin-react": "^7.11.1",
+    "extract-text-webpack-plugin": "^3.0.2",
     "figlet": "^1.2.0",
     "file-loader": "^1.1.11",
     "node-sass": "^4.9.3",
@@ -45,11 +47,13 @@
     "axios": "^0.18.0",
     "bootstrap": "4.1.1",
     "lodash": "^4.17.10",
+    "moment": "^2.22.2",
     "normalize.css": "^8.0.0",
     "polished": "^1.9.3",
     "prop-types": "^15.6.2",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
+    "react-fa": "^5.0.0",
     "react-redux": "^5.0.7",
     "react-router-dom": "^4.3.1",
     "react-webcam": "^1.0.1",
@@ -60,6 +64,7 @@
     "redux-promise-middleware": "^5.1.1",
     "redux-thunk": "^2.3.0",
     "styled-components": "^3.4.2",
-    "typed.js": "^2.0.9"
+    "typed.js": "^2.0.9",
+    "uuid": "^3.3.2"
   }
 }
