@@ -22,11 +22,12 @@ module.exports = {
                 "trailingComma":"es5",
                 "singleQuote": true,
                 "printWidth": 80,
-                "tabWidth":4
+                "tabWidth":4,
             }
         ],
         "no-shadow": "off",
         "no-console": "off",
+        'no-plusplus': ["error", { allowForLoopAfterthoughts: true }]
     },
     "plugins": [
         "prettier"

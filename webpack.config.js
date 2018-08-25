@@ -49,7 +49,7 @@ return {
         //_ : 'lodash'
       }),
 
-     // new BundleAnalyzerPlugin(),
+      //new BundleAnalyzerPlugin(),
 
       new BrowserSyncPlugin({
         host: 'localhost',
