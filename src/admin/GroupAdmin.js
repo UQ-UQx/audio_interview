@@ -1,13 +1,27 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
     Input,
     Button,
     InputGroup,
-    InputGroupText,
     InputGroupAddon,
+    NavbarBrand,
+    Navbar,
+    Collapse,
+    NavbarToggler,
+    Nav,
+    NavItem,
+    NavLink,
+    CardBody,
+    Card,
+    Form,
+    FormGroup,
+    Label,
+    InputGroupText,
 } from 'reactstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash, faCog } from '@fortawesome/free-solid-svg-icons';
 
 import { Icon } from 'react-fa';
 
@@ -31,68 +45,232 @@ const GroupTopBar = styled.div`
     width: 100%;
 `;
 
-const GroupAdmin = props => {
-    const {
-        id,
-        // name,
-        questions,
-        onChangeHandler,
-    } = props;
+const RemoveGroupLink = styled(NavLink)`
+    cursor: pointer;
+    color: #e30101 !important;
+`;
 
-    return (
-        <Fragment>
-            <GroupTopBar>
-                <Button
-                    color="danger"
-                    onClick={() => onChangeHandler(id, 'removeGroup')}
+const GroupSettingsLink = styled(NavLink)`
+    cursor: pointer;
+`;
+
+class GroupAdmin extends Component {
+    constructor(props) {
+        super(props);
+        this.toggle = this.toggle.bind(this);
+        this.state = {
+            isOpen: false,
+        };
+    }
+
+    toggle() {
+        const { isOpen } = this.state;
+        this.setState({
+            isOpen: !isOpen,
+        });
+    }
+
+    render() {
+        const {
+            id,
+            // name,
+            questions,
+            settings,
+            onChangeHandler,
+        } = this.props;
+
+        const { isOpen } = this.state;
+
+        const numberOfQuestionsThatWantToBeAsked = questions.filter(
+            question => question.settings.ask
+        ).length;
+
+        const options = [];
+
+        for (let i = 0; i < numberOfQuestionsThatWantToBeAsked; i++) {
+            options.push(
+                <option
+                    key={`${id}_numberOfQuestionsThatWantToBeAsked_option_${i}`}
+                    value={i + 1}
                 >
-                    <Icon name="trash" /> Remove Group
-                </Button>
-            </GroupTopBar>
-            <Container>
-                {questions.map(question => (
-                    <QuestionInputGroup key={`${id}_${question.id}`}>
-                        <InputGroupAddon addonType="prepend">
-                            <InputGroupText>
-                                <Icon name="bars" />
-                            </InputGroupText>
-                        </InputGroupAddon>
-                        <Input
-                            name={`${id}_${question.id}_question_input`}
-                            placeholder="Please Write Your Question Here..."
-                            onChange={event =>
-                                onChangeHandler(id, 'updateQuestion', {
-                                    id: question.id,
-                                    event,
-                                })
-                            }
-                            value={question.question}
-                        />{' '}
-                        <InputGroupAddon addonType="append">
-                            <Button
+                    {i + 1}
+                </option>
+            );
+        }
+
+        console.log(settings, numberOfQuestionsThatWantToBeAsked);
+
+        return (
+            <Fragment>
+                <GroupTopBar>
+                    <Navbar color="light" light expand="md">
+                        <NavbarBrand>Question Group</NavbarBrand>
+                        <NavbarToggler onClick={this.toggle} />
+                        <Collapse isOpen={isOpen} navbar />
+                        <Nav className="ml-auto" navbar>
+                            <NavItem>
+                                <GroupSettingsLink
+                                    color="info"
+                                    onClick={this.toggle}
+                                >
+                                    <FontAwesomeIcon icon={faCog} />
+                                    {'  '}
+                                    Group Settings
+                                </GroupSettingsLink>
+                            </NavItem>
+                            <NavItem />
+                        </Nav>
+                    </Navbar>
+                </GroupTopBar>
+                <Collapse isOpen={isOpen}>
+                    <Card>
+                        <CardBody>
+                            <Form>
+                                <FormGroup check>
+                                    <Label check>
+                                        <Input type="checkbox" /> Check me out
+                                    </Label>
+                                </FormGroup>
+                                <FormGroup>
+                                    <Label for="exampleSelect">Select</Label>
+                                    <Input
+                                        type="select"
+                                        name="select"
+                                        id="exampleSelect"
+                                        value={settings.numberOfQuestionsToAsk}
+                                        onChange={event => {
+                                            console.log(event.target.value);
+                                            onChangeHandler(
+                                                id,
+                                                'updateGroupSettings',
+                                                {
+                                                    numberOfQuestionsToAsk: parseInt(
+                                                        event.target.value,
+                                                        10
+                                                    ),
+                                                }
+                                            );
+                                        }}
+                                    >
+                                        <option
+                                            key={`${id}_numberOfQuestionsThatWantToBeAsked_option_${0}`}
+                                            value={0}
+                                        >
+                                            {0}
+                                        </option>
+                                        {options}
+                                    </Input>
+                                </FormGroup>
+                            </Form>
+                            <hr />
+                            <RemoveGroupLink
                                 color="danger"
                                 onClick={() =>
-                                    onChangeHandler(id, 'removeQuestion', {
-                                        id: question.id,
-                                    })
+                                    onChangeHandler(id, 'removeGroup')
                                 }
                             >
-                                <Icon name="trash" />
-                            </Button>
-                        </InputGroupAddon>
-                    </QuestionInputGroup>
-                ))}
-                <AddQuestionButton
-                    color="info"
-                    size="sm"
-                    onClick={() => onChangeHandler(id, 'addQuestion')}
-                >
-                    Add Question
-                </AddQuestionButton>
-            </Container>
-        </Fragment>
-    );
-};
+                                <FontAwesomeIcon icon={faTrash} />
+                                {'  '}
+                                Remove Group
+                            </RemoveGroupLink>
+                        </CardBody>
+                    </Card>
+                </Collapse>
+                <Container>
+                    {questions.map(question => (
+                        <QuestionInputGroup key={`${id}_${question.id}`}>
+                            <InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                    <Input
+                                        checked={question.settings.ask}
+                                        onChange={() => {
+                                            let numberToAsk = 0;
+
+                                            const numberOfQuestionsThatWantToBeAsked = questions.filter(
+                                                questionb => {
+                                                    if (
+                                                        question.id ===
+                                                        questionb.id
+                                                    ) {
+                                                        return !question
+                                                            .settings.ask;
+                                                    }
+                                                    return questionb.settings
+                                                        .ask;
+                                                }
+                                            ).length;
+
+                                            console.log(
+                                                settings.numberOfQuestionsToAsk,
+                                                numberOfQuestionsThatWantToBeAsked
+                                            );
+                                            if (
+                                                settings.numberOfQuestionsToAsk >
+                                                numberOfQuestionsThatWantToBeAsked
+                                            ) {
+                                                numberToAsk = numberOfQuestionsThatWantToBeAsked;
+                                            } else {
+                                                numberToAsk =
+                                                    settings.numberOfQuestionsToAsk;
+                                            }
+                                            onChangeHandler(
+                                                id,
+                                                'updateQuestionAskSetting',
+                                                {
+                                                    id: question.id,
+                                                    settings: {
+                                                        ask: !question.settings
+                                                            .ask,
+                                                    },
+                                                    groupSettings: {
+                                                        numberOfQuestionsToAsk: numberToAsk,
+                                                    },
+                                                }
+                                            );
+                                        }}
+                                        addon
+                                        type="checkbox"
+                                        aria-label="Checkbox for following text input"
+                                    />
+                                </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                                name={`${id}_${question.id}_question_input`}
+                                placeholder="Please Write Your Question Here..."
+                                onChange={event =>
+                                    onChangeHandler(id, 'updateQuestion', {
+                                        id: question.id,
+                                        event,
+                                    })
+                                }
+                                value={question.question}
+                            />{' '}
+                            <InputGroupAddon addonType="append">
+                                <Button
+                                    color="danger"
+                                    onClick={() =>
+                                        onChangeHandler(id, 'removeQuestion', {
+                                            id: question.id,
+                                        })
+                                    }
+                                >
+                                    <Icon name="trash" />
+                                </Button>
+                            </InputGroupAddon>
+                        </QuestionInputGroup>
+                    ))}
+                    <AddQuestionButton
+                        color="info"
+                        size="sm"
+                        onClick={() => onChangeHandler(id, 'addQuestion')}
+                    >
+                        Add Question
+                    </AddQuestionButton>
+                </Container>
+            </Fragment>
+        );
+    }
+}
 
 export default GroupAdmin;
 
@@ -100,5 +278,6 @@ GroupAdmin.propTypes = {
     id: PropTypes.string.isRequired,
     // name: PropTypes.string.isRequired,
     questions: PropTypes.arrayOf(PropTypes.shape()).isRequired,
+    settings: PropTypes.shape().isRequired,
     onChangeHandler: PropTypes.func.isRequired,
 };

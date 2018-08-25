@@ -17,30 +17,8 @@ class QuestionPool extends Component {
     constructor(props) {
         super(props);
         this.state = {};
-        this.onAddQuestion = this.onAddQuestion.bind(this);
         this.onAddGroup = this.onAddGroup.bind(this);
         this.groupOnChange = this.groupOnChange.bind(this);
-    }
-
-    onAddQuestion() {
-        const { stateHandler, groups } = this.props;
-
-        stateHandler({
-            groups: [
-                ...groups,
-                {
-                    id: uuidv4(),
-                    name: '',
-                    questions: [
-                        ...groups.questions,
-                        {
-                            id: uuidv4(),
-                            question: '',
-                        },
-                    ],
-                },
-            ],
-        });
     }
 
     onAddGroup() {
@@ -56,8 +34,15 @@ class QuestionPool extends Component {
                         {
                             id: uuidv4(),
                             question: '',
+                            settings: {
+                                ask: true,
+                            },
                         },
                     ],
+                    settings: {
+                        randomise: false,
+                        numberOfQuestionsToAsk: 1,
+                    },
                 },
             ],
         });
@@ -67,6 +52,61 @@ class QuestionPool extends Component {
         const { stateHandler, groups } = this.props;
 
         switch (type) {
+            case 'updateGroupSettings':
+                stateHandler({
+                    groups: groups.map(group => {
+                        if (group.id === id) {
+                            return {
+                                ...group,
+                                settings: {
+                                    ...group.settings,
+                                    ...details,
+                                },
+                            };
+                        }
+                        return group;
+                    }),
+                });
+                break;
+            case 'updateQuestionAskSetting':
+                stateHandler({
+                    groups: groups.map(group => {
+                        if (group.id === id) {
+                            const questions = [...group.questions];
+
+                            const questionToUpdateIndex = questions.findIndex(
+                                question => question.id === details.id
+                            );
+
+                            const questionToUpdate = questions.filter(
+                                question => question.id === details.id
+                            )[0];
+
+                            const { settings } = questionToUpdate;
+
+                            questions[questionToUpdateIndex] = {
+                                ...questionToUpdate,
+                                settings: {
+                                    ...settings,
+                                    ...details.settings,
+                                },
+                            };
+
+                            return {
+                                ...group,
+                                questions: [...questions],
+                                settings: {
+                                    ...group.settings,
+                                    ...(details.groupSettings
+                                        ? details.groupSettings
+                                        : {}),
+                                },
+                            };
+                        }
+                        return group;
+                    }),
+                });
+                break;
             case 'updateQuestion':
                 stateHandler({
                     groups: groups.map(group => {
@@ -97,6 +137,8 @@ class QuestionPool extends Component {
                     groups: groups.map(group => {
                         if (group.id === id) {
                             const questions = [...group.questions];
+                            const { settings } = group;
+                            const { numberOfQuestionsToAsk } = settings;
 
                             return {
                                 ...group,
@@ -105,8 +147,16 @@ class QuestionPool extends Component {
                                     {
                                         id: uuidv4(),
                                         question: '',
+                                        settings: {
+                                            ask: true,
+                                        },
                                     },
                                 ],
+                                settings: {
+                                    ...settings,
+                                    numberOfQuestionsToAsk:
+                                        numberOfQuestionsToAsk + 1,
+                                },
                             };
                         }
                         return group;
@@ -118,6 +168,15 @@ class QuestionPool extends Component {
                     groups: groups.map(group => {
                         if (group.id === id) {
                             const questions = [...group.questions];
+                            const { settings } = group;
+
+                            const remainingQuestions = questions.filter(
+                                question => question.id !== details.id
+                            );
+
+                            const numberOfQuestionsThatWantToBeAsked = remainingQuestions.filter(
+                                question => question.settings.ask
+                            ).length;
 
                             return {
                                 ...group,
@@ -126,6 +185,14 @@ class QuestionPool extends Component {
                                         question => question.id !== details.id
                                     ),
                                 ],
+                                settings: {
+                                    ...settings,
+                                    numberOfQuestionsToAsk:
+                                        settings.numberOfQuestionsToAsk >
+                                        numberOfQuestionsThatWantToBeAsked
+                                            ? numberOfQuestionsThatWantToBeAsked
+                                            : settings.numberOfQuestionsToAsk,
+                                },
                             };
                         }
                         return group;
