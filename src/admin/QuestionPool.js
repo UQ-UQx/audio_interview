@@ -14,6 +14,13 @@ const GroupsContainer = styled.div`
     margin-bottom: 10px;
 `;
 
+const reorder = (list, startIndex, endIndex) => {
+    const result = [...list];
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+
+    return result;
+};
 class QuestionPool extends Component {
     constructor(props) {
         super(props);
@@ -52,7 +59,18 @@ class QuestionPool extends Component {
     }
 
     onDragEnd(result) {
-        console.log(result, this.props);
+        const { source, destination } = result;
+        const { groups, stateHandler } = this.props;
+        console.log(source, destination, this.props);
+
+        let reorderedGroup = [...groups];
+        if (destination) {
+            reorderedGroup = [
+                ...reorder(groups, source.index, destination.index),
+            ];
+        }
+
+        stateHandler({ groups: reorderedGroup });
     }
 
     groupOnChange(id, type, details) {
