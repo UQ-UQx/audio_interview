@@ -5,6 +5,7 @@ import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
 import uuidv4 from 'uuid/v4';
+import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import GroupAdmin from './GroupAdmin';
 
 const Container = styled.div``;
@@ -17,8 +18,10 @@ class QuestionPool extends Component {
     constructor(props) {
         super(props);
         this.state = {};
+
         this.onAddGroup = this.onAddGroup.bind(this);
         this.groupOnChange = this.groupOnChange.bind(this);
+        this.onDragEnd = this.onDragEnd.bind(this);
     }
 
     onAddGroup() {
@@ -46,6 +49,10 @@ class QuestionPool extends Component {
                 },
             ],
         });
+    }
+
+    onDragEnd(result) {
+        console.log(result, this.props);
     }
 
     groupOnChange(id, type, details) {
@@ -137,8 +144,6 @@ class QuestionPool extends Component {
                     groups: groups.map(group => {
                         if (group.id === id) {
                             const questions = [...group.questions];
-                            const { settings } = group;
-                            const { numberOfQuestionsToAsk } = settings;
 
                             return {
                                 ...group,
@@ -152,11 +157,6 @@ class QuestionPool extends Component {
                                         },
                                     },
                                 ],
-                                settings: {
-                                    ...settings,
-                                    numberOfQuestionsToAsk:
-                                        numberOfQuestionsToAsk + 1,
-                                },
                             };
                         }
                         return group;
@@ -215,15 +215,25 @@ class QuestionPool extends Component {
         return (
             <Container>
                 <GroupsContainer>
-                    {groups
-                        ? groups.map(group => (
-                              <GroupAdmin
-                                  {...group}
-                                  onChangeHandler={this.groupOnChange}
-                                  key={group.id}
-                              />
-                          ))
-                        : ''}
+                    <DragDropContext onDragEnd={this.onDragEnd}>
+                        <Droppable droppableId="droppable">
+                            {provided => (
+                                <div ref={provided.innerRef}>
+                                    {groups.map((group, index) => (
+                                        <GroupAdmin
+                                            dragHandleProps={
+                                                provided.dragHandleProps
+                                            }
+                                            {...group}
+                                            onChangeHandler={this.groupOnChange}
+                                            key={group.id}
+                                            index={index}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </Droppable>
+                    </DragDropContext>
                 </GroupsContainer>
 
                 <Button color="primary" size="sm" onClick={this.onAddGroup}>
