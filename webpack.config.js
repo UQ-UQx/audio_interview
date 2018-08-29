@@ -21,9 +21,32 @@ function showMessage(chalkMessage){
 
 module.exports = (env, argv) => {
 
+  var plugins = [
+    new ProgressBarPlugin(),
+  
+    // Automatically load modules instead of having to import or require them everywhere.
+    new webpack.ProvidePlugin({
+      //jQuery : 'jquery',
+      //$ : 'jquery',
+      //jquery : 'jquery',
+      //_ : 'lodash'
+    }),
+
+    new BrowserSyncPlugin({
+      host: 'localhost',
+      port: 3000,
+      proxy: 'http://localhost:80/',
+      files: [
+        './public/**/*'
+      ]
+    })
+
+  ]
+
   var chalkMessage = 'Happy Coding! 😄';
   if(argv.mode === "production") chalkMessage = "🎉  Woo! ready for production 🎉 "
  
+  if(argv.mode === "development") plugins.push(new BundleAnalyzerPlugin());
 
 
     showMessage(chalkMessage);
@@ -38,29 +61,7 @@ return {
       filename: '[name].js',
       path: __dirname + '/public/dist'
     },
-    plugins:[
-      new ProgressBarPlugin(),
-    
-      // Automatically load modules instead of having to import or require them everywhere.
-      new webpack.ProvidePlugin({
-        //jQuery : 'jquery',
-        //$ : 'jquery',
-        //jquery : 'jquery',
-        //_ : 'lodash'
-      }),
-
-      new BundleAnalyzerPlugin(),
-
-      new BrowserSyncPlugin({
-        host: 'localhost',
-        port: 3000,
-        proxy: 'http://localhost:80/',
-        files: [
-          './public/**/*'
-        ]
-      })
-
-    ],
+    plugins:plugins,
     module: {
       rules: [
         {
