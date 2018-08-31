@@ -38,7 +38,7 @@ class Admin extends Component {
         super(props);
 
         this.state = {
-            tab: 'pool',
+            tab: 'structure',
             saveError: '',
             groups: props.groups,
         };
@@ -98,7 +98,7 @@ class Admin extends Component {
         let tabToLoad = '';
         switch (tab) {
             case 'structure':
-                tabToLoad = <InterviewStructure />;
+                tabToLoad = <InterviewStructure groups={groups} />;
                 break;
             case 'pool':
                 tabToLoad = (
