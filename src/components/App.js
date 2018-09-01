@@ -33,7 +33,6 @@ const WebcamContainer = styled.div`
 `;
 
 const QuestionContainer = styled.div`
-    min-width: 600px;
     flex: 1;
     flex-flow: column;
 `;

@@ -21,6 +21,16 @@ const reorder = (list, startIndex, endIndex) => {
 
     return result;
 };
+
+const questionStructure = () => ({
+    id: uuidv4(),
+    question: '',
+    settings: {
+        ask: true,
+        time: 10000,
+    },
+});
+
 class QuestionPool extends Component {
     constructor(props) {
         super(props);
@@ -40,15 +50,7 @@ class QuestionPool extends Component {
                 {
                     id: uuidv4(),
                     name: '',
-                    questions: [
-                        {
-                            id: uuidv4(),
-                            question: '',
-                            settings: {
-                                ask: true,
-                            },
-                        },
-                    ],
+                    questions: [questionStructure()],
                     settings: {
                         randomise: false,
                         numberOfQuestionsToAsk: 1,
@@ -165,16 +167,7 @@ class QuestionPool extends Component {
 
                             return {
                                 ...group,
-                                questions: [
-                                    ...questions,
-                                    {
-                                        id: uuidv4(),
-                                        question: '',
-                                        settings: {
-                                            ask: true,
-                                        },
-                                    },
-                                ],
+                                questions: [...questions, questionStructure()],
                             };
                         }
                         return group;

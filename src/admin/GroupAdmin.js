@@ -107,7 +107,12 @@ class GroupAdmin extends Component {
         console.log(settings, numberOfQuestionsThatWantToBeAsked);
 
         return (
-            <Draggable key={id} draggableId={id} index={index}>
+            <Draggable
+                key={id}
+                draggableId={id}
+                index={index}
+                tab-index={index}
+            >
                 {provided => (
                     <DraggableContainer
                         innerRef={provided.innerRef}
@@ -142,47 +147,67 @@ class GroupAdmin extends Component {
                                     <Form>
                                         <FormGroup check>
                                             <Label check>
-                                                <Input type="checkbox" /> Check
-                                                me out
+                                                <Input
+                                                    type="checkbox"
+                                                    checked={settings.randomise}
+                                                    onChange={() => {
+                                                        onChangeHandler(
+                                                            id,
+                                                            'updateGroupSettings',
+                                                            {
+                                                                randomise: !settings.randomise,
+                                                            }
+                                                        );
+                                                    }}
+                                                />{' '}
+                                                Randomise Questions
                                             </Label>
                                         </FormGroup>
-                                        <FormGroup>
-                                            <Label for="exampleSelect">
-                                                Select
-                                            </Label>
-                                            <Input
-                                                type="select"
-                                                name="select"
-                                                id="exampleSelect"
-                                                value={
-                                                    settings.numberOfQuestionsToAsk
-                                                }
-                                                onChange={event => {
-                                                    console.log(
-                                                        event.target.value
-                                                    );
-                                                    onChangeHandler(
-                                                        id,
-                                                        'updateGroupSettings',
-                                                        {
-                                                            numberOfQuestionsToAsk: parseInt(
-                                                                event.target
-                                                                    .value,
-                                                                10
-                                                            ),
-                                                        }
-                                                    );
-                                                }}
-                                            >
-                                                <option
-                                                    key={`${id}_numberOfQuestionsThatWantToBeAsked_option_${0}`}
-                                                    value={0}
+                                        <FormGroup />
+                                        {settings.randomise ? (
+                                            <FormGroup>
+                                                <Label for="exampleSelect">
+                                                    Number of questions to
+                                                    randomise (out of the
+                                                    enabled pool of questions
+                                                    for this group)
+                                                </Label>
+                                                <Input
+                                                    type="select"
+                                                    name="select"
+                                                    id="exampleSelect"
+                                                    value={
+                                                        settings.numberOfQuestionsToAsk
+                                                    }
+                                                    onChange={event => {
+                                                        console.log(
+                                                            event.target.value
+                                                        );
+                                                        onChangeHandler(
+                                                            id,
+                                                            'updateGroupSettings',
+                                                            {
+                                                                numberOfQuestionsToAsk: parseInt(
+                                                                    event.target
+                                                                        .value,
+                                                                    10
+                                                                ),
+                                                            }
+                                                        );
+                                                    }}
                                                 >
-                                                    {0}
-                                                </option>
-                                                {options}
-                                            </Input>
-                                        </FormGroup>
+                                                    <option
+                                                        key={`${id}_numberOfQuestionsThatWantToBeAsked_option_${0}`}
+                                                        value={0}
+                                                    >
+                                                        {0}
+                                                    </option>
+                                                    {options}
+                                                </Input>
+                                            </FormGroup>
+                                        ) : (
+                                            ''
+                                        )}
                                     </Form>
                                     <hr />
                                     <RemoveGroupLink

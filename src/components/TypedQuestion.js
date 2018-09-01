@@ -16,6 +16,9 @@ const Question = styled.div`
     font-weight: bold;
     word-wrap: break-word;
     padding: 10px;
+    flex: 1;
+    justify-content: 'center';
+    align-items: 'center';
 `;
 
 class TypedQuestion extends Component {
