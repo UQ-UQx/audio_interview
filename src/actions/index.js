@@ -6,7 +6,7 @@ export const Actions = {
     GET_SAVED_GROUPS_ERROR: 'GET_SAVED_GROUPS_ERROR',
 
     SAVE_GROUPS_START: 'SAVE_GROUPS_START',
-    SAVE_GROUPS_SUCEESS: 'SAVE_GROUPS_SUCEESS',
+    SAVE_GROUPS_SUCESS: 'SAVE_GROUPS_SUCESS',
     SAVE_GROUPS_ERROR: 'SAVE_GROUPS_ERROR',
 
     UPDATE_GROUPS: 'UPDATE_GROUPS',
@@ -84,7 +84,7 @@ const saveGroups = groups => (dispatch, getState) => {
         dispatch({
             types: [
                 Actions.SAVE_GROUPS_START,
-                Actions.SAVE_GROUPS_SUCEESS,
+                Actions.SAVE_GROUPS_SUCESS,
                 Actions.SAVE_GROUPS_ERROR,
             ],
             data, // this is so i can access the data without having to dig too deep into the request tree

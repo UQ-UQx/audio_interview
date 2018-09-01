@@ -66,13 +66,11 @@ class Admin extends Component {
             .then(response => {
                 console.log(response);
 
-                if (response.type === Actions.SAVE_GROUPS_SUCEESS) {
+                if (response.type === Actions.SAVE_GROUPS_SUCESS) {
                     history.push('/');
                 } else {
                     this.setState({
-                        saveError: `Something went wrong... ${
-                            response.error.message
-                        }`,
+                        saveError: `Something went wrong...`,
                     });
                     setSaveFalse();
                 }
