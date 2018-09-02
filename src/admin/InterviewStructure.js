@@ -19,7 +19,15 @@ const convertGroupsToQuestionsList = groups => {
         let questionsToAsk = [];
 
         if (randomise) {
-            questionsToAsk = [...sampleSize(questions, numberOfQuestionsToAsk)];
+            // get all questions that are able to be asked
+            questionsToAsk = questions.filter(
+                question => question.settings.ask
+            );
+
+            // get number of questions that are required
+            questionsToAsk = [
+                ...sampleSize(questionsToAsk, numberOfQuestionsToAsk),
+            ];
         } else {
             questionsToAsk = questions.filter(
                 question => question.settings.ask

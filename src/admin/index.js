@@ -66,7 +66,7 @@ class Admin extends Component {
             .then(response => {
                 console.log(response);
 
-                if (response.type === Actions.SAVE_GROUPS_SUCESS) {
+                if (response.type === Actions.SAVE_GROUPS_SUCCESS) {
                     history.push('/');
                 } else {
                     this.setState({
