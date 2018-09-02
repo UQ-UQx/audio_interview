@@ -13,26 +13,24 @@ const convertGroupsToQuestionsList = groups => {
 
     const list = groups.map(group => {
         const { settings, questions } = group;
+        const { randomise, numberOfQuestionsToAsk } = settings;
+        console.log('BLOW!', settings, questions);
 
-        let list = [];
+        let questionsToAsk = [];
 
-        if (settings.randomise) {
-            list = questions.map(question => {
-                if (question.settings.ask)
-                    return { question, time: question.settings.time };
-                return false;
-            });
+        if (randomise) {
+            questionsToAsk = [...sampleSize(questions, numberOfQuestionsToAsk)];
         } else {
-            const { numberOfQuestionsToAsk } = settings;
-
-            console.log('wow', sampleSize(questions, numberOfQuestionsToAsk));
+            questionsToAsk = questions.filter(
+                question => question.settings.ask
+            );
         }
-
-        return [...list];
+        return [...questionsToAsk];
     });
 
     console.log(list);
-    return [...groups];
+
+    return [].concat(...list);
 };
 
 class InterviewStructure extends Component {
@@ -43,15 +41,20 @@ class InterviewStructure extends Component {
 
     render() {
         const { groups } = this.props;
+        const questionsList = convertGroupsToQuestionsList(groups);
+
         return (
             <Container>
-                <pre>
-                    {JSON.stringify(
-                        convertGroupsToQuestionsList(groups),
-                        null,
-                        2
-                    )}
-                </pre>
+                <h4>
+                    The following is a possible list of questions that the
+                    lerner will see in order:
+                </h4>
+                {questionsList.map(question => (
+                    <div key={question.id}>
+                        {question.question} - {question.settings.time / 1000}{' '}
+                        minutes
+                    </div>
+                ))}
             </Container>
         );
     }
