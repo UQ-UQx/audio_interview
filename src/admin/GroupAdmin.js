@@ -22,7 +22,6 @@ import {
 } from 'reactstrap';
 import { Draggable } from 'react-beautiful-dnd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faCog, faBars } from '@fortawesome/free-solid-svg-icons';
 
 const Container = styled.div`
     margin-bottom: 10px;
@@ -121,7 +120,7 @@ class GroupAdmin extends Component {
                         <GroupTopBar>
                             <Navbar color="light" light expand="md">
                                 <DragHandle {...provided.dragHandleProps}>
-                                    <FontAwesomeIcon icon={faBars} />
+                                    <FontAwesomeIcon icon="bars" />
                                 </DragHandle>
                                 <NavbarBrand>Question Group</NavbarBrand>
                                 <NavbarToggler onClick={this.toggle} />
@@ -132,7 +131,7 @@ class GroupAdmin extends Component {
                                             color="info"
                                             onClick={this.toggle}
                                         >
-                                            <FontAwesomeIcon icon={faCog} />
+                                            <FontAwesomeIcon icon="cog" />
                                             {'  '}
                                             Group Settings
                                         </GroupSettingsLink>
@@ -216,7 +215,7 @@ class GroupAdmin extends Component {
                                             onChangeHandler(id, 'removeGroup')
                                         }
                                     >
-                                        <FontAwesomeIcon icon={faTrash} />
+                                        <FontAwesomeIcon icon="trash" />
                                         {'  '}
                                         Remove Group
                                     </RemoveGroupLink>
@@ -315,7 +314,7 @@ class GroupAdmin extends Component {
                                                 )
                                             }
                                         >
-                                            <FontAwesomeIcon icon={faTrash} />
+                                            <FontAwesomeIcon icon="trash" />
                                         </Button>
                                     </InputGroupAddon>
                                 </QuestionInputGroup>
