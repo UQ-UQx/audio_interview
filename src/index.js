@@ -3,6 +3,16 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { Alert } from 'reactstrap';
+
+import { library } from '@fortawesome/fontawesome-svg-core';
+import {
+    faStroopwafel,
+    faTrash,
+    faCog,
+    faBars,
+    faSyncAlt,
+} from '@fortawesome/free-solid-svg-icons';
+
 import { getSavedGroups, Actions } from './actions';
 
 import store from './store';
@@ -12,6 +22,10 @@ import AppMenu from './AppMenu';
 
 import 'normalize.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+library.add(faStroopwafel, faTrash, faCog, faBars, faSyncAlt);
+
+console.log('woah');
 
 const renderApp = () => (
     <Provider store={store}>

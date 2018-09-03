@@ -3,59 +3,64 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-
-import { sampleSize } from 'lodash';
+import { Button } from 'reactstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import moment from 'moment';
+import { convertGroupsToQuestionsList } from '../helpers';
 
 const Container = styled.div``;
-
-const convertGroupsToQuestionsList = groups => {
-    // go through the groups 1by one, read the group settings first, and then grab the questions,
-
-    const list = groups.map(group => {
-        const { settings, questions } = group;
-
-        let list = [];
-
-        if (settings.randomise) {
-            list = questions.map(question => {
-                if (question.settings.ask)
-                    return { question, time: question.settings.time };
-                return false;
-            });
-        } else {
-            const { numberOfQuestionsToAsk } = settings;
-
-            console.log('wow', sampleSize(questions, numberOfQuestionsToAsk));
-        }
-
-        return [...list];
-    });
-
-    console.log(list);
-    return [...groups];
-};
 
 class InterviewStructure extends Component {
     constructor(props) {
         super(props);
-        this.state = {};
+        const { groups } = props;
+
+        this.state = {
+            questionsList: convertGroupsToQuestionsList(groups),
+        };
     }
 
     render() {
+        const { questionsList } = this.state;
         const { groups } = this.props;
+
         return (
             <Container>
-                <pre>
-                    {JSON.stringify(
-                        convertGroupsToQuestionsList(groups),
-                        null,
-                        2
-                    )}
-                </pre>
+                <h4>
+                    The following is a possible list of questions that the
+                    lerner will see in order:
+                </h4>
+                <Button
+                    size="sm"
+                    onClick={() => {
+                        this.setState({
+                            questionsList: convertGroupsToQuestionsList(groups),
+                        });
+                    }}
+                >
+                    <FontAwesomeIcon icon="sync-alt" /> Refresh
+                </Button>
+                {questionsList.map((question, index) => {
+                    const { time } = question.settings;
+
+                    const computedTime = moment.duration(time * 1000);
+
+                    console.log(computedTime);
+
+                    return (
+                        <div key={question.id}>
+                            {index + 1}) {question.question} -{' '}
+                            <b>
+                                {`${computedTime.minutes()} Minutes ${computedTime.seconds()} Seconds`}
+                            </b>
+                        </div>
+                    );
+                })}
             </Container>
         );
     }
 }
+
 export default withRouter(
     connect(
         state => ({

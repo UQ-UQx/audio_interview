@@ -95,7 +95,8 @@ class QuestionPool extends Component {
                     }),
                 });
                 break;
-            case 'updateQuestionAskSetting':
+
+            case 'updateQuestionSettings':
                 stateHandler({
                     groups: groups.map(group => {
                         if (group.id === id) {

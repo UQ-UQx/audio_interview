@@ -2,6 +2,15 @@ import { combineReducers } from 'redux';
 
 import { Actions, Tables } from '../actions';
 
+const questionsListReducer = (state = [], action) => {
+    switch (action.type) {
+        case Actions.SAVE_GROUPS_SUCCESS:
+            return state;
+        default:
+            return state;
+    }
+};
+
 const groupsRecordIDReducer = (state = null, action) => {
     switch (action.type) {
         case Actions.GET_SAVED_GROUPS_SUCCESS:
@@ -73,6 +82,7 @@ const saveReducer = (state = false, action) => {
 };
 
 export default combineReducers({
+    questionsList: questionsListReducer,
     groupsRecordID: groupsRecordIDReducer,
     groups: groupsReducer,
     question: questionReducer,

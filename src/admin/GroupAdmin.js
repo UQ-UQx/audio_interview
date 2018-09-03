@@ -22,7 +22,6 @@ import {
 } from 'reactstrap';
 import { Draggable } from 'react-beautiful-dnd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faCog, faBars } from '@fortawesome/free-solid-svg-icons';
 
 const Container = styled.div`
     margin-bottom: 10px;
@@ -58,6 +57,8 @@ const DraggableContainer = styled.div``;
 const DragHandle = styled.div`
     margin-right: 20px;
 `;
+
+const TimeInput = styled(Input)``;
 
 class GroupAdmin extends Component {
     constructor(props) {
@@ -121,7 +122,7 @@ class GroupAdmin extends Component {
                         <GroupTopBar>
                             <Navbar color="light" light expand="md">
                                 <DragHandle {...provided.dragHandleProps}>
-                                    <FontAwesomeIcon icon={faBars} />
+                                    <FontAwesomeIcon icon="bars" />
                                 </DragHandle>
                                 <NavbarBrand>Question Group</NavbarBrand>
                                 <NavbarToggler onClick={this.toggle} />
@@ -132,7 +133,7 @@ class GroupAdmin extends Component {
                                             color="info"
                                             onClick={this.toggle}
                                         >
-                                            <FontAwesomeIcon icon={faCog} />
+                                            <FontAwesomeIcon icon="cog" />
                                             {'  '}
                                             Group Settings
                                         </GroupSettingsLink>
@@ -216,7 +217,7 @@ class GroupAdmin extends Component {
                                             onChangeHandler(id, 'removeGroup')
                                         }
                                     >
-                                        <FontAwesomeIcon icon={faTrash} />
+                                        <FontAwesomeIcon icon="trash" />
                                         {'  '}
                                         Remove Group
                                     </RemoveGroupLink>
@@ -265,7 +266,7 @@ class GroupAdmin extends Component {
                                                     }
                                                     onChangeHandler(
                                                         id,
-                                                        'updateQuestionAskSetting',
+                                                        'updateQuestionSettings',
                                                         {
                                                             id: question.id,
                                                             settings: {
@@ -303,6 +304,29 @@ class GroupAdmin extends Component {
                                         value={question.question}
                                     />{' '}
                                     <InputGroupAddon addonType="append">
+                                        <TimeInput
+                                            name={`${id}_${
+                                                question.id
+                                            }_question_time_input`}
+                                            type="number"
+                                            onChange={event =>
+                                                onChangeHandler(
+                                                    id,
+                                                    'updateQuestionSettings',
+                                                    {
+                                                        id: question.id,
+                                                        settings: {
+                                                            time: parseInt(
+                                                                event.target
+                                                                    .value,
+                                                                10
+                                                            ),
+                                                        },
+                                                    }
+                                                )
+                                            }
+                                            value={question.settings.time}
+                                        />{' '}
                                         <Button
                                             color="danger"
                                             onClick={() =>
@@ -315,7 +339,7 @@ class GroupAdmin extends Component {
                                                 )
                                             }
                                         >
-                                            <FontAwesomeIcon icon={faTrash} />
+                                            <FontAwesomeIcon icon="trash" />
                                         </Button>
                                     </InputGroupAddon>
                                 </QuestionInputGroup>
