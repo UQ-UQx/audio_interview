@@ -6,7 +6,6 @@ const convertGroupsToQuestionsList = groups => {
     const list = groups.map(group => {
         const { settings, questions } = group;
         const { randomise, numberOfQuestionsToAsk } = settings;
-        console.log('BLOW!', settings, questions);
 
         let questionsToAsk = [];
 
@@ -27,8 +26,6 @@ const convertGroupsToQuestionsList = groups => {
         }
         return [...questionsToAsk];
     });
-
-    console.log(list);
 
     return [].concat(...list);
 };

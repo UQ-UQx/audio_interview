@@ -58,6 +58,8 @@ const DragHandle = styled.div`
     margin-right: 20px;
 `;
 
+const TimeInput = styled(Input)``;
+
 class GroupAdmin extends Component {
     constructor(props) {
         super(props);
@@ -264,7 +266,7 @@ class GroupAdmin extends Component {
                                                     }
                                                     onChangeHandler(
                                                         id,
-                                                        'updateQuestionAskSetting',
+                                                        'updateQuestionSettings',
                                                         {
                                                             id: question.id,
                                                             settings: {
@@ -302,6 +304,29 @@ class GroupAdmin extends Component {
                                         value={question.question}
                                     />{' '}
                                     <InputGroupAddon addonType="append">
+                                        <TimeInput
+                                            name={`${id}_${
+                                                question.id
+                                            }_question_time_input`}
+                                            type="number"
+                                            onChange={event =>
+                                                onChangeHandler(
+                                                    id,
+                                                    'updateQuestionSettings',
+                                                    {
+                                                        id: question.id,
+                                                        settings: {
+                                                            time: parseInt(
+                                                                event.target
+                                                                    .value,
+                                                                10
+                                                            ),
+                                                        },
+                                                    }
+                                                )
+                                            }
+                                            value={question.settings.time}
+                                        />{' '}
                                         <Button
                                             color="danger"
                                             onClick={() =>

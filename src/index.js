@@ -10,6 +10,7 @@ import {
     faTrash,
     faCog,
     faBars,
+    faSyncAlt,
 } from '@fortawesome/free-solid-svg-icons';
 
 import { getSavedGroups, Actions } from './actions';
@@ -22,7 +23,9 @@ import AppMenu from './AppMenu';
 import 'normalize.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-library.add(faStroopwafel, faTrash, faCog, faBars);
+library.add(faStroopwafel, faTrash, faCog, faBars, faSyncAlt);
+
+console.log('woah');
 
 const renderApp = () => (
     <Provider store={store}>
