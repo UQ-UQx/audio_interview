@@ -2,10 +2,32 @@ import { combineReducers } from 'redux';
 
 import { Actions, Tables } from '../actions';
 
+const questionsListRecordIDReducer = (state = null, action) => {
+    switch (action.type) {
+        case Actions.GET_SAVED_QUESTIONS_LIST_SUCCESS:
+            console.log(action);
+            return action.payload.data[Tables.QUESTIONS].length > 0
+                ? action.payload.data[Tables.QUESTIONS][0].id
+                : state;
+        case Actions.SAVE_QUESTIONS_LIST_SUCCESS:
+            return action.payload.data;
+        default:
+            return state;
+    }
+};
+
 const questionsListReducer = (state = [], action) => {
     switch (action.type) {
-        case Actions.SAVE_GROUPS_SUCCESS:
-            return state;
+        case Actions.UPDATE_QUESTIONS_LIST:
+            return [...action.payload.questions];
+        case Actions.GET_SAVED_QUESTIONS_LIST_SUCCESS:
+            return action.payload.data[Tables.QUESTIONS].length > 0
+                ? [
+                      ...JSON.parse(
+                          action.payload.data[Tables.QUESTIONS][0].questions
+                      ),
+                  ]
+                : state;
         default:
             return state;
     }
@@ -82,6 +104,7 @@ const saveReducer = (state = false, action) => {
 };
 
 export default combineReducers({
+    questionsListRecordID: questionsListRecordIDReducer,
     questionsList: questionsListReducer,
     groupsRecordID: groupsRecordIDReducer,
     groups: groupsReducer,

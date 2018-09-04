@@ -1,5 +1,7 @@
 <?php
 
+
+
 class MyApi
 {
 	/**
@@ -72,6 +74,14 @@ class MyApi
 
     public function hello(){
 		$data = json_decode($this->request->data);
+
+
+
+
+		
+
+		error_log(json_encode($response));
+
 		$this->reply("Hello ".$data->name.", I'm PHP :)");
 	}
 
@@ -140,7 +150,6 @@ class MyApi
 require_once('../lib/db.php');
 require_once('../config.php');
 require_once('../lib/jwt.php');
-
 
 // if(isset($config['use_db']) && $config['use_db']) {
 // 	Db::config( 'driver',   'mysql' );

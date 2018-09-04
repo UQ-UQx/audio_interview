@@ -9,16 +9,23 @@ const Container = styled.div`
     width: 100%;
 `;
 
-const Question = styled.div`
+const QuestionContainer = styled.div`
     height: ${props => (props.Height ? props.Height : '400')}px;
+    width: 700px;
+    margin: 0 auto;
+    background-color: lightgreen;
     text-align: center;
     font-size: 25px;
     font-weight: bold;
     word-wrap: break-word;
     padding: 10px;
-    flex: 1;
-    justify-content: 'center';
-    align-items: 'center';
+
+    span {
+        height: inherit;
+        width: inherit;
+        overflow: inherit;
+        text-overflow: ellipsis;
+    }
 `;
 
 class TypedQuestion extends Component {
@@ -35,20 +42,20 @@ class TypedQuestion extends Component {
         if (prevQuestion !== question) {
             const options = {
                 strings: [prevQuestion, question],
-                typeSpeed: 50,
-                backSpeed: 50,
+                typeSpeed: 15,
+                backSpeed: 5,
                 showCursor: false,
                 smartBackspace: false,
             };
             console.log(options);
-            this.typed = new Typed(this.questionSpan, options);
+            this.typedInstance = new Typed(this.questionSpan, options);
         }
     }
 
     componentWillUnmount() {
         // Make sure to destroy Typed instance on unmounting
         // to prevent memory leaks
-        if (this.typed) this.typed.destroy();
+        if (this.typedInstance) this.typedInstance.destroy();
     }
 
     render() {
@@ -56,14 +63,13 @@ class TypedQuestion extends Component {
 
         return (
             <Container Height={Height}>
-                <Question>
+                <QuestionContainer>
                     <span
-                        style={{ whiteSpace: 'pre' }}
                         ref={questionSpan => {
                             this.questionSpan = questionSpan;
                         }}
                     />
-                </Question>
+                </QuestionContainer>
             </Container>
         );
     }
