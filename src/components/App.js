@@ -99,7 +99,7 @@ class App extends Component {
     }
 
     changeQuestion(question) {
-        const { askQuestion, clearQuestion } = this.props;
+        const { askQuestion } = this.props;
         const { questions } = this.state;
 
         if (questions.length === 0) {
@@ -180,11 +180,11 @@ class App extends Component {
 }
 
 App.propTypes = {
-    startRecording: PropTypes.func.isRequired,
-    stopRecording: PropTypes.func.isRequired,
+    // startRecording: PropTypes.func.isRequired,
+    // stopRecording: PropTypes.func.isRequired,
     question: PropTypes.string,
     askQuestion: PropTypes.func.isRequired,
-    clearQuestion: PropTypes.func.isRequired,
+    // clearQuestion: PropTypes.func.isRequired,
     screenshots: PropTypes.arrayOf(PropTypes.string),
     questionsList: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
     groups: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
