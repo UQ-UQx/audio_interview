@@ -4,17 +4,16 @@ import styled from 'styled-components';
 import Typed from 'typed.js';
 
 const Container = styled.div`
-    height: ${props => (props.Height ? props.Height : '400')}px;
+    min-height: 250px;
 
-    width: 100%;
+    ${'' /* height: ${props => (props.Height ? props.Height : '400')}px; */} width: 100%;
 `;
 
 const QuestionContainer = styled.div`
-    height: ${props => (props.Height ? props.Height : '400')}px;
-    width: 700px;
+    min-height: 250px;
+    ${'' /* height: ${props => (props.Height ? props.Height : '400')}px; */} width: 700px;
     margin: 0 auto;
-    background-color: lightgreen;
-    text-align: center;
+    ${'' /* background-color: lightgreen; */} text-align: center;
     font-size: 25px;
     font-weight: bold;
     word-wrap: break-word;
@@ -42,7 +41,7 @@ class TypedQuestion extends Component {
         if (prevQuestion !== question) {
             const options = {
                 strings: [prevQuestion, question],
-                typeSpeed: 15,
+                typeSpeed: 10,
                 backSpeed: 5,
                 showCursor: false,
                 smartBackspace: false,
