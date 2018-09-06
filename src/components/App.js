@@ -97,11 +97,8 @@ class App extends Component {
         }
 
         SaveList.then(() => {
-            console.log('LIIIST', [...list]);
-
             const question = list.shift();
 
-            console.log('LIIIST', [...list]);
             clearQuestion();
 
             this.timerInterval = setInterval(() => {
@@ -132,8 +129,6 @@ class App extends Component {
     changeQuestion(question) {
         const { askQuestion, clearQuestion } = this.props;
         const { questions, gapTime } = this.state;
-
-        console.log('LIIIST', [...questions]);
 
         const list = [...questions];
         clearQuestion();
@@ -202,7 +197,6 @@ class App extends Component {
             questions,
         } = this.state;
 
-        console.log(this.state, currentQuestion, gapTime, gapTimeRemaining);
         return (
             <AppContainer>
                 <MediaVisualsContainer Height={mediaContainerHeight}>

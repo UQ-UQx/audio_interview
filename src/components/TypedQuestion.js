@@ -46,7 +46,6 @@ class TypedQuestion extends Component {
                 showCursor: false,
                 smartBackspace: false,
             };
-            console.log(options);
             this.typedInstance = new Typed(this.questionSpan, options);
         }
     }

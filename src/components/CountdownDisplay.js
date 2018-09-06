@@ -18,7 +18,6 @@ const Display = styled.div`
 
 const CountdownDisplay = props => {
     const { time, startTime, changeHue } = props;
-    console.log(time);
     return (
         <Display changeHue={changeHue} time={time} startTime={startTime}>
             {time}
