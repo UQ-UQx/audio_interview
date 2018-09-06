@@ -11,6 +11,7 @@ import { setSaveFalse, saveGroups, updateGroups, Actions } from '../actions';
 
 import InterviewStructure from './InterviewStructure';
 import QuestionPool from './QuestionPool';
+import Submissions from './Submissions';
 
 const Container = styled.div`
     padding: 20px;
@@ -106,6 +107,9 @@ class Admin extends Component {
                     />
                 );
                 break;
+            case 'submissions':
+                tabToLoad = <Submissions />;
+                break;
             default:
                 break;
         }
@@ -141,6 +145,15 @@ class Admin extends Component {
                             }}
                         >
                             Question Pool
+                        </TabButtons>
+                        <TabButtons
+                            active={tab === 'submissions'}
+                            color={tab === 'submissions' ? 'primary' : 'info'}
+                            onClick={() => {
+                                this.setState({ tab: 'submissions' });
+                            }}
+                        >
+                            Submissions
                         </TabButtons>
                     </ButtonGroup>
                 </TabButtonsContainer>

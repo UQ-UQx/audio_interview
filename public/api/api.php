@@ -64,7 +64,7 @@ class MyApi
 				$this->hello($this->request->data);
 				break;
 			case "uploadFile":
-				$this->uploadFile($this->request->data);
+				$this->uploadFile();
 			default:
 				$this->reply("action switch failed",400);
 			break;
@@ -74,9 +74,8 @@ class MyApi
 
 	}
 
-	public function uploadFile($data){
+	public function uploadFile(){
 
-		error_log($data);
 
 		//file_put_contents("base.txt", $data );
 
@@ -89,20 +88,31 @@ class MyApi
 		}
 		
 		// pull the raw binary data from the POST array
-		$data = substr($_POST['data'], strpos($_POST['data'], ",") + 1);
+		$audioData = substr($_POST['audio'], strpos($_POST['audio'], ",") + 1);
+		$videoData = substr($_POST['video'], strpos($_POST['video'], ",") + 1);
+
 		// decode it
-		$decodedData = base64_decode($data);
+		$decodedAudioData = base64_decode($audioData);
+		$decodedVideoData = base64_decode($videoData);
+
 		// print out the raw data, 
 		//echo ($decodedData);
-		$filename = 'audio_recording_' . date( 'Y-m-d-H-i-s' ) .'.webm';
+		$audioFilename = 'audio_recording_' . $_POST['userID'] .'.webm'; //date( 'Y-m-d-H-i-s' ) .'.webm';
+		$videoFilename = 'video_recording_' . $_POST['userID'] .'.webm'; //date( 'Y-m-d-H-i-s' ) .'.webm';
+
 		// write the data out to the file
 		
-		$fp = fopen('../media/recordings/'.$filename, 'wb');
-		fwrite($fp, $decodedData);
-		$this->reply($filename);
-
-
+		$fp = fopen('../media/recordings/'.$audioFilename, 'wb');
+		fwrite($fp, $decodedAudioData);
 		fclose($fp);
+
+		$fp = fopen('../media/recordings/'.$videoFilename, 'wb');
+		fwrite($fp, $decodedVideoData);
+		fclose($fp);
+
+		$this->reply(array('audioFilename'=>$audioFilename, 'videoFilename'=>$videoFilename));
+
+
 
 		
 

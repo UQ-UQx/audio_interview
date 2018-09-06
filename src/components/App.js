@@ -3,11 +3,11 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import axios from 'axios';
 import { ReactMic } from 'react-mic';
-import { adjustHue } from 'polished';
 
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
+import whammy from '../../public/lib/js/whammy';
 import {
     startRecording,
     stopRecording,
@@ -23,13 +23,12 @@ import TypedQuestion from './TypedQuestion';
 import CountdownDisplay from './CountdownDisplay';
 import { convertGroupsToQuestionsList } from '../helpers';
 
-const mediaContainerHeight = 400;
+const mediaContainerHeight = 0;
 
 const AppContainer = styled.div``;
 
 const MediaVisualsContainer = styled.div`
     height: ${props => (props.Height ? props.Height : mediaContainerHeight)}px;
-    margin-bottom: 10px;
     display: flex;
     flex-wrap: wrap;
 `;
@@ -69,7 +68,8 @@ class App extends Component {
             gapTimeRemaining: gapTimeDefault / 1000,
             timeRemaining: 0,
             record: false,
-            filename: null,
+            audioFilename: null,
+            videoFilename: null,
         };
 
         this.stopInterview = this.stopInterview.bind(this);
@@ -112,9 +112,25 @@ class App extends Component {
                         };
                     })
             )
-            .then(base64 => {
-                console.log(base64);
+            .then(
+                audioBase64 =>
+                    new Promise(resolve => {
+                        const output = this.whammyEncoder.compile();
 
+                        console.log(output);
+
+                        const reader = new FileReader();
+                        reader.readAsDataURL(output);
+                        reader.onloadend = () => {
+                            const videoBase64 = reader.result;
+
+                            console.log('WOOAH', videoBase64);
+
+                            resolve({ audioBase64, videoBase64 });
+                        };
+                    })
+            )
+            .then(({ audioBase64, videoBase64 }) => {
                 const fd = new FormData();
                 const filename = encodeURIComponent(
                     `audio_recording_${new Date().getTime()}.webm`
@@ -122,7 +138,10 @@ class App extends Component {
                 console.log(`mp3name = ${filename}`);
                 fd.append('fname', filename);
                 fd.append('action', 'uploadFile');
-                fd.append('data', base64);
+                fd.append('audio', audioBase64);
+                fd.append('video', videoBase64);
+                fd.append('userID', $LTI.userID);
+
                 fd.append('jwt_token', $JWT_TOKEN);
 
                 return axios({
@@ -133,9 +152,14 @@ class App extends Component {
                     processData: false,
                 });
             })
-            .then(filename => {
-                console.log(filename);
-                this.setState({ filename: filename.data });
+            .then(filenames => {
+                console.log(filenames);
+
+                const { audioFilename, videoFilename } = filenames.data;
+                this.setState({
+                    audioFilename,
+                    videoFilename,
+                });
             })
             .catch(error => {
                 console.error(error);
@@ -157,7 +181,6 @@ class App extends Component {
     }
 
     startMediaRecording() {
-        const { startRecording } = this.props;
         this.setState({
             record: true,
         });
@@ -166,12 +189,10 @@ class App extends Component {
     }
 
     stopMediaRecording() {
-        const { stopRecording } = this.props;
         this.setState({
             record: false,
         });
 
-        stopRecording();
         this.stopInterview();
     }
 
@@ -205,22 +226,27 @@ class App extends Component {
     }
 
     stopInterview() {
+        const { stopRecording } = this.props;
+
         if (this.timeout) clearTimeout(this.timeout);
         if (this.gapTimeout) clearTimeout(this.gapTimeout);
         if (this.timerInterval) clearInterval(this.timerInterval);
+
+        clearQuestion();
+        stopRecording();
 
         this.setState({
             questions: [],
             currentQuestion: null,
             timeRemaining: 0,
             gapTimeRemaining: 0,
+            record: false,
         });
-        clearQuestion();
     }
 
     startInterview() {
         const {
-            // startRecording,
+            startRecording,
             // stopRecording,
             // screenshots,
             // question,
@@ -246,6 +272,14 @@ class App extends Component {
         }
 
         SaveList.then(() => {
+            startRecording();
+
+            this.whammyEncoder = new whammy.Video(0.2);
+
+            this.setState({
+                record: true,
+            });
+
             const question = list.shift();
 
             clearQuestion();
@@ -304,11 +338,12 @@ class App extends Component {
             gapTimeRemaining,
             questions,
             record,
-            filename,
+            audioFilename,
+            videoFilename,
         } = this.state;
 
         const startTime = currentQuestion ? currentQuestion.settings.time : 1;
-        console.log(record);
+        console.log(screenshots);
 
         return (
             <AppContainer>
@@ -316,21 +351,24 @@ class App extends Component {
                     <WebcamContainer>
                         <InterviewCam
                             height={mediaContainerHeight}
+                            onScreenshot={data => {
+                                this.whammyEncoder.add(data);
+                            }}
                             screenshotStreamInterval={5000}
                         />
                     </WebcamContainer>
-                    <ReactMic
-                        record={record}
-                        className="sound-wave"
-                        onStop={this.onStop}
-                        onData={this.onData}
-                        strokeColor="#000000"
-                        backgroundColor={adjustHue(
-                            90 * (timeRemaining / startTime),
-                            '#FF530D'
-                        )}
-                    />
                 </MediaVisualsContainer>
+                <ReactMic
+                    record={record}
+                    className="sound-wave"
+                    // visualSetting="frequencyBars"
+                    height={200}
+                    width={window.screen.width}
+                    onStop={this.onStop}
+                    onData={this.onData}
+                    strokeColor="white"
+                    backgroundColor="black"
+                />
 
                 {[...screenshots].reverse().map((screenshot, index) => (
                     <img
@@ -371,18 +409,26 @@ class App extends Component {
                     )}
                 </CountdownContainer>
                 <ButtonsContainer>
-                    <Button color="primary" onClick={this.startMediaRecording}>
+                    <Button color="primary" onClick={this.startInterview}>
                         Start Interview
                     </Button>
-                    <Button color="warning" onClick={this.stopMediaRecording}>
+                    <Button color="warning" onClick={this.stopInterview}>
                         Stop Interview
                     </Button>
                 </ButtonsContainer>
 
-                {filename ? (
-                    <audio controls src={`./media/recordings/${filename}`}>
+                {audioFilename ? (
+                    <audio controls src={`./media/recordings/${audioFilename}`}>
                         <track kind="captions" src="" />
                     </audio>
+                ) : (
+                    'none'
+                )}
+
+                {videoFilename ? (
+                    <video controls src={`./media/recordings/${videoFilename}`}>
+                        <track kind="captions" src="" />
+                    </video>
                 ) : (
                     'none'
                 )}

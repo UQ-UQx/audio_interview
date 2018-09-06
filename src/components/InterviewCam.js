@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { getScreenshot } from '../actions';
 
 const Container = styled.div`
-    height: ${props => (props.height ? props.height : 400)}px;
+    height: ${props => (props.height ? props.height : 0)}px;
     width: 100%;
     background-color: black;
 `;
@@ -42,8 +42,12 @@ class InterviewCam extends Component {
     }
 
     screenshotInterval() {
-        const { record, getScreenshot } = this.props;
-        if (record) getScreenshot(this.webcam.getScreenshot());
+        const { record, getScreenshot, onScreenshot } = this.props;
+        if (record) {
+            const screenshot = this.webcam.getScreenshot();
+            onScreenshot(screenshot);
+            getScreenshot(screenshot);
+        }
     }
 
     render() {
@@ -62,7 +66,7 @@ class InterviewCam extends Component {
                     ref={webcam => {
                         this.webcam = webcam;
                     }}
-                    screenshotFormat="image/jpeg"
+                    screenshotFormat="image/webp"
                     videoConstraints={videoConstraints}
                     onUserMedia={this.onMedia}
                 />
@@ -78,6 +82,7 @@ InterviewCam.propTypes = {
      */
     screenshotStreamInterval: PropTypes.number,
     getScreenshot: PropTypes.func.isRequired,
+    onScreenshot: PropTypes.func,
     record: PropTypes.bool.isRequired,
     height: PropTypes.number,
 };
@@ -85,6 +90,7 @@ InterviewCam.propTypes = {
 InterviewCam.defaultProps = {
     screenshotStreamInterval: 10000,
     height: 400,
+    onScreenshot: () => {},
 };
 
 export default connect(
