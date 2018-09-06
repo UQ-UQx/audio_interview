@@ -37,7 +37,11 @@ module.exports = (env, argv) => {
       port: 3000,
       proxy: 'http://localhost:80/',
       files: [
-        './public/**/*'
+        // './public/**/*'
+        './public/dist/*', 
+        './public/index.php', 
+        './public/api/*.php', 
+        './public/lib/*.php',
       ]
     })
 

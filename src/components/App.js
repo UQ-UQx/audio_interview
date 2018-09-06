@@ -417,21 +417,60 @@ class App extends Component {
                     </Button>
                 </ButtonsContainer>
 
-                {audioFilename ? (
-                    <audio controls src={`./media/recordings/${audioFilename}`}>
-                        <track kind="captions" src="" />
-                    </audio>
+                {audioFilename && videoFilename ? (
+                    <ButtonsContainer>
+                        <Button
+                            color="primary"
+                            onClick={() => {
+                                this.audioPlayer.play();
+                                this.videoPlayer.play();
+                            }}
+                        >
+                            Start Preview
+                        </Button>
+                        <Button
+                            color="warning"
+                            onClick={() => {
+                                this.audioPlayer.pause();
+                                this.videoPlayer.pause();
+                            }}
+                        >
+                            Stop Preview
+                        </Button>
+                    </ButtonsContainer>
                 ) : (
-                    'none'
+                    ''
                 )}
 
-                {videoFilename ? (
-                    <video controls src={`./media/recordings/${videoFilename}`}>
-                        <track kind="captions" src="" />
-                    </video>
-                ) : (
-                    'none'
-                )}
+                <div>
+                    {audioFilename ? (
+                        <audio
+                            ref={ref => {
+                                this.audioPlayer = ref;
+                            }}
+                            src={`./media/recordings/${audioFilename}`}
+                        >
+                            <track kind="captions" src="" />
+                        </audio>
+                    ) : (
+                        ''
+                    )}
+                </div>
+
+                <div>
+                    {videoFilename ? (
+                        <video
+                            ref={ref => {
+                                this.videoPlayer = ref;
+                            }}
+                            src={`./media/recordings/${videoFilename}`}
+                        >
+                            <track kind="captions" src="" />
+                        </video>
+                    ) : (
+                        ''
+                    )}
+                </div>
             </AppContainer>
         );
     }
