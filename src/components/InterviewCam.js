@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { getScreenshot } from '../actions';
 
 const Container = styled.div`
-    height: ${props => (props.Height ? props.Height : 400)}px;
+    height: ${props => (props.height ? props.height : 400)}px;
     width: 100%;
     background-color: black;
 `;
@@ -19,6 +19,7 @@ class InterviewCam extends Component {
             interval: null,
         };
         this.screenshotInterval = this.screenshotInterval.bind(this);
+        this.onMedia = this.onMedia.bind(this);
     }
 
     componentWillMount() {
@@ -35,13 +36,18 @@ class InterviewCam extends Component {
         this.setState({ interval });
     }
 
+    onMedia(media) {
+        const { height } = this.props;
+        console.log('WOOOO', media, height);
+    }
+
     screenshotInterval() {
         const { record, getScreenshot } = this.props;
         if (record) getScreenshot(this.webcam.getScreenshot());
     }
 
     render() {
-        const { Height } = this.props;
+        const { height } = this.props;
         const videoConstraints = {
             // width: 1280,
             // height: 720,
@@ -49,15 +55,16 @@ class InterviewCam extends Component {
         };
 
         return (
-            <Container Height={Height}>
+            <Container height={height}>
                 <Webcam
-                    height={Height}
+                    height={height}
                     audio={false}
                     ref={webcam => {
                         this.webcam = webcam;
                     }}
                     screenshotFormat="image/jpeg"
                     videoConstraints={videoConstraints}
+                    onUserMedia={this.onMedia}
                 />
             </Container>
         );
@@ -72,12 +79,12 @@ InterviewCam.propTypes = {
     screenshotStreamInterval: PropTypes.number,
     getScreenshot: PropTypes.func.isRequired,
     record: PropTypes.bool.isRequired,
-    Height: PropTypes.number,
+    height: PropTypes.number,
 };
 
 InterviewCam.defaultProps = {
     screenshotStreamInterval: 10000,
-    Height: 400,
+    height: 400,
 };
 
 export default connect(

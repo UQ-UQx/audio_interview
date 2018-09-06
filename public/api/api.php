@@ -63,6 +63,8 @@ class MyApi
 			case "hello":
 				$this->hello($this->request->data);
 				break;
+			case "uploadFile":
+				$this->uploadFile($this->request->data);
 			default:
 				$this->reply("action switch failed",400);
 			break;
@@ -70,6 +72,50 @@ class MyApi
 
 
 
+	}
+
+	public function uploadFile($data){
+
+		error_log($data);
+
+		//file_put_contents("base.txt", $data );
+
+		//file_put_contents("converted.mp3", base64_decode($data) );
+
+		if(!is_dir("../media")){
+			$res = mkdir("../media",0777); 
+
+			$res = mkdir("../media/recordings",0777); 
+		}
+		
+		// pull the raw binary data from the POST array
+		$data = substr($_POST['data'], strpos($_POST['data'], ",") + 1);
+		// decode it
+		$decodedData = base64_decode($data);
+		// print out the raw data, 
+		//echo ($decodedData);
+		$filename = 'audio_recording_' . date( 'Y-m-d-H-i-s' ) .'.webm';
+		// write the data out to the file
+		
+		$fp = fopen('../media/recordings/'.$filename, 'wb');
+		fwrite($fp, $decodedData);
+		$this->reply($filename);
+
+
+		fclose($fp);
+
+		
+
+	}
+
+	private function fwrite_stream($fp, $string) {
+		for ($written = 0; $written < strlen($string); $written += $fwrite) {
+			$fwrite = fwrite($fp, substr($string, $written));
+			if ($fwrite === false) {
+				return $written;
+			}
+		}
+		return $written;
 	}
 
     public function hello(){

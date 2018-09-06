@@ -1,7 +1,10 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-// import axios from 'axios';
+import axios from 'axios';
+import { ReactMic } from 'react-mic';
+import { adjustHue } from 'polished';
+
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
@@ -25,7 +28,7 @@ const mediaContainerHeight = 400;
 const AppContainer = styled.div``;
 
 const MediaVisualsContainer = styled.div`
-    height: ${props => (props.Height ? props.Height : '400')}px;
+    height: ${props => (props.Height ? props.Height : mediaContainerHeight)}px;
     margin-bottom: 10px;
     display: flex;
     flex-wrap: wrap;
@@ -45,7 +48,15 @@ const CountdownContainer = styled.div`
     width: 100%;
 `;
 
-const gapTimeDefault = 5000;
+const ButtonsContainer = styled.div`
+    margin-top: 20px;
+    width: 100%;
+    text-align: center;
+    button {
+        margin: 10px;
+    }
+`;
+const gapTimeDefault = 10000;
 
 class App extends Component {
     constructor(props) {
@@ -57,16 +68,154 @@ class App extends Component {
             gapTime: gapTimeDefault,
             gapTimeRemaining: gapTimeDefault / 1000,
             timeRemaining: 0,
+            record: false,
+            filename: null,
         };
+
+        this.stopInterview = this.stopInterview.bind(this);
         this.startInterview = this.startInterview.bind(this);
         this.changeQuestion = this.changeQuestion.bind(this);
+        this.startMediaRecording = this.startMediaRecording.bind(this);
+        this.stopMediaRecording = this.stopMediaRecording.bind(this);
         this.updateTimer = this.updateTimer.bind(this);
+
+        this.onData = this.onData.bind(this);
+        this.onStop = this.onStop.bind(this);
     }
 
     componentWillUnmount() {
         if (this.timeout) clearTimeout(this.timeout);
         if (this.gapTimeout) clearTimeout(this.gapTimeout);
         if (this.timerInterval) clearInterval(this.timerInterval);
+    }
+
+    onData(recordedBlob) {
+        console.log('chunk of real-time data is: ', this.state, recordedBlob);
+    }
+
+    onStop(recordedBlob) {
+        console.log('recordedBlob is: ', recordedBlob);
+
+        axios({
+            method: 'get',
+            url: recordedBlob.blobURL, // blob url eg. blob:http://127.0.0.1:8000/e89c5d87-a634-4540-974c-30dc476825cc
+            responseType: 'blob',
+        })
+            .then(
+                response =>
+                    new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(response.data);
+                        reader.onloadend = () => {
+                            const base64data = reader.result;
+                            resolve(base64data);
+                        };
+                    })
+            )
+            .then(base64 => {
+                console.log(base64);
+
+                const fd = new FormData();
+                const filename = encodeURIComponent(
+                    `audio_recording_${new Date().getTime()}.webm`
+                );
+                console.log(`mp3name = ${filename}`);
+                fd.append('fname', filename);
+                fd.append('action', 'uploadFile');
+                fd.append('data', base64);
+                fd.append('jwt_token', $JWT_TOKEN);
+
+                return axios({
+                    method: 'post',
+                    url: '../public/api/api.php',
+                    data: fd,
+                    contentType: false,
+                    processData: false,
+                });
+            })
+            .then(filename => {
+                console.log(filename);
+                this.setState({ filename: filename.data });
+            })
+            .catch(error => {
+                console.error(error);
+            });
+
+        // axios({
+        //     method: 'post',
+        //     url: '../public/api/api.php',
+        //     data: fd,
+        //     contentType: false,
+        //     processData: false,
+        // })
+        //     .then(response => {
+        //         console.log(response);
+        //     })
+        //     .catch(err => {
+        //         console.error(err);
+        //     });
+    }
+
+    startMediaRecording() {
+        const { startRecording } = this.props;
+        this.setState({
+            record: true,
+        });
+        startRecording();
+        this.startInterview();
+    }
+
+    stopMediaRecording() {
+        const { stopRecording } = this.props;
+        this.setState({
+            record: false,
+        });
+
+        stopRecording();
+        this.stopInterview();
+    }
+
+    changeQuestion(question) {
+        const { askQuestion, clearQuestion } = this.props;
+        const { questions, gapTime } = this.state;
+
+        const list = [...questions];
+        clearQuestion();
+
+        this.gapTimeout = setTimeout(() => {
+            askQuestion(question.question);
+
+            const nextQuestion = list.shift();
+
+            this.setState({
+                questions: list,
+                currentQuestion: question,
+                timeRemaining: question.settings.time,
+                gapTimeRemaining: gapTime / 1000,
+            });
+
+            this.timeout = setTimeout(() => {
+                if (nextQuestion) {
+                    this.changeQuestion(nextQuestion);
+                } else {
+                    this.stopInterview();
+                }
+            }, question.settings.time * 1000);
+        }, gapTime);
+    }
+
+    stopInterview() {
+        if (this.timeout) clearTimeout(this.timeout);
+        if (this.gapTimeout) clearTimeout(this.gapTimeout);
+        if (this.timerInterval) clearInterval(this.timerInterval);
+
+        this.setState({
+            questions: [],
+            currentQuestion: null,
+            timeRemaining: 0,
+            gapTimeRemaining: 0,
+        });
+        clearQuestion();
     }
 
     startInterview() {
@@ -126,45 +275,6 @@ class App extends Component {
         });
     }
 
-    changeQuestion(question) {
-        const { askQuestion, clearQuestion } = this.props;
-        const { questions, gapTime } = this.state;
-
-        const list = [...questions];
-        clearQuestion();
-
-        this.gapTimeout = setTimeout(() => {
-            askQuestion(question.question);
-
-            const nextQuestion = list.shift();
-
-            this.setState({
-                questions: list,
-                currentQuestion: question,
-                timeRemaining: question.settings.time,
-                gapTimeRemaining: gapTime / 1000,
-            });
-
-            this.timeout = setTimeout(() => {
-                if (nextQuestion) {
-                    this.changeQuestion(nextQuestion);
-                } else {
-                    if (this.timeout) clearTimeout(this.timeout);
-                    if (this.gapTimeout) clearTimeout(this.gapTimeout);
-                    if (this.timerInterval) clearInterval(this.timerInterval);
-
-                    this.setState({
-                        questions: list,
-                        currentQuestion: null,
-                        timeRemaining: 0,
-                        gapTimeRemaining: 0,
-                    });
-                    clearQuestion();
-                }
-            }, question.settings.time * 1000);
-        }, gapTime);
-    }
-
     updateTimer() {
         const { timeRemaining, gapTimeRemaining } = this.state;
 
@@ -181,8 +291,6 @@ class App extends Component {
 
     render() {
         const {
-            // startRecording,
-            // stopRecording,
             screenshots,
             question,
             // askQuestion,
@@ -195,18 +303,35 @@ class App extends Component {
             gapTime,
             gapTimeRemaining,
             questions,
+            record,
+            filename,
         } = this.state;
+
+        const startTime = currentQuestion ? currentQuestion.settings.time : 1;
+        console.log(record);
 
         return (
             <AppContainer>
                 <MediaVisualsContainer Height={mediaContainerHeight}>
                     <WebcamContainer>
                         <InterviewCam
-                            Height={mediaContainerHeight}
+                            height={mediaContainerHeight}
                             screenshotStreamInterval={5000}
                         />
                     </WebcamContainer>
+                    <ReactMic
+                        record={record}
+                        className="sound-wave"
+                        onStop={this.onStop}
+                        onData={this.onData}
+                        strokeColor="#000000"
+                        backgroundColor={adjustHue(
+                            90 * (timeRemaining / startTime),
+                            '#FF530D'
+                        )}
+                    />
                 </MediaVisualsContainer>
+
                 {[...screenshots].reverse().map((screenshot, index) => (
                     <img
                         key={screenshot}
@@ -215,22 +340,6 @@ class App extends Component {
                         alt={`user face screenshot ${index}`}
                     />
                 ))}
-                {/* <Button
-                    onClick={() => {
-                        startRecording();
-                        askQuestion('This is a new question');
-                    }}
-                >
-                    Start
-                </Button>
-                <Button
-                    onClick={() => {
-                        stopRecording();
-                        clearQuestion();
-                    }}
-                >
-                    Stop
-                </Button> */}
 
                 <QuestionContainer>
                     <TypedQuestion
@@ -242,9 +351,7 @@ class App extends Component {
                 <CountdownContainer>
                     <CountdownDisplay
                         changeHue
-                        startTime={
-                            currentQuestion ? currentQuestion.settings.time : 1
-                        }
+                        startTime={startTime}
                         time={timeRemaining}
                     />
                 </CountdownContainer>
@@ -263,15 +370,30 @@ class App extends Component {
                         ''
                     )}
                 </CountdownContainer>
-                <Button onClick={this.startInterview}>Start Interview</Button>
+                <ButtonsContainer>
+                    <Button color="primary" onClick={this.startMediaRecording}>
+                        Start Interview
+                    </Button>
+                    <Button color="warning" onClick={this.stopMediaRecording}>
+                        Stop Interview
+                    </Button>
+                </ButtonsContainer>
+
+                {filename ? (
+                    <audio controls src={`./media/recordings/${filename}`}>
+                        <track kind="captions" src="" />
+                    </audio>
+                ) : (
+                    'none'
+                )}
             </AppContainer>
         );
     }
 }
 
 App.propTypes = {
-    // startRecording: PropTypes.func.isRequired,
-    // stopRecording: PropTypes.func.isRequired,
+    startRecording: PropTypes.func.isRequired,
+    stopRecording: PropTypes.func.isRequired,
     question: PropTypes.string,
     askQuestion: PropTypes.func.isRequired,
     clearQuestion: PropTypes.func.isRequired,
