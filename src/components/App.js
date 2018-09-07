@@ -20,6 +20,7 @@ import {
 import InterviewCam from './InterviewCam';
 import TypedQuestion from './TypedQuestion';
 import CountdownDisplay from './CountdownDisplay';
+import Preview from './Preview';
 
 import { convertGroupsToQuestionsList } from '../helpers';
 
@@ -62,8 +63,8 @@ const CoundownTitle = styled.div`
     margin: 10px;
 `;
 
-const gapTimeDefault = 10000;
-const screenshotInterval = 5000;
+const gapTimeDefault = 5000;
+const screenshotInterval = 1000;
 class App extends Component {
     constructor(props) {
         super(props);
@@ -385,14 +386,12 @@ class App extends Component {
                     strokeColor="white"
                     backgroundColor="black"
                 />
-
                 <QuestionContainer>
                     <TypedQuestion
                         Height={mediaContainerHeight}
                         question={question}
                     />
                 </QuestionContainer>
-
                 <CountdownContainer>
                     <CoundownTitle>
                         {inGap
@@ -408,7 +407,6 @@ class App extends Component {
                         display={`${time}`}
                     />
                 </CountdownContainer>
-
                 <ButtonsContainer>
                     <Button color="primary" onClick={this.startInterview}>
                         Start Interview
@@ -417,10 +415,8 @@ class App extends Component {
                         Stop Interview
                     </Button>
                 </ButtonsContainer>
-
                 <hr />
                 <br />
-
                 {[...screenshots].reverse().map((screenshot, index) => (
                     <img
                         key={screenshot}
@@ -431,59 +427,10 @@ class App extends Component {
                 ))}
 
                 {audioFilename && videoFilename ? (
-                    <ButtonsContainer>
-                        <Button
-                            color="primary"
-                            onClick={() => {
-                                this.audioPlayer.play();
-                                this.videoPlayer.play();
-                            }}
-                        >
-                            Start Preview
-                        </Button>
-                        <Button
-                            color="warning"
-                            onClick={() => {
-                                this.audioPlayer.pause();
-                                this.videoPlayer.pause();
-                            }}
-                        >
-                            Stop Preview
-                        </Button>
-                    </ButtonsContainer>
+                    <Preview {...{ audioFilename, videoFilename }} />
                 ) : (
                     ''
                 )}
-
-                <div>
-                    {audioFilename ? (
-                        <audio
-                            ref={ref => {
-                                this.audioPlayer = ref;
-                            }}
-                            src={`./media/recordings/${audioFilename}`}
-                        >
-                            <track kind="captions" src="" />
-                        </audio>
-                    ) : (
-                        ''
-                    )}
-                </div>
-
-                <div>
-                    {videoFilename ? (
-                        <video
-                            ref={ref => {
-                                this.videoPlayer = ref;
-                            }}
-                            src={`./media/recordings/${videoFilename}`}
-                        >
-                            <track kind="captions" src="" />
-                        </video>
-                    ) : (
-                        ''
-                    )}
-                </div>
             </AppContainer>
         );
     }

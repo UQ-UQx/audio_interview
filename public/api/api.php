@@ -81,40 +81,54 @@ class MyApi
 
 		//file_put_contents("converted.mp3", base64_decode($data) );
 
-		if(!is_dir("../media")){
-			$res = mkdir("../media",0777); 
+		$userID = $_POST['userID'];
 
-			$res = mkdir("../media/recordings",0777); 
+		$audio = $_POST['audio'];
+		$video = $_POST['video'];
+
+		$mediaDir = "../media";
+		$recordingsDir = "../media/recordings";
+		$userDir = "../media/recordings/".$userID;
+
+		if(!is_dir($mediaDir)){
+			$res = mkdir($mediaDir,0777);
 		}
+
+		if(!is_dir($recordingsDir)){
+			$res = mkdir($recordingsDir,0777); 
+		}
+
+		if(!is_dir($userDir)){
+			$res = mkdir($userDir,0777); 
+		}
+
+
+		error_log(is_dir($userDir));
+
 		
 		// pull the raw binary data from the POST array
-		$audioData = substr($_POST['audio'], strpos($_POST['audio'], ",") + 1);
-		$videoData = substr($_POST['video'], strpos($_POST['video'], ",") + 1);
+		$audioData = substr($audio, strpos($audio, ",") + 1);
+		$videoData = substr($video, strpos($video, ",") + 1);
 
 		// decode it
 		$decodedAudioData = base64_decode($audioData);
 		$decodedVideoData = base64_decode($videoData);
 
 		// print out the raw data, 
-		//echo ($decodedData);
-		$audioFilename = 'audio_recording_' . $_POST['userID'] .'.webm'; //date( 'Y-m-d-H-i-s' ) .'.webm';
-		$videoFilename = 'video_recording_' . $_POST['userID'] .'.webm'; //date( 'Y-m-d-H-i-s' ) .'.webm';
+		$audioFilename = 'audio_recording_' . $userID .'.webm'; 
+		$videoFilename = 'video_recording_' . $userID .'.webm'; 
 
 		// write the data out to the file
-		
-		$fp = fopen('../media/recordings/'.$audioFilename, 'wb');
+		$fp = fopen($userDir.'/'.$audioFilename, 'wb');
 		fwrite($fp, $decodedAudioData);
 		fclose($fp);
 
-		$fp = fopen('../media/recordings/'.$videoFilename, 'wb');
+		$fp = fopen($userDir.'/'.$videoFilename, 'wb');
 		fwrite($fp, $decodedVideoData);
 		fclose($fp);
 
 		$this->reply(array('audioFilename'=>$audioFilename, 'videoFilename'=>$videoFilename));
 
-
-
-		
 
 	}
 

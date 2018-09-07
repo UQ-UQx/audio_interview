@@ -4,6 +4,8 @@ var webpack = require("webpack");
 var webpackConfig = require('./webpack.config')
 
 
-// modify the config for product if needed
+console.log(webpackConfig);
 
+
+// modify the config for product if needed
 module.exports = webpackConfig;
