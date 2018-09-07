@@ -57,6 +57,7 @@
     "prop-types": "^15.6.2",
     "react": "^16.4.2",
     "react-beautiful-dnd": "^9.0.1",
+    "react-circular-progressbar": "^1.0.0",
     "react-dom": "^16.4.2",
     "react-mic": "^12.2.2",
     "react-redux": "^5.0.7",

@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { adjustHue } from 'polished';
 import axios from 'axios';
 import { ReactMic } from 'react-mic';
 
@@ -16,11 +17,11 @@ import {
     updateQuestions,
     saveQuestionsList,
 } from '../actions';
-// import { Row, Col } from 'reactstrap';
-// import ApiTestButtons from './ApiTestButtons';
+
 import InterviewCam from './InterviewCam';
 import TypedQuestion from './TypedQuestion';
 import CountdownDisplay from './CountdownDisplay';
+
 import { convertGroupsToQuestionsList } from '../helpers';
 
 const mediaContainerHeight = 0;
@@ -55,13 +56,21 @@ const ButtonsContainer = styled.div`
         margin: 10px;
     }
 `;
-const gapTimeDefault = 10000;
 
+const CoundownTitle = styled.div`
+    font-size: 25px;
+    font-weight: bold;
+    margin: 10px;
+`;
+
+const gapTimeDefault = 10000;
+const screenshotInterval = 5000;
 class App extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
+            stage: 'start',
             questions: [],
             currentQuestion: null,
             gapTime: gapTimeDefault,
@@ -164,20 +173,6 @@ class App extends Component {
             .catch(error => {
                 console.error(error);
             });
-
-        // axios({
-        //     method: 'post',
-        //     url: '../public/api/api.php',
-        //     data: fd,
-        //     contentType: false,
-        //     processData: false,
-        // })
-        //     .then(response => {
-        //         console.log(response);
-        //     })
-        //     .catch(err => {
-        //         console.error(err);
-        //     });
     }
 
     startMediaRecording() {
@@ -202,6 +197,9 @@ class App extends Component {
 
         const list = [...questions];
         clearQuestion();
+        this.setState({
+            currentQuestion: null,
+        });
 
         this.gapTimeout = setTimeout(() => {
             askQuestion(question.question);
@@ -236,6 +234,7 @@ class App extends Component {
         stopRecording();
 
         this.setState({
+            stage: 'end',
             questions: [],
             currentQuestion: null,
             timeRemaining: 0,
@@ -274,7 +273,9 @@ class App extends Component {
         SaveList.then(() => {
             startRecording();
 
-            this.whammyEncoder = new whammy.Video(0.2);
+            this.whammyEncoder = new whammy.Video(
+                1 / (screenshotInterval / 1000)
+            );
 
             this.setState({
                 record: true,
@@ -290,6 +291,8 @@ class App extends Component {
 
             this.gapTimeout = setTimeout(() => {
                 this.setState({
+                    stage: 'during',
+
                     questions: list,
                     currentQuestion: question,
                     timeRemaining: question.settings.time,
@@ -336,14 +339,28 @@ class App extends Component {
             currentQuestion,
             gapTime,
             gapTimeRemaining,
-            questions,
+            stage,
             record,
             audioFilename,
             videoFilename,
         } = this.state;
 
-        const startTime = currentQuestion ? currentQuestion.settings.time : 1;
-        console.log(screenshots);
+        let startTime = currentQuestion ? currentQuestion.settings.time : 1;
+        let time = timeRemaining;
+        let inGap = false;
+
+        if (!currentQuestion) {
+            startTime = gapTime / 1000;
+            time = gapTimeRemaining;
+            inGap = true;
+        }
+
+        console.log(
+            screenshots,
+            timeRemaining / startTime,
+            timeRemaining,
+            startTime
+        );
 
         return (
             <AppContainer>
@@ -354,7 +371,7 @@ class App extends Component {
                             onScreenshot={data => {
                                 this.whammyEncoder.add(data);
                             }}
-                            screenshotStreamInterval={5000}
+                            screenshotStreamInterval={screenshotInterval}
                         />
                     </WebcamContainer>
                 </MediaVisualsContainer>
@@ -370,15 +387,6 @@ class App extends Component {
                     backgroundColor="black"
                 />
 
-                {[...screenshots].reverse().map((screenshot, index) => (
-                    <img
-                        key={screenshot}
-                        width="100px"
-                        src={screenshot}
-                        alt={`user face screenshot ${index}`}
-                    />
-                ))}
-
                 <QuestionContainer>
                     <TypedQuestion
                         Height={mediaContainerHeight}
@@ -387,27 +395,21 @@ class App extends Component {
                 </QuestionContainer>
 
                 <CountdownContainer>
+                    <CoundownTitle>
+                        {inGap
+                            ? `${
+                                  stage === 'start' ? `First` : `Next`
+                              } Question In...`
+                            : ''}
+                    </CoundownTitle>
                     <CountdownDisplay
-                        changeHue
+                        changeHue={!inGap}
                         startTime={startTime}
-                        time={timeRemaining}
+                        time={time}
+                        display={`${time}`}
                     />
                 </CountdownContainer>
-                <CountdownContainer>
-                    {questions.length > 0 ||
-                    this.gapTimeout ||
-                    gapTimeRemaining > 0 ? (
-                        <Fragment>
-                            Next Question In:
-                            <CountdownDisplay
-                                startTime={gapTime / 1000}
-                                time={gapTimeRemaining}
-                            />
-                        </Fragment>
-                    ) : (
-                        ''
-                    )}
-                </CountdownContainer>
+
                 <ButtonsContainer>
                     <Button color="primary" onClick={this.startInterview}>
                         Start Interview
@@ -416,6 +418,18 @@ class App extends Component {
                         Stop Interview
                     </Button>
                 </ButtonsContainer>
+
+                <hr />
+                <br />
+
+                {[...screenshots].reverse().map((screenshot, index) => (
+                    <img
+                        key={screenshot}
+                        width="100px"
+                        src={screenshot}
+                        alt={`user face screenshot ${index}`}
+                    />
+                ))}
 
                 {audioFilename && videoFilename ? (
                     <ButtonsContainer>
