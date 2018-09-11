@@ -3,6 +3,9 @@ var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 var ProgressBarPlugin = require('progress-bar-webpack-plugin');
 var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
+
+
+
 var figlet = require('figlet');
 var chalk = require('chalk');
 
@@ -23,7 +26,7 @@ module.exports = (env, argv) => {
 
   var plugins = [
     new ProgressBarPlugin(),
-  
+
     // Automatically load modules instead of having to import or require them everywhere.
     new webpack.ProvidePlugin({
       //jQuery : 'jquery',
@@ -32,12 +35,18 @@ module.exports = (env, argv) => {
       //_ : 'lodash'
     }),
 
+ 
+
     new BrowserSyncPlugin({
       host: 'localhost',
       port: 3000,
       proxy: 'http://localhost:80/',
       files: [
-        './public/**/*'
+        // './public/**/*'
+        './public/dist/*', 
+        './public/index.php', 
+        './public/api/*.php', 
+        './public/lib/*.php',
       ]
     })
 

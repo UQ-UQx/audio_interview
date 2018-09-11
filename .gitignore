@@ -1,3 +1,6 @@
 node_modules
 public/config.php
 public/dist
+public/media
+vendor
+composer.phar

@@ -1,6 +1,14 @@
 import moment from 'moment';
 
 export const Actions = {
+    GET_SAVED_QUESTIONS_LIST_START: 'GET_SAVED_QUESTIONS_LIST_START',
+    GET_SAVED_QUESTIONS_LIST_SUCCESS: 'GET_SAVED_QUESTIONS_LIST_SUCCESS',
+    GET_SAVED_QUESTIONS_LIST_ERROR: 'GET_SAVED_QUESTIONS_LIST_ERROR',
+
+    SAVE_QUESTIONS_LIST_START: 'SAVE_QUESTIONS_LIST_START',
+    SAVE_QUESTIONS_LIST_SUCCESS: 'SAVE_QUESTIONS_LIST_SUCCESS',
+    SAVE_QUESTIONS_LIST_ERROR: 'SAVE_QUESTIONS_LIST_ERROR',
+
     GET_SAVED_GROUPS_START: 'GET_SAVED_GROUPS_START',
     GET_SAVED_GROUPS_SUCCESS: 'GET_SAVED_GROUPS_SUCCESS',
     GET_SAVED_GROUPS_ERROR: 'GET_SAVED_GROUPS_ERROR',
@@ -9,6 +17,7 @@ export const Actions = {
     SAVE_GROUPS_SUCCESS: 'SAVE_GROUPS_SUCCESS',
     SAVE_GROUPS_ERROR: 'SAVE_GROUPS_ERROR',
 
+    UPDATE_QUESTIONS_LIST: 'UPDATE_QUESTIONS_LIST',
     UPDATE_GROUPS: 'UPDATE_GROUPS',
 
     ASK_QUESTION: 'ASK_QUESTION',
@@ -25,6 +34,83 @@ export const Actions = {
 
 export const Tables = {
     GROUPS: 'interview_question_groups',
+    QUESTIONS: 'questions_list',
+};
+
+const getSavedQuestionsList = () => {
+    const condition1 = `course_id,eq,${$LTI.courseID}`;
+    const condition2 = `resource_id,eq,${$LTI.id}`;
+    const condition3 = `user_id,eq,${$LTI.userID}`;
+
+    const conditions = [condition1, condition2, condition3];
+
+    return {
+        types: [
+            Actions.GET_SAVED_QUESTIONS_LIST_START,
+            Actions.GET_SAVED_QUESTIONS_LIST_SUCCESS,
+            Actions.GET_SAVED_QUESTIONS_LIST_ERROR,
+        ],
+        payload: {
+            request: {
+                method: 'get',
+                url: `/${Tables.QUESTIONS}`,
+                params: {
+                    filter: conditions,
+                    transform: 1,
+                },
+            },
+        },
+    };
+};
+
+const saveQuestionsList = (list = []) => (dispatch, getState) => {
+    const { questionsListRecordID } = getState();
+
+    const created = moment().format('YYYY-MM-DD HH:mm:ss');
+    const updated = moment().format('YYYY-MM-DD HH:mm:ss');
+
+    const recordExists =
+        questionsListRecordID === null || questionsListRecordID === undefined;
+
+    const data = {
+        ...(recordExists ? { course_id: $LTI.courseID } : {}),
+        ...(recordExists ? { resource_id: $LTI.id } : {}),
+        ...(recordExists ? { user_id: $LTI.userID } : {}),
+        questions: JSON.stringify(list),
+        ...(recordExists ? { created } : {}),
+        updated,
+    };
+
+    const request = {
+        request: {
+            method: recordExists ? 'POST' : 'PUT',
+            url: `/${Tables.QUESTIONS}${
+                recordExists ? '' : `/${questionsListRecordID}`
+            }`,
+            data,
+            params: {
+                transform: 1,
+            },
+        },
+    };
+
+    return new Promise((resolve, reject) => {
+        dispatch({
+            types: [
+                Actions.SAVE_QUESTIONS_LIST_START,
+                Actions.SAVE_QUESTIONS_LIST_SUCCESS,
+                Actions.SAVE_QUESTIONS_LIST_ERROR,
+            ],
+            data, // this is so i can access the data without having to dig too deep into the request tree
+            payload: request,
+        })
+            .then(response => {
+                resolve(response);
+            })
+            .catch(err => {
+                reject(err);
+            });
+    });
 };
 
 const getSavedGroups = () => {
@@ -52,7 +138,7 @@ const getSavedGroups = () => {
     };
 };
 
-const saveGroups = groups => (dispatch, getState) => {
+const saveGroups = (groups = []) => (dispatch, getState) => {
     const { groupsRecordID } = getState();
 
     const created = moment().format('YYYY-MM-DD HH:mm:ss');
@@ -98,6 +184,13 @@ const saveGroups = groups => (dispatch, getState) => {
             });
     });
 };
+
+const updateQuestions = questions => ({
+    type: Actions.UPDATE_QUESTIONS_LIST,
+    payload: {
+        questions,
+    },
+});
 
 const updateGroups = groups => ({
     type: Actions.UPDATE_GROUPS,
@@ -166,8 +259,11 @@ const setSaveFalse = () => ({
 
 // function are ordered as above
 export {
+    getSavedQuestionsList,
+    saveQuestionsList,
     getSavedGroups,
     saveGroups,
+    updateQuestions,
     updateGroups,
     setQuestions,
     askQuestion,

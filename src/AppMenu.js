@@ -69,7 +69,7 @@ const AppMenu = props => {
             ) : (
                 <StyledLink to="/edit">
                     <Button color="link" type="button">
-                        Edit LTI App
+                        Admin
                     </Button>
                 </StyledLink>
             )}

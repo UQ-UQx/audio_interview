@@ -8,10 +8,11 @@
   "private": true,
   "scripts": {
     "start": "webpack --watch --mode development",
-    "build": "BABEL_ENV=production webpack --mode production --config ./webpack.config.prod.js",
+    "build": "BABEL_ENV=production webpack --mode production --config ./webpack.config.prod.js --progress",
     "lint": "./node_modules/.bin/eslint ./src --ext .js"
   },
   "devDependencies": {
+    "@prettier/plugin-php": "^0.6.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
     "babel-plugin-styled-components": "^1.5.1",
@@ -57,10 +58,14 @@
     "prop-types": "^15.6.2",
     "react": "^16.4.2",
     "react-beautiful-dnd": "^9.0.1",
+    "react-circular-progressbar": "^1.0.0",
     "react-dom": "^16.4.2",
+    "react-mic": "^12.2.2",
+    "react-player": "^1.6.4",
     "react-redux": "^5.0.7",
     "react-router-dom": "^4.3.1",
     "react-webcam": "^1.0.1",
+    "react-webcam-capture": "^1.2.1",
     "reactstrap": "^6.4.0",
     "redux": "^4.0.0",
     "redux-axios-middleware": "^4.0.0",
@@ -69,6 +74,7 @@
     "redux-thunk": "^2.3.0",
     "styled-components": "^3.4.2",
     "typed.js": "^2.0.9",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "whammy": "^0.0.1"
   }
 }
