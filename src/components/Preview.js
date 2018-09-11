@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import styled from 'styled-components';
+
 import ReactPlayer from 'react-player';
 
 import { Button } from 'reactstrap';
+
+const PreviewContainer = styled.div``;
 
 class Preview extends Component {
     constructor(props) {
@@ -17,8 +21,9 @@ class Preview extends Component {
     render() {
         const { audioFilename, videoFilename } = this.props;
         const { playing } = this.state;
+        console.log(audioFilename, videoFilename);
         return (
-            <Preview>
+            <PreviewContainer>
                 <ReactPlayer
                     ref={el => {
                         console.log('videoPlayer', el);
@@ -35,6 +40,7 @@ class Preview extends Component {
                     }}
                     playing={playing}
                     url={`./media/recordings/${$LTI.userID}/${audioFilename}`}
+                    height={0}
                 />
 
                 <Button
@@ -55,7 +61,7 @@ class Preview extends Component {
                 >
                     Stop
                 </Button>
-            </Preview>
+            </PreviewContainer>
         );
     }
 }

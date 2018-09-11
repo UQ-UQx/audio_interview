@@ -5,7 +5,6 @@ import { Actions, Tables } from '../actions';
 const questionsListRecordIDReducer = (state = null, action) => {
     switch (action.type) {
         case Actions.GET_SAVED_QUESTIONS_LIST_SUCCESS:
-            console.log(action);
             return action.payload.data[Tables.QUESTIONS].length > 0
                 ? action.payload.data[Tables.QUESTIONS][0].id
                 : state;
@@ -81,7 +80,6 @@ const screenshotsReducer = (state = [], action) => {
 };
 
 const recordReducer = (state = false, action) => {
-    console.log(action);
     switch (action.type) {
         case Actions.START_RECORDING:
             return true;

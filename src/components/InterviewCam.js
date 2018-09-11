@@ -43,7 +43,7 @@ class InterviewCam extends Component {
 
     screenshotInterval() {
         const { record, getScreenshot, onScreenshot } = this.props;
-        if (record) {
+        if (record && this.webcam) {
             const screenshot = this.webcam.getScreenshot();
             onScreenshot(screenshot);
             getScreenshot(screenshot);

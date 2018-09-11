@@ -3,8 +3,7 @@ var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 var ProgressBarPlugin = require('progress-bar-webpack-plugin');
 var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-var CompressionPlugin = require("compression-webpack-plugin");
-var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+
 
 
 var figlet = require('figlet');
@@ -72,17 +71,6 @@ return {
       path: __dirname + '/public/dist'
     },
     plugins:plugins,
-    optimization: {
-      minimizer: [
-        new UglifyJsPlugin({
-          sourceMap: false,
-          extractComments: true,
-          exclude: /\/excludes/,
-          cache: true
-
-        })
-      ]
-    },
     module: {
       rules: [
         {

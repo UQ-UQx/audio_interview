@@ -44,8 +44,6 @@ const getSavedQuestionsList = () => {
 
     const conditions = [condition1, condition2, condition3];
 
-    console.log('CONDITIONS', conditions);
-
     return {
         types: [
             Actions.GET_SAVED_QUESTIONS_LIST_START,
