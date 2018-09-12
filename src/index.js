@@ -11,6 +11,7 @@ import {
     faCog,
     faBars,
     faSyncAlt,
+    faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 
 import axios from 'axios';
@@ -25,7 +26,7 @@ import AppMenu from './AppMenu';
 import 'normalize.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-library.add(faStroopwafel, faTrash, faCog, faBars, faSyncAlt);
+library.add(faStroopwafel, faTrash, faCog, faBars, faSyncAlt, faSpinner);
 
 axios({
     method: 'get',

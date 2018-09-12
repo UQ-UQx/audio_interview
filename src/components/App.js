@@ -1,12 +1,13 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import axios from 'axios';
 import { ReactMic } from 'react-mic';
 
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
+import moment from 'moment';
 import whammy from '../../public/lib/js/whammy';
 import {
     startRecording,
@@ -21,22 +22,44 @@ import InterviewCam from './InterviewCam';
 import TypedQuestion from './TypedQuestion';
 import CountdownDisplay from './CountdownDisplay';
 import Preview from './Preview';
+import SubmissionStatus from './SubmissionStatus';
 
 import { convertGroupsToQuestionsList } from '../helpers';
 
-const mediaContainerHeight = 0;
+const mediaContainerHeight = 200;
 
-const AppContainer = styled.div``;
+const AppContainer = styled.div`
+    ${props =>
+        props.hide &&
+        css`
+            display: none;
+        `};
+
+    ${props =>
+        props.blur &&
+        css`
+            position: relative;
+            -webkit-filter: blur(10px);
+            -moz-filter: blur(10px);
+            -o-filter: blur(10px);
+            -ms-filter: blur(10px);
+            filter: blur(10px);
+        `};
+`;
 
 const MediaVisualsContainer = styled.div`
     height: ${props => (props.Height ? props.Height : mediaContainerHeight)}px;
-    display: flex;
-    flex-wrap: wrap;
+
+    ${'' /* flex-wrap: wrap; */};
 `;
 
 const WebcamContainer = styled.div`
-    flex: 1;
-    text-align: center;
+    float: left;
+    width: 20%;
+`;
+const AudioVisualContainer = styled.div`
+    float: left;
+    width: 80%;
 `;
 
 const QuestionContainer = styled.div`
@@ -63,8 +86,36 @@ const CoundownTitle = styled.div`
     margin: 10px;
 `;
 
+const Mask = styled.div`
+    ${props =>
+        props.hide &&
+        css`
+            background-color: rgba(0, 0, 0, 0.5);
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            ${'' /* display: block !important; */};
+        `};
+    text-align: center;
+`;
+
+const MaskContent = styled.div`
+    margin: auto;
+    width: 50%;
+    ${props =>
+        props.hide &&
+        css`
+            display: none;
+        `};
+`;
+
 const gapTimeDefault = 5000;
 const screenshotInterval = 1000;
+let prevLoaded = 0;
+
 class App extends Component {
     constructor(props) {
         super(props);
@@ -76,9 +127,14 @@ class App extends Component {
             gapTime: gapTimeDefault,
             gapTimeRemaining: gapTimeDefault / 1000,
             timeRemaining: 0,
-            // record: false,
+            record: false,
             audioFilename: null,
             videoFilename: null,
+            progress: 0,
+            uploadStartMoment: null,
+            currentLoaded: 0,
+            speed: 0,
+            uploadTimeRemaining: 0,
         };
 
         this.stopInterview = this.stopInterview.bind(this);
@@ -88,7 +144,7 @@ class App extends Component {
         this.stopMediaRecording = this.stopMediaRecording.bind(this);
         this.updateTimer = this.updateTimer.bind(this);
 
-        // this.onData = this.onData.bind(this);
+        this.onData = this.onData.bind(this);
         this.onStop = this.onStop.bind(this);
     }
 
@@ -106,12 +162,19 @@ class App extends Component {
         stopRecording();
     }
 
-    // onData(recordedBlob) {
-    //     // console.log('chunk of real-time data is: ', this.state, recordedBlob);
-    // }
+    onData(recordedBlob) {
+        console.log(
+            'chunk of real-time data is: ',
+            this.state,
+            this.props,
+            recordedBlob
+        );
+    }
 
     onStop(recordedBlob) {
         console.log('recordedBlob is: ', recordedBlob);
+
+        const { uploadStartMoment } = this.state;
 
         axios({
             method: 'get',
@@ -148,6 +211,8 @@ class App extends Component {
                     })
             )
             .then(({ audioBase64, videoBase64 }) => {
+                const currentMoment = moment();
+
                 const fd = new FormData();
                 const filename = encodeURIComponent(
                     `audio_recording_${new Date().getTime()}.webm`
@@ -161,12 +226,68 @@ class App extends Component {
 
                 fd.append('jwt_token', $JWT_TOKEN);
 
+                const config = {
+                    onUploadProgress: progressEvent => {
+                        const uploadStartMomentCal =
+                            uploadStartMoment || currentMoment;
+                        // console.log(progressEvent)
+                        // var percentCompleted = Math.round( (progressEvent.loaded * 100) / progressEvent.total );
+                        const percentCompleted = parseInt(
+                            (
+                                (progressEvent.loaded / progressEvent.total) *
+                                100
+                            ).toFixed(2),
+                            10
+                        );
+                        const secondsElapsed = moment().diff(
+                            uploadStartMomentCal,
+                            'seconds',
+                            true
+                        );
+
+                        const chunk = progressEvent.loaded - prevLoaded;
+
+                        // console.log("CONVERSION ",progressEvent.loaded, progressEvent.loaded/128 )
+
+                        let speed =
+                            progressEvent.loaded / 1000 / secondsElapsed;
+
+                        const uploadTimeRemaining =
+                            (progressEvent.total - progressEvent.loaded) /
+                            1000 /
+                            speed;
+
+                        speed = parseInt(speed.toFixed(2), 10);
+
+                        // console.log(
+                        //     'difference: ',
+                        //     uploadStartMomentCal,
+                        //     percentCompleted,
+                        //     secondsElapsed,
+                        //     progressEvent.loaded - prevLoaded,
+                        //     progressEvent,
+                        //     speed,
+                        //     uploadTimeRemaining
+                        // );
+
+                        prevLoaded = progressEvent.loaded;
+
+                        this.setState({
+                            progress: percentCompleted,
+                            speed,
+                            uploadTimeRemaining,
+                            uploadStartMoment: currentMoment,
+                        });
+                    },
+                };
+
                 return axios({
                     method: 'post',
                     url: '../public/api/api.php',
                     data: fd,
                     contentType: false,
                     processData: false,
+                    ...config,
                 });
             })
             .then(filenames => {
@@ -184,9 +305,9 @@ class App extends Component {
     }
 
     startMediaRecording() {
-        // this.setState({
-        //     record: true,
-        // });
+        this.setState({
+            record: true,
+        });
         const { startRecording } = this.props;
 
         startRecording();
@@ -194,9 +315,9 @@ class App extends Component {
     }
 
     stopMediaRecording() {
-        // this.setState({
-        //     record: false,
-        // });
+        this.setState({
+            record: false,
+        });
         const { stopRecording } = this.props;
 
         stopRecording();
@@ -218,7 +339,7 @@ class App extends Component {
 
             const nextQuestion = list.shift();
 
-            console.log(list);
+            // console.log(list);
 
             this.setState({
                 ...(list.length === 0 ? { stage: 'last' } : {}),
@@ -254,7 +375,7 @@ class App extends Component {
             currentQuestion: null,
             timeRemaining: 0,
             gapTimeRemaining: 0,
-            // record: false,
+            record: false,
         });
     }
 
@@ -293,7 +414,7 @@ class App extends Component {
             );
 
             this.setState({
-                // record: true,
+                record: true,
                 stage: 'during',
             });
 
@@ -355,10 +476,15 @@ class App extends Component {
             gapTime,
             gapTimeRemaining,
             stage,
-
+            // record,
             audioFilename,
             videoFilename,
+            progress,
+            speed,
+            uploadTimeRemaining,
         } = this.state;
+
+        // console.log(record, this.state.record);
 
         let startTime = currentQuestion ? currentQuestion.settings.time : 1;
         let time = timeRemaining;
@@ -370,15 +496,17 @@ class App extends Component {
             inGap = true;
         }
 
-        console.log(
+        console
+            .log
             // screenshots,
             // timeRemaining / startTime,
             // timeRemaining,
             // startTime,
             // audioFilename,
             // videoFilename,
-            stage
-        );
+            // record,
+            // stage
+            ();
 
         let stageReference = '';
 
@@ -397,52 +525,52 @@ class App extends Component {
         }
 
         return (
-            <AppContainer>
-                <Fragment>
-                    <MediaVisualsContainer Height={mediaContainerHeight}>
-                        <WebcamContainer>
-                            <InterviewCam
-                                height={mediaContainerHeight}
-                                onScreenshot={data => {
-                                    console.log();
-                                    this.whammyEncoder.add(data);
-                                }}
-                                screenshotStreamInterval={screenshotInterval}
-                            />
-                        </WebcamContainer>
-                    </MediaVisualsContainer>
-                    <ReactMic
-                        record={record}
-                        className="sound-wave"
-                        visualSetting="frequencyBars"
-                        height={200}
-                        width={window.screen.width}
-                        onStop={this.onStop}
-                        onData={this.onData}
-                        strokeColor="black"
-                        backgroundColor="lightgrey"
+            <Fragment>
+                <MaskContent hide={stage !== 'end'}>
+                    <SubmissionStatus
+                        percentCompleted={progress}
+                        timeRemaining={uploadTimeRemaining}
+                        speed={speed}
                     />
-                    <QuestionContainer>
-                        <TypedQuestion
-                            Height={mediaContainerHeight}
-                            question={question}
-                        />
-                    </QuestionContainer>
-                    {stage === 'during' || stage === 'last' ? (
-                        <CountdownContainer>
-                            <CoundownTitle>
-                                {inGap
-                                    ? `Your ${stageReference} question will be shown in ...`
-                                    : ''}
-                            </CoundownTitle>
-                            <CountdownDisplay
-                                changeHue={!inGap}
-                                startTime={startTime}
-                                time={time}
-                                display={`${time}`}
+                </MaskContent>
+                <AppContainer hide={stage === 'end'}>
+                    <Fragment>
+                        <MediaVisualsContainer Height={mediaContainerHeight}>
+                            <WebcamContainer>
+                                <InterviewCam
+                                    height={mediaContainerHeight}
+                                    onScreenshot={data => {
+                                        // console.log();
+                                        this.whammyEncoder.add(data);
+                                    }}
+                                    screenshotStreamInterval={
+                                        screenshotInterval
+                                    }
+                                />
+                            </WebcamContainer>
+                            <AudioVisualContainer>
+                                <ReactMic
+                                    record={
+                                        stage === 'during' || stage === 'last'
+                                    }
+                                    // className="sound-wave"
+                                    visualSetting="frequencyBars"
+                                    height={200}
+                                    width={window.screen.width}
+                                    onStop={this.onStop}
+                                    onData={this.onData}
+                                    strokeColor="black"
+                                    backgroundColor="lightgrey"
+                                />
+                            </AudioVisualContainer>
+                        </MediaVisualsContainer>
+
+                        <QuestionContainer>
+                            <TypedQuestion
+                                Height={mediaContainerHeight}
+                                question={question}
                             />
-                        </CountdownContainer>
-                    ) : (
+                        </QuestionContainer>
                         <ButtonsContainer>
                             <Button
                                 color="primary"
@@ -450,33 +578,66 @@ class App extends Component {
                             >
                                 Start Interview
                             </Button>
-                            {/* <Button color="warning" onClick={this.stopInterview}>
-                        Stop Interview
-                    </Button> */}
+                            <Button
+                                color="warning"
+                                onClick={this.stopInterview}
+                            >
+                                Stop Interview
+                            </Button>
                         </ButtonsContainer>
-                    )}
-                </Fragment>
+                        {stage === 'during' || stage === 'last' ? (
+                            <CountdownContainer>
+                                <CoundownTitle>
+                                    {inGap
+                                        ? `Your ${stageReference} question will be shown in ...`
+                                        : ''}
+                                </CoundownTitle>
+                                <CountdownDisplay
+                                    changeHue={!inGap}
+                                    startTime={startTime}
+                                    time={time}
+                                    display={`${time}`}
+                                />
+                            </CountdownContainer>
+                        ) : (
+                            <ButtonsContainer>
+                                <Button
+                                    color="primary"
+                                    onClick={this.startInterview}
+                                >
+                                    Start Interview
+                                </Button>
+                                <Button
+                                    color="warning"
+                                    onClick={this.stopInterview}
+                                >
+                                    Stop Interview
+                                </Button>
+                            </ButtonsContainer>
+                        )}
+                    </Fragment>
 
-                <hr />
-                <br />
-                {[...screenshots].reverse().map((screenshot, index) => (
-                    <img
-                        key={screenshot}
-                        width="100px"
-                        src={screenshot}
-                        alt={`user face screenshot ${index}`}
-                    />
-                ))}
+                    {/* <hr />
+                        <br />
+                        {[...screenshots].reverse().map((screenshot, index) => (
+                            <img
+                                key={screenshot}
+                                width="100px"
+                                src={screenshot}
+                                alt={`user face screenshot ${index}`}
+                            />
+                        ))}
 
-                {audioFilename && videoFilename ? (
-                    <Preview
-                        audioFilename={audioFilename}
-                        videoFilename={videoFilename}
-                    />
-                ) : (
-                    ''
-                )}
-            </AppContainer>
+                        {audioFilename && videoFilename ? (
+                            <Preview
+                                audioFilename={audioFilename}
+                                videoFilename={videoFilename}
+                            />
+                        ) : (
+                            ''
+                        )} */}
+                </AppContainer>
+            </Fragment>
         );
     }
 }
@@ -492,7 +653,7 @@ App.propTypes = {
     groups: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
     updateQuestions: PropTypes.func.isRequired,
     saveQuestionsList: PropTypes.func.isRequired,
-    record: PropTypes.bool.isRequired,
+    // record: PropTypes.bool.isRequired,
 };
 
 App.defaultProps = {
