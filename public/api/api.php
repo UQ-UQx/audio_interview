@@ -71,13 +71,15 @@ class MyApi
     {
         try {
             $userID = $_POST['userID'];
+            $ltiID = $_POST['ltiID'];
 
             $audio = $_POST['audio'];
             $video = $_POST['video'];
 
             $mediaDir = "../media";
-            $recordingsDir = "../media/recordings";
-            $userDir = "../media/recordings/" . $userID;
+            $recordingsDir = $mediaDir . "/recordings";
+            $ltiDir = $recordingsDir . "/" . $ltiID;
+            $userDir = $ltiDir . "/" . $userID;
 
             if (!is_dir($mediaDir)) {
                 $res = mkdir($mediaDir, 0777);
@@ -85,6 +87,10 @@ class MyApi
 
             if (!is_dir($recordingsDir)) {
                 $res = mkdir($recordingsDir, 0777);
+            }
+
+            if (!is_dir($ltiDir)) {
+                $res = mkdir($ltiDir, 0777);
             }
 
             if (!is_dir($userDir)) {

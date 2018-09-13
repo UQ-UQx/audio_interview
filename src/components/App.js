@@ -16,12 +16,12 @@ import {
     clearQuestion,
     updateQuestions,
     saveQuestionsList,
+    setCompletedTrue,
 } from '../actions';
 
 import InterviewCam from './InterviewCam';
 import TypedQuestion from './TypedQuestion';
 import CountdownDisplay from './CountdownDisplay';
-import Preview from './Preview';
 import SubmissionStatus from './SubmissionStatus';
 
 import { convertGroupsToQuestionsList } from '../helpers';
@@ -86,25 +86,9 @@ const CoundownTitle = styled.div`
     margin: 10px;
 `;
 
-const Mask = styled.div`
-    ${props =>
-        props.hide &&
-        css`
-            background-color: rgba(0, 0, 0, 0.5);
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: 10;
-            ${'' /* display: block !important; */};
-        `};
-    text-align: center;
-`;
-
 const MaskContent = styled.div`
     margin: auto;
-    width: 50%;
+
     ${props =>
         props.hide &&
         css`
@@ -114,22 +98,25 @@ const MaskContent = styled.div`
 
 const gapTimeDefault = 5000;
 const screenshotInterval = 1000;
-let prevLoaded = 0;
 
 class App extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            stage: 'start',
+            stage: props.completed ? 'end' : 'start',
             questions: [],
             currentQuestion: null,
             gapTime: gapTimeDefault,
             gapTimeRemaining: gapTimeDefault / 1000,
             timeRemaining: 0,
             record: false,
-            audioFilename: null,
-            videoFilename: null,
+            audioFilename: props.completed
+                ? `audio_recording_${$LTI.userID}.webm`
+                : null,
+            videoFilename: props.completed
+                ? `video_recording_${$LTI.userID}.webm`
+                : null,
             progress: 0,
             uploadStartMoment: null,
             currentLoaded: 0,
@@ -143,6 +130,7 @@ class App extends Component {
         this.startMediaRecording = this.startMediaRecording.bind(this);
         this.stopMediaRecording = this.stopMediaRecording.bind(this);
         this.updateTimer = this.updateTimer.bind(this);
+        this.saveInterview = this.saveInterview.bind(this);
 
         this.onData = this.onData.bind(this);
         this.onStop = this.onStop.bind(this);
@@ -174,8 +162,6 @@ class App extends Component {
     onStop(recordedBlob) {
         console.log('recordedBlob is: ', recordedBlob);
 
-        const { uploadStartMoment } = this.state;
-
         axios({
             method: 'get',
             url: recordedBlob.blobURL, // blob url eg. blob:http://127.0.0.1:8000/e89c5d87-a634-4540-974c-30dc476825cc
@@ -192,115 +178,104 @@ class App extends Component {
                         };
                     })
             )
-            .then(
-                audioBase64 =>
-                    new Promise(resolve => {
-                        const output = this.whammyEncoder.compile();
+            .then(audioBase64 => {
+                const output = this.whammyEncoder.compile();
 
-                        console.log(output);
+                console.log(output);
 
-                        const reader = new FileReader();
-                        reader.readAsDataURL(output);
-                        reader.onloadend = () => {
-                            const videoBase64 = reader.result;
+                const reader = new FileReader();
+                reader.readAsDataURL(output);
+                reader.onloadend = () => {
+                    const videoBase64 = reader.result;
 
-                            console.log('WOOAH', videoBase64);
+                    console.log('WOOAH', videoBase64);
 
-                            resolve({ audioBase64, videoBase64 });
-                        };
-                    })
-            )
-            .then(({ audioBase64, videoBase64 }) => {
-                const currentMoment = moment();
-
-                const fd = new FormData();
-                const filename = encodeURIComponent(
-                    `audio_recording_${new Date().getTime()}.webm`
-                );
-                console.log(`mp3name = ${filename}`);
-                fd.append('fname', filename);
-                fd.append('action', 'uploadFile');
-                fd.append('audio', audioBase64);
-                fd.append('video', videoBase64);
-                fd.append('userID', $LTI.userID);
-
-                fd.append('jwt_token', $JWT_TOKEN);
-
-                const config = {
-                    onUploadProgress: progressEvent => {
-                        const uploadStartMomentCal =
-                            uploadStartMoment || currentMoment;
-                        // console.log(progressEvent)
-                        // var percentCompleted = Math.round( (progressEvent.loaded * 100) / progressEvent.total );
-                        const percentCompleted = parseInt(
-                            (
-                                (progressEvent.loaded / progressEvent.total) *
-                                100
-                            ).toFixed(2),
-                            10
-                        );
-                        const secondsElapsed = moment().diff(
-                            uploadStartMomentCal,
-                            'seconds',
-                            true
-                        );
-
-                        const chunk = progressEvent.loaded - prevLoaded;
-
-                        // console.log("CONVERSION ",progressEvent.loaded, progressEvent.loaded/128 )
-
-                        let speed =
-                            progressEvent.loaded / 1000 / secondsElapsed;
-
-                        const uploadTimeRemaining =
-                            (progressEvent.total - progressEvent.loaded) /
-                            1000 /
-                            speed;
-
-                        speed = parseInt(speed.toFixed(2), 10);
-
-                        // console.log(
-                        //     'difference: ',
-                        //     uploadStartMomentCal,
-                        //     percentCompleted,
-                        //     secondsElapsed,
-                        //     progressEvent.loaded - prevLoaded,
-                        //     progressEvent,
-                        //     speed,
-                        //     uploadTimeRemaining
-                        // );
-
-                        prevLoaded = progressEvent.loaded;
-
-                        this.setState({
-                            progress: percentCompleted,
-                            speed,
-                            uploadTimeRemaining,
-                            uploadStartMoment: currentMoment,
-                        });
-                    },
+                    this.saveInterview({ audioBase64, videoBase64 });
                 };
-
-                return axios({
-                    method: 'post',
-                    url: '../public/api/api.php',
-                    data: fd,
-                    contentType: false,
-                    processData: false,
-                    ...config,
-                });
             })
-            .then(filenames => {
-                console.log('red', filenames);
+
+            .catch(error => {
+                console.log(error);
+            });
+    }
+
+    saveInterview({ audioBase64, videoBase64 }) {
+        const { uploadStartMoment } = this.state;
+        const { setCompletedTrue } = this.props;
+        const currentMoment = moment();
+
+        const fd = new FormData();
+        const filename = encodeURIComponent(
+            `audio_recording_${new Date().getTime()}.webm`
+        );
+        console.log(`mp3name = ${filename}`);
+        fd.append('fname', filename);
+        fd.append('action', 'uploadFile');
+        fd.append('audio', audioBase64);
+        fd.append('video', videoBase64);
+        fd.append('userID', $LTI.userID);
+        fd.append('ltiID', $LTI.id);
+
+        fd.append('jwt_token', $JWT_TOKEN);
+
+        const config = {
+            onUploadProgress: progressEvent => {
+                const uploadStartMomentCal = uploadStartMoment || currentMoment;
+                const percentCompleted = parseInt(
+                    (
+                        (progressEvent.loaded / progressEvent.total) *
+                        100
+                    ).toFixed(2),
+                    10
+                );
+                const secondsElapsed = moment().diff(
+                    uploadStartMomentCal,
+                    'seconds',
+                    true
+                );
+
+                let speed = progressEvent.loaded / 1000 / secondsElapsed;
+
+                const uploadTimeRemaining =
+                    (progressEvent.total - progressEvent.loaded) / 1000 / speed;
+
+                speed = parseInt(speed.toFixed(2), 10);
+
+                console.log(
+                    percentCompleted,
+                    speed,
+                    uploadTimeRemaining,
+                    currentMoment
+                );
+
+                this.setState({
+                    progress: percentCompleted,
+                    speed,
+                    uploadTimeRemaining,
+                    uploadStartMoment: currentMoment,
+                });
+            },
+        };
+
+        axios({
+            method: 'post',
+            url: '../public/api/api.php',
+            data: fd,
+            contentType: false,
+            processData: false,
+            ...config,
+        })
+            .then(filenames =>
+                Promise.all([Promise.resolve(filenames), setCompletedTrue()])
+            )
+            .then(response => {
+                const filenames = response[0];
 
                 const { audioFilename, videoFilename } = filenames.data;
                 this.setState({
                     audioFilename,
                     videoFilename,
                 });
-            })
-            .catch(error => {
-                console.log(error);
             });
     }
 
@@ -338,8 +313,6 @@ class App extends Component {
             askQuestion(question.question);
 
             const nextQuestion = list.shift();
-
-            // console.log(list);
 
             this.setState({
                 ...(list.length === 0 ? { stage: 'last' } : {}),
@@ -462,13 +435,7 @@ class App extends Component {
     }
 
     render() {
-        const {
-            screenshots,
-            question,
-            // askQuestion,
-            // clearQuestion,
-            record,
-        } = this.props;
+        const { question, completed } = this.props;
 
         const {
             timeRemaining,
@@ -476,15 +443,12 @@ class App extends Component {
             gapTime,
             gapTimeRemaining,
             stage,
-            // record,
             audioFilename,
             videoFilename,
             progress,
             speed,
             uploadTimeRemaining,
         } = this.state;
-
-        // console.log(record, this.state.record);
 
         let startTime = currentQuestion ? currentQuestion.settings.time : 1;
         let time = timeRemaining;
@@ -495,18 +459,6 @@ class App extends Component {
             time = gapTimeRemaining;
             inGap = true;
         }
-
-        console
-            .log
-            // screenshots,
-            // timeRemaining / startTime,
-            // timeRemaining,
-            // startTime,
-            // audioFilename,
-            // videoFilename,
-            // record,
-            // stage
-            ();
 
         let stageReference = '';
 
@@ -531,16 +483,20 @@ class App extends Component {
                         percentCompleted={progress}
                         timeRemaining={uploadTimeRemaining}
                         speed={speed}
+                        completed={completed}
+                        audioFilename={audioFilename}
+                        videoFilename={videoFilename}
                     />
                 </MaskContent>
-                <AppContainer hide={stage === 'end'}>
+
+                <AppContainer hide={stage === 'end' || completed}>
                     <Fragment>
                         <MediaVisualsContainer Height={mediaContainerHeight}>
                             <WebcamContainer>
                                 <InterviewCam
                                     height={mediaContainerHeight}
                                     onScreenshot={data => {
-                                        // console.log();
+                                        console.log(data);
                                         this.whammyEncoder.add(data);
                                     }}
                                     screenshotStreamInterval={
@@ -553,7 +509,6 @@ class App extends Component {
                                     record={
                                         stage === 'during' || stage === 'last'
                                     }
-                                    // className="sound-wave"
                                     visualSetting="frequencyBars"
                                     height={200}
                                     width={window.screen.width}
@@ -616,26 +571,6 @@ class App extends Component {
                             </ButtonsContainer>
                         )}
                     </Fragment>
-
-                    {/* <hr />
-                        <br />
-                        {[...screenshots].reverse().map((screenshot, index) => (
-                            <img
-                                key={screenshot}
-                                width="100px"
-                                src={screenshot}
-                                alt={`user face screenshot ${index}`}
-                            />
-                        ))}
-
-                        {audioFilename && videoFilename ? (
-                            <Preview
-                                audioFilename={audioFilename}
-                                videoFilename={videoFilename}
-                            />
-                        ) : (
-                            ''
-                        )} */}
                 </AppContainer>
             </Fragment>
         );
@@ -648,16 +583,15 @@ App.propTypes = {
     question: PropTypes.string,
     askQuestion: PropTypes.func.isRequired,
     clearQuestion: PropTypes.func.isRequired,
-    screenshots: PropTypes.arrayOf(PropTypes.string),
     questionsList: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
     groups: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
     updateQuestions: PropTypes.func.isRequired,
     saveQuestionsList: PropTypes.func.isRequired,
-    // record: PropTypes.bool.isRequired,
+    completed: PropTypes.bool.isRequired,
+    setCompletedTrue: PropTypes.func.isRequired,
 };
 
 App.defaultProps = {
-    screenshots: [],
     question: '',
 };
 
@@ -666,9 +600,9 @@ export default withRouter(
         state => ({
             record: state.record,
             question: state.question,
-            screenshots: state.screenshots,
             questionsList: state.questionsList,
             groups: state.groups,
+            completed: state.completed,
         }),
         {
             startRecording,
@@ -677,6 +611,7 @@ export default withRouter(
             clearQuestion,
             updateQuestions,
             saveQuestionsList,
+            setCompletedTrue,
         }
     )(App)
 );

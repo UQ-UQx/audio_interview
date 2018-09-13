@@ -2,12 +2,13 @@ module.exports = {
     "extends": [
         "airbnb",
         "prettier",
-        "prettier/react"
+        "prettier/react",
     ],
     "plugins": [
+        "promise",
         "react",
         "jsx-a11y",
-        "import"
+        "import",
     ],
     "env":{
         "jest": true,
@@ -27,7 +28,13 @@ module.exports = {
         ],
         "no-shadow": "off",
         "no-console": "off",
-        'no-plusplus': ["error", { allowForLoopAfterthoughts: true }]
+        'no-plusplus': ["error", { allowForLoopAfterthoughts: true }],
+
+        
+              
+        
+  
+          
     },
     "plugins": [
         "prettier"

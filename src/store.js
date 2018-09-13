@@ -30,6 +30,7 @@ const clients = {
 const middleware = applyMiddleware(
     promise(),
     thunk,
+
     logger,
     multiClientMiddleware(clients)
 );

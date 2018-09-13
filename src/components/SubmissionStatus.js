@@ -2,10 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import moment from 'moment';
+import { duration } from 'moment-duration-format'; // eslint-disable-line no-unused-vars
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import transition from 'styled-transition-group';
-
 import { Line } from 'rc-progress';
+import { Alert } from 'reactstrap';
+import Preview from './Preview';
 
 const Fade = transition.div`
     &:enter { opacity: 0.01; }
@@ -28,29 +30,26 @@ const SubmissionStatusContainer = styled.div`
 `;
 
 const SubmittedMessage = styled.div`
-    background-color: #00d426;
-    ${'' /* color: #006913; */} padding: 10px;
+    ${'' /* background-color: #00d426;
+    color: #006913;
 
     -webkit-border-radius: 20px;
     -moz-border-radius: 20px;
-    border-radius: 20px;
-    margin: 50px;
-    padding-top: 25px;
+    border-radius: 20px; */} padding-top: 35px;
     text-align: center;
 
     font-weight: bold;
-    font-size: 17px;
+    font-size: 23px;
 `;
 
 const SubmittingMessage = styled.div`
-    background-color: #ff8d00;
+    //background-color: #ff8d00;
     color: #824800;
     padding: 10px;
 
-    -webkit-border-radius: 20px;
+    ${'' /* -webkit-border-radius: 20px;
     -moz-border-radius: 20px;
-    border-radius: 20px;
-    margin: 50px;
+    border-radius: 20px; */} margin: 50px;
     padding-top: 15px;
 
     font-weight: bold;
@@ -73,7 +72,15 @@ const TimeRemainingContainer = styled.div`
 const UploadSpeed = styled.div``;
 
 const SubmissionStatus = props => {
-    const { percentCompleted, speed, timeRemaining } = props;
+    const {
+        percentCompleted,
+        speed,
+        timeRemaining,
+        completed,
+        audioFilename,
+        videoFilename,
+    } = props;
+    console.log(completed);
     return (
         <React.Fragment>
             <Fade
@@ -85,12 +92,12 @@ const SubmissionStatus = props => {
                     {percentCompleted > 0 && percentCompleted < 100 ? (
                         <div>
                             <SubmittingMessage>
-                                Your Interview is now being uploaded ...{' '}
-                                <FontAwesomeIcon icon="spinner" pulse />
+                                Your Interview is being uploaded ...{' '}
                                 <p>
                                     Please DO NOT close this window until the
                                     upload has been completed
                                 </p>
+                                <FontAwesomeIcon icon="spinner" pulse />
                             </SubmittingMessage>
                             <Line
                                 percent={percentCompleted}
@@ -115,18 +122,26 @@ const SubmissionStatus = props => {
                     )}
                 </SubmissionStatusContainer>
             </Fade>
-            <Fade unmountOnExit in={percentCompleted === 100} timeout={1000}>
+            <Fade
+                unmountOnExit
+                in={percentCompleted === 100 || completed}
+                timeout={1000}
+            >
                 <SubmittedMessage>
-                    <p>
-                        <span role="img" aria-label="party popper emoji">
+                    <Alert color="success">
+                        {/* <span role="img" aria-label="party popper emoji">
                             🎉
-                        </span>{' '}
+                        </span>{' '} */}
                         Your Interview has been submitted
-                        {'  '}
+                        {/* {'  '}
                         <span role="img" aria-label="party popper emoji">
                             🎉
-                        </span>
-                    </p>
+                        </span> */}
+                    </Alert>
+                    <Preview
+                        audioFilename={audioFilename}
+                        videoFilename={videoFilename}
+                    />
                 </SubmittedMessage>
             </Fade>
         </React.Fragment>
@@ -137,12 +152,16 @@ SubmissionStatus.propTypes = {
     percentCompleted: PropTypes.number,
     speed: PropTypes.number,
     timeRemaining: PropTypes.number,
+    completed: PropTypes.bool,
+    audioFilename: PropTypes.string.isRequired,
+    videoFilename: PropTypes.string.isRequired,
 };
 
 SubmissionStatus.defaultProps = {
     percentCompleted: 0,
     speed: 0,
     timeRemaining: 0,
+    completed: false,
 };
 export default SubmissionStatus;
 
