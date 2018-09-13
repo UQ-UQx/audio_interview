@@ -101,6 +101,22 @@ const saveReducer = (state = false, action) => {
     }
 };
 
+const maxAttemptsReducer = (state = 1, action) => {
+    console.log(action);
+    return state;
+};
+
+const completedReducer = (state = false, action) => {
+    switch (action.type) {
+        case Actions.GET_SAVED_QUESTIONS_LIST_SUCCESS:
+            return action.payload.data[Tables.QUESTIONS].length > 0
+                ? action.payload.data[Tables.QUESTIONS][0].completed === 1
+                : state;
+        default:
+            return state;
+    }
+};
+
 export default combineReducers({
     questionsListRecordID: questionsListRecordIDReducer,
     questionsList: questionsListReducer,
@@ -110,4 +126,6 @@ export default combineReducers({
     screenshots: screenshotsReducer,
     record: recordReducer,
     save: saveReducer,
+    maxAttempts: maxAttemptsReducer,
+    completed: completedReducer,
 });

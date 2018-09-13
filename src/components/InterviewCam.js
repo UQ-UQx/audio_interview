@@ -61,6 +61,7 @@ class InterviewCam extends Component {
         return (
             <Container height={height}>
                 <Webcam
+                    width="100%"
                     height={height}
                     audio={false}
                     ref={webcam => {

@@ -5,6 +5,10 @@ export const Actions = {
     GET_SAVED_QUESTIONS_LIST_SUCCESS: 'GET_SAVED_QUESTIONS_LIST_SUCCESS',
     GET_SAVED_QUESTIONS_LIST_ERROR: 'GET_SAVED_QUESTIONS_LIST_ERROR',
 
+    SET_COMPLETED_START: 'SET_COMPLETED_START',
+    SET_COMPLETED_SUCCESS: 'SET_COMPLETED_SUCCESS',
+    SET_COMPLETED_ERROR: 'SET_COMPLETED_ERROR',
+
     SAVE_QUESTIONS_LIST_START: 'SAVE_QUESTIONS_LIST_START',
     SAVE_QUESTIONS_LIST_SUCCESS: 'SAVE_QUESTIONS_LIST_SUCCESS',
     SAVE_QUESTIONS_LIST_ERROR: 'SAVE_QUESTIONS_LIST_ERROR',
@@ -63,6 +67,51 @@ const getSavedQuestionsList = () => {
     };
 };
 
+const setCompletedTrue = () => (dispatch, getState) => {
+    const { questionsListRecordID } = getState();
+
+    const updated = moment().format('YYYY-MM-DD HH:mm:ss');
+
+    const recordExists =
+        questionsListRecordID === null || questionsListRecordID === undefined;
+
+    const data = {
+        updated,
+        completed: true,
+    };
+
+    const request = {
+        request: {
+            method: recordExists ? 'POST' : 'PUT',
+            url: `/${Tables.QUESTIONS}${
+                recordExists ? '' : `/${questionsListRecordID}`
+            }`,
+            data,
+            params: {
+                transform: 1,
+            },
+        },
+    };
+
+    return new Promise((resolve, reject) => {
+        dispatch({
+            types: [
+                Actions.SET_COMPLETED_START,
+                Actions.SET_COMPLETED_SUCCESS,
+                Actions.SET_COMPLETED_ERROR,
+            ],
+            data, // this is so i can access the data without having to dig too deep into the request tree
+            payload: request,
+        })
+            .then(response => {
+                resolve(response);
+            })
+            .catch(err => {
+                reject(err);
+            });
+    });
+};
+
 const saveQuestionsList = (list = []) => (dispatch, getState) => {
     const { questionsListRecordID } = getState();
 
@@ -79,6 +128,8 @@ const saveQuestionsList = (list = []) => (dispatch, getState) => {
         questions: JSON.stringify(list),
         ...(recordExists ? { created } : {}),
         updated,
+        ...(recordExists ? { attempted: 0 } : {}),
+        ...(recordExists ? { completed: false } : {}),
     };
 
     const request = {
@@ -273,4 +324,5 @@ export {
     getScreenshot,
     setSaveTrue,
     setSaveFalse,
+    setCompletedTrue,
 };
