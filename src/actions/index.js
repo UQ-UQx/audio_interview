@@ -72,19 +72,19 @@ const setCompletedTrue = () => (dispatch, getState) => {
 
     const updated = moment().format('YYYY-MM-DD HH:mm:ss');
 
-    const recordExists =
+    const recordDoesNotExist =
         questionsListRecordID === null || questionsListRecordID === undefined;
 
     const data = {
         updated,
-        completed: true,
+        completed: 1,
     };
 
     const request = {
         request: {
-            method: recordExists ? 'POST' : 'PUT',
+            method: recordDoesNotExist ? 'POST' : 'PUT',
             url: `/${Tables.QUESTIONS}${
-                recordExists ? '' : `/${questionsListRecordID}`
+                recordDoesNotExist ? '' : `/${questionsListRecordID}`
             }`,
             data,
             params: {
@@ -118,25 +118,25 @@ const saveQuestionsList = (list = []) => (dispatch, getState) => {
     const created = moment().format('YYYY-MM-DD HH:mm:ss');
     const updated = moment().format('YYYY-MM-DD HH:mm:ss');
 
-    const recordExists =
+    const recordDoesNotExist =
         questionsListRecordID === null || questionsListRecordID === undefined;
 
     const data = {
-        ...(recordExists ? { course_id: $LTI.courseID } : {}),
-        ...(recordExists ? { resource_id: $LTI.id } : {}),
-        ...(recordExists ? { user_id: $LTI.userID } : {}),
+        ...(recordDoesNotExist ? { course_id: $LTI.courseID } : {}),
+        ...(recordDoesNotExist ? { resource_id: $LTI.id } : {}),
+        ...(recordDoesNotExist ? { user_id: $LTI.userID } : {}),
         questions: JSON.stringify(list),
-        ...(recordExists ? { created } : {}),
+        ...(recordDoesNotExist ? { created } : {}),
         updated,
-        ...(recordExists ? { attempted: 0 } : {}),
-        ...(recordExists ? { completed: false } : {}),
+        ...(recordDoesNotExist ? { attempted: 0 } : {}),
+        ...(recordDoesNotExist ? { completed: 0 } : {}),
     };
 
     const request = {
         request: {
-            method: recordExists ? 'POST' : 'PUT',
+            method: recordDoesNotExist ? 'POST' : 'PUT',
             url: `/${Tables.QUESTIONS}${
-                recordExists ? '' : `/${questionsListRecordID}`
+                recordDoesNotExist ? '' : `/${questionsListRecordID}`
             }`,
             data,
             params: {
