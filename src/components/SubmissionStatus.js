@@ -124,7 +124,10 @@ const SubmissionStatus = props => {
             </Fade>
             <Fade
                 unmountOnExit
-                in={percentCompleted === 100 || completed}
+                in={
+                    percentCompleted === 100 ||
+                    (completed && audioFilename && videoFilename)
+                }
                 timeout={1000}
             >
                 <SubmittedMessage>

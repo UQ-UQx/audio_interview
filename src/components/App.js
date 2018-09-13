@@ -526,20 +526,7 @@ class App extends Component {
                                 question={question}
                             />
                         </QuestionContainer>
-                        <ButtonsContainer>
-                            <Button
-                                color="primary"
-                                onClick={this.startInterview}
-                            >
-                                Start Interview
-                            </Button>
-                            <Button
-                                color="warning"
-                                onClick={this.stopInterview}
-                            >
-                                Stop Interview
-                            </Button>
-                        </ButtonsContainer>
+
                         {stage === 'during' || stage === 'last' ? (
                             <CountdownContainer>
                                 <CoundownTitle>
