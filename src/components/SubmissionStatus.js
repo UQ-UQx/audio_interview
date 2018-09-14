@@ -126,7 +126,9 @@ const SubmissionStatus = props => {
                 unmountOnExit
                 in={
                     percentCompleted === 100 ||
-                    (completed && audioFilename && videoFilename)
+                    (completed &&
+                        audioFilename !== null &&
+                        videoFilename !== null)
                 }
                 timeout={1000}
             >

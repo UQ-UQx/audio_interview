@@ -1,23 +1,8 @@
 {
-    "presets": [
-        "env",
-        "react",
-        "stage-3"
-    ],
-    "env": {
-        "production": {
-            "plugins": [
-                [
-                    "transform-remove-console",
-                    {
-                        "exclude": [
-                            "error",
-                            "warn"
-                        ]
-                    }
-                ],
-                "babel-plugin-styled-components"
-            ]
-        }
+  "presets": ["env", "react", "stage-3"],
+  "env": {
+    "production": {
+      "plugins": ["babel-plugin-styled-components"]
     }
+  }
 }
