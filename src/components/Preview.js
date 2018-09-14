@@ -62,114 +62,118 @@ class Preview extends Component {
         const { audioFilename, videoFilename } = this.props;
         const { playing, played } = this.state;
         console.log(audioFilename, videoFilename);
-        return (
-            <PreviewContainer>
-                <Players>
-                    <ReactPlayer
-                        ref={el => {
-                            console.log('videoPlayer', el);
-                            this.videoPlayer = el;
-                        }}
-                        playing={playing}
-                        url={`./media/recordings/${$LTI.id}/${
-                            $LTI.userID
-                        }/${videoFilename}`}
-                        width="100%"
-                        onProgress={this.onProgress}
-                        onEnded={() => {
-                            setTimeout(() => {
-                                this.videoPlayer.seekTo(0);
-                                this.setState({
-                                    playing: false,
-                                });
-                            }, 1000);
-                        }}
-                    />
 
-                    <ReactPlayer
-                        ref={el => {
-                            console.log('audioPlayer', el);
-                            this.audioPlayer = el;
-                        }}
-                        playing={playing}
-                        url={`./media/recordings/${$LTI.id}/${
-                            $LTI.userID
-                        }/${audioFilename}`}
-                        height={0}
-                        onProgress={this.onProgress}
-                        onEnded={() => {
-                            setTimeout(() => {
-                                this.audioPlayer.seekTo(0);
-                                this.setState({
-                                    playing: false,
-                                });
-                            }, 1000);
-                        }}
-                    />
-                    <Progress>
-                        <Bar progress={played} />
-                    </Progress>
-                </Players>
-
-                <ButtonGroup>
-                    {playing || played > 0 ? (
-                        <React.Fragment>
-                            <Button
-                                onClick={() => {
-                                    this.setState({
-                                        playing: !playing,
-                                    });
-                                }}
-                                color={
-                                    !playing && played > 0
-                                        ? 'warning'
-                                        : 'secondary'
-                                }
-                            >
-                                {!playing ? (
-                                    <ButtonIcon>
-                                        <FontAwesomeIcon icon="play" />
-                                    </ButtonIcon>
-                                ) : (
-                                    <ButtonIcon>
-                                        <FontAwesomeIcon icon="pause" />
-                                    </ButtonIcon>
-                                )}
-                                {!playing && played > 0 ? 'Paused' : 'Pause'}
-                            </Button>
-                            <Button
-                                onClick={() => {
+        if (audioFilename !== null && videoFilename !== null) {
+            return (
+                <PreviewContainer>
+                    <Players>
+                        <ReactPlayer
+                            ref={el => {
+                                if (el) this.videoPlayer = el;
+                            }}
+                            playing={playing}
+                            url={`./media/recordings/${$LTI.id}/${
+                                $LTI.userID
+                            }/${videoFilename}`}
+                            width="100%"
+                            onProgress={this.onProgress}
+                            onEnded={() => {
+                                setTimeout(() => {
                                     this.videoPlayer.seekTo(0);
+                                    this.setState({
+                                        playing: false,
+                                    });
+                                }, 1000);
+                            }}
+                        />
+
+                        <ReactPlayer
+                            ref={el => {
+                                if (el) this.audioPlayer = el;
+                            }}
+                            playing={playing}
+                            url={`./media/recordings/${$LTI.id}/${
+                                $LTI.userID
+                            }/${audioFilename}`}
+                            height={0}
+                            onProgress={this.onProgress}
+                            onEnded={() => {
+                                setTimeout(() => {
                                     this.audioPlayer.seekTo(0);
                                     this.setState({
                                         playing: false,
                                     });
+                                }, 1000);
+                            }}
+                        />
+                        <Progress>
+                            <Bar progress={played} />
+                        </Progress>
+                    </Players>
+
+                    <ButtonGroup>
+                        {playing || played > 0 ? (
+                            <React.Fragment>
+                                <Button
+                                    onClick={() => {
+                                        this.setState({
+                                            playing: !playing,
+                                        });
+                                    }}
+                                    color={
+                                        !playing && played > 0
+                                            ? 'warning'
+                                            : 'secondary'
+                                    }
+                                >
+                                    {!playing ? (
+                                        <ButtonIcon>
+                                            <FontAwesomeIcon icon="play" />
+                                        </ButtonIcon>
+                                    ) : (
+                                        <ButtonIcon>
+                                            <FontAwesomeIcon icon="pause" />
+                                        </ButtonIcon>
+                                    )}
+                                    {!playing && played > 0
+                                        ? 'Paused'
+                                        : 'Pause'}
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        this.videoPlayer.seekTo(0);
+                                        this.audioPlayer.seekTo(0);
+                                        this.setState({
+                                            playing: false,
+                                        });
+                                    }}
+                                    color="danger"
+                                >
+                                    <ButtonIcon>
+                                        <FontAwesomeIcon icon="stop" />
+                                    </ButtonIcon>
+                                    Stop
+                                </Button>
+                            </React.Fragment>
+                        ) : (
+                            <Button
+                                onClick={() => {
+                                    this.setState({
+                                        playing: true,
+                                    });
                                 }}
-                                color="danger"
                             >
                                 <ButtonIcon>
-                                    <FontAwesomeIcon icon="stop" />
+                                    <FontAwesomeIcon icon="play" />
                                 </ButtonIcon>
-                                Stop
+                                {playing ? 'Playing...' : 'Play'}
                             </Button>
-                        </React.Fragment>
-                    ) : (
-                        <Button
-                            onClick={() => {
-                                this.setState({
-                                    playing: true,
-                                });
-                            }}
-                        >
-                            <ButtonIcon>
-                                <FontAwesomeIcon icon="play" />
-                            </ButtonIcon>
-                            {playing ? 'Playing...' : 'Play'}
-                        </Button>
-                    )}
-                </ButtonGroup>
-            </PreviewContainer>
-        );
+                        )}
+                    </ButtonGroup>
+                </PreviewContainer>
+            );
+        }
+        return '';
     }
 }
 
