@@ -131,7 +131,7 @@ class App extends Component {
         this.saveInterview = this.saveInterview.bind(this);
         this.checkIfMediaIsAvailable = this.checkIfMediaIsAvailable.bind(this);
 
-        this.onData = this.onData.bind(this);
+        // this.onData = this.onData.bind(this);
         this.onStop = this.onStop.bind(this);
     }
 
