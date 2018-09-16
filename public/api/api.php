@@ -195,7 +195,6 @@ class MyApi
      */
     private function _isAuthenticated()
     {
-        error_log(json_encode($this->request));
         try {
             $jwt_decoded = JWT::decode(
                 $this->request->jwt_token,
