@@ -106,7 +106,8 @@ const SubmissionStatus = props => {
                 </SubmittedMessage>
             ) : (
                 <SubmissionStatusContainer>
-                    {percentCompleted > 0 && percentCompleted < 100 ? (
+                    {(percentCompleted > 0 && percentCompleted < 100) ||
+                    (percentCompleted === 100 && !completed) ? (
                         <div>
                             <SubmittingMessage>
                                 Your Interview is being uploaded ...{' '}
@@ -115,12 +116,21 @@ const SubmissionStatus = props => {
                                     upload has been completed
                                 </p>
                                 <FontAwesomeIcon icon="spinner" pulse />
+                                <br />
+                                <p>
+                                    <h5>
+                                        {percentCompleted === 100 && !completed
+                                            ? 'Processing...'
+                                            : `Uploading... ${percentCompleted}%`}
+                                    </h5>
+                                </p>
                             </SubmittingMessage>
                             <Line
                                 percent={percentCompleted}
                                 strokeWidth="2"
                                 strokeColor="#06AFD4"
                             />
+
                             <TimeRemainingContainer>
                                 Estimated Time Reaining:{' '}
                                 {moment

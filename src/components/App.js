@@ -96,8 +96,8 @@ const MaskContent = styled.div`
         `};
 `;
 
-const gapTimeDefault = 5000;
-const screenshotInterval = 1000;
+const gapTimeDefault = 10000;
+const screenshotInterval = 5000;
 
 class App extends Component {
     constructor(props) {
@@ -536,6 +536,7 @@ class App extends Component {
 
         console.log(
             'wait a minute',
+            stage,
             record,
             completed,
             !completed && progress === 0 && mediaAvailable
