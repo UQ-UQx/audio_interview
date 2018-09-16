@@ -4,23 +4,23 @@ import styled from 'styled-components';
 import moment from 'moment';
 import { duration } from 'moment-duration-format'; // eslint-disable-line no-unused-vars
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import transition from 'styled-transition-group';
+// import transition from 'styled-transition-group';
 import { Line } from 'rc-progress';
 import { Alert } from 'reactstrap';
 import Preview from './Preview';
 
-const Fade = transition.div`
-    &:enter { opacity: 0.01; }
-    &:enter-active {
-      opacity: 1;
-      transition: opacity 1000ms ease-in;
-    }
-    &:exit { opacity: 1; }
-    &:exit-active {
-      opacity: 0.01;
-      transition: opacity 0ms ease-in;
-    }
-  `;
+// const Fade = transition.div`
+//     &:enter { opacity: 0.01; }
+//     &:enter-active {
+//       opacity: 1;
+//       transition: opacity 1000ms ease-in;
+//     }
+//     &:exit { opacity: 1; }
+//     &:exit-active {
+//       opacity: 0.01;
+//       transition: opacity 0ms ease-in;
+//     }
+//   `;
 
 const SubmissionStatusContainer = styled.div`
     opacity: 1 !important;
@@ -80,14 +80,31 @@ const SubmissionStatus = props => {
         audioFilename,
         videoFilename,
     } = props;
-    console.log(completed);
+    console.log(completed, percentCompleted);
     return (
         <React.Fragment>
-            <Fade
-                unmountOnExit
-                in={percentCompleted > 0 && percentCompleted < 100}
-                timeout={1000}
-            >
+            {completed ? (
+                <SubmittedMessage>
+                    <Alert color="success">
+                        {/* <span role="img" aria-label="party popper emoji">
+                            🎉
+                        </span>{' '} */}
+                        Your Interview has been submitted
+                        {/* {'  '}
+                        <span role="img" aria-label="party popper emoji">
+                            🎉
+                        </span> */}
+                    </Alert>
+                    {audioFilename !== null && videoFilename !== null ? (
+                        <Preview
+                            audioFilename={audioFilename}
+                            videoFilename={videoFilename}
+                        />
+                    ) : (
+                        ''
+                    )}
+                </SubmittedMessage>
+            ) : (
                 <SubmissionStatusContainer>
                     {percentCompleted > 0 && percentCompleted < 100 ? (
                         <div>
@@ -121,34 +138,7 @@ const SubmissionStatus = props => {
                         ''
                     )}
                 </SubmissionStatusContainer>
-            </Fade>
-            <Fade
-                unmountOnExit
-                in={
-                    percentCompleted === 100 ||
-                    (completed &&
-                        audioFilename !== null &&
-                        videoFilename !== null)
-                }
-                timeout={1000}
-            >
-                <SubmittedMessage>
-                    <Alert color="success">
-                        {/* <span role="img" aria-label="party popper emoji">
-                            🎉
-                        </span>{' '} */}
-                        Your Interview has been submitted
-                        {/* {'  '}
-                        <span role="img" aria-label="party popper emoji">
-                            🎉
-                        </span> */}
-                    </Alert>
-                    <Preview
-                        audioFilename={audioFilename}
-                        videoFilename={videoFilename}
-                    />
-                </SubmittedMessage>
-            </Fade>
+            )}
         </React.Fragment>
     );
 };
@@ -158,8 +148,8 @@ SubmissionStatus.propTypes = {
     speed: PropTypes.number,
     timeRemaining: PropTypes.number,
     completed: PropTypes.bool,
-    audioFilename: PropTypes.string.isRequired,
-    videoFilename: PropTypes.string.isRequired,
+    audioFilename: PropTypes.string,
+    videoFilename: PropTypes.arrayOf(PropTypes.string),
 };
 
 SubmissionStatus.defaultProps = {
@@ -167,6 +157,8 @@ SubmissionStatus.defaultProps = {
     speed: 0,
     timeRemaining: 0,
     completed: false,
+    audioFilename: null,
+    videoFilename: null,
 };
 export default SubmissionStatus;
 

@@ -32,7 +32,7 @@ const AppContainer = styled.div`
     ${props =>
         props.hide &&
         css`
-            display: none;
+            ${'' /* display: none; */};
         `};
 
     ${props =>
@@ -92,7 +92,7 @@ const MaskContent = styled.div`
     ${props =>
         props.hide &&
         css`
-            display: none;
+            ${'' /* display: none; */};
         `};
 `;
 
@@ -111,17 +111,15 @@ class App extends Component {
             gapTimeRemaining: gapTimeDefault / 1000,
             timeRemaining: 0,
             record: false,
-            audioFilename: props.completed
-                ? `audio_recording_${$LTI.userID}.webm`
-                : null,
-            videoFilename: props.completed
-                ? `video_recording_${$LTI.userID}.webm`
-                : null,
+            audioFilename: null,
+            videoFilename: null,
             progress: 0,
             uploadStartMoment: null,
             currentLoaded: 0,
             speed: 0,
             uploadTimeRemaining: 0,
+            mediaAvailable: false,
+            mediaDenied: false,
         };
 
         this.stopInterview = this.stopInterview.bind(this);
@@ -131,6 +129,7 @@ class App extends Component {
         this.stopMediaRecording = this.stopMediaRecording.bind(this);
         this.updateTimer = this.updateTimer.bind(this);
         this.saveInterview = this.saveInterview.bind(this);
+        this.checkIfMediaIsAvailable = this.checkIfMediaIsAvailable.bind(this);
 
         this.onData = this.onData.bind(this);
         this.onStop = this.onStop.bind(this);
@@ -140,6 +139,7 @@ class App extends Component {
         if (this.timeout) window.clearTimeout(this.timeout);
         if (this.gapTimeout) window.clearTimeout(this.gapTimeout);
         if (this.timerInterval) window.clearInterval(this.timerInterval);
+        this.checkIfMediaIsAvailable();
     }
 
     componentWillUnmount() {
@@ -150,14 +150,14 @@ class App extends Component {
         stopRecording();
     }
 
-    onData(recordedBlob) {
-        console.log(
-            'chunk of real-time data is: ',
-            this.state,
-            this.props,
-            recordedBlob
-        );
-    }
+    // onData(recordedBlob) {
+    //     // console.log(
+    //     //     'chunk of real-time data is: ',
+    //     //     this.state,
+    //     //     this.props,
+    //     //     recordedBlob
+    //     // );
+    // }
 
     onStop(recordedBlob) {
         console.log('recordedBlob is: ', recordedBlob);
@@ -179,19 +179,20 @@ class App extends Component {
                     })
             )
             .then(audioBase64 => {
-                const output = this.whammyEncoder.compile();
+                this.saveInterview({ audioBase64 });
 
-                console.log(output);
+                // const output = this.whammyEncoder.compile();
 
-                const reader = new FileReader();
-                reader.readAsDataURL(output);
-                reader.onloadend = () => {
-                    const videoBase64 = reader.result;
+                // console.log(output);
 
-                    console.log('WOOAH', videoBase64);
+                // const reader = new FileReader();
+                // reader.readAsDataURL(output);
+                // reader.onloadend = () => {
+                //     const videoBase64 = reader.result;
 
-                    this.saveInterview({ audioBase64, videoBase64 });
-                };
+                //     console.log('WOOAH', videoBase64);
+
+                // };
             })
 
             .catch(error => {
@@ -199,9 +200,9 @@ class App extends Component {
             });
     }
 
-    saveInterview({ audioBase64, videoBase64 }) {
+    saveInterview({ audioBase64 }) {
         const { uploadStartMoment } = this.state;
-        const { setCompletedTrue } = this.props;
+        const { setCompletedTrue, screenshots } = this.props;
         const currentMoment = moment();
 
         const fd = new FormData();
@@ -212,7 +213,17 @@ class App extends Component {
         fd.append('fname', filename);
         fd.append('action', 'uploadFile');
         fd.append('audio', audioBase64);
-        fd.append('video', videoBase64);
+        fd.append(
+            'images',
+            JSON.stringify(
+                screenshots.map(screenshot => ({
+                    filename: '_screenshot_image_',
+                    data: screenshot.data,
+                    timestamp: screenshot.timestamp,
+                }))
+            )
+        );
+        // fd.append('video', videoBase64);
         fd.append('userID', $LTI.userID);
         fd.append('ltiID', $LTI.id);
 
@@ -257,26 +268,38 @@ class App extends Component {
             },
         };
 
-        axios({
-            method: 'post',
-            url: '../public/api/api.php',
-            data: fd,
-            contentType: false,
-            processData: false,
-            ...config,
-        })
-            .then(filenames =>
-                Promise.all([Promise.resolve(filenames), setCompletedTrue()])
-            )
-            .then(response => {
-                const filenames = response[0];
+        // axios({
+        //     method: 'post',
+        //     url: '../public/api/api.php',
+        //     data: fd,
+        //     contentType: false,
+        //     processData: false,
+        //     ...config,
+        // }).then(() => {
+        //     console.log('CALLING');
+        //     setCompletedTrue();
+        // });
 
-                const { audioFilename, videoFilename } = filenames.data;
-                this.setState({
-                    audioFilename,
-                    videoFilename,
-                });
+        axios
+            .post('../public/api/api.php', fd, config)
+            .then(response => {
+                setCompletedTrue();
+                console.log(response);
+            })
+            .catch(error => {
+                console.log(error);
             });
+
+        // .then(response => {
+        //     console.log(this.props, response);
+        //     // const responseData = response[0];
+        //     // const { audioFilename, filenames } = responseData.data;
+        //     // console.log(audioFilename, filenames);
+        //     // this.setState({
+        //     //     audioFilename,
+        //     //     videoFilename,
+        //     // });
+        // });
     }
 
     startMediaRecording() {
@@ -434,6 +457,39 @@ class App extends Component {
             });
     }
 
+    checkIfMediaIsAvailable() {
+        console.log(this.state);
+
+        const { completed } = this.props;
+
+        console.log('completed', completed);
+        if (!completed) {
+            navigator.mediaDevices
+                .getUserMedia({ audio: true, video: true })
+                .then(stream =>
+                    /* use the stream */
+                    {
+                        console.log(stream);
+                        // stream.stop();
+                        this.setState({
+                            mediaAvailable: true,
+                            mediaDenied: false,
+                        });
+                    }
+                )
+                .catch(err =>
+                    /* handle the error */
+                    {
+                        console.log(err);
+                        this.setState({
+                            mediaAvailable: false,
+                            mediaDenied: true,
+                        });
+                    }
+                );
+        }
+    }
+
     render() {
         const { question, completed } = this.props;
 
@@ -448,6 +504,8 @@ class App extends Component {
             progress,
             speed,
             uploadTimeRemaining,
+            record,
+            mediaAvailable,
         } = this.state;
 
         let startTime = currentQuestion ? currentQuestion.settings.time : 1;
@@ -476,9 +534,17 @@ class App extends Component {
                 break;
         }
 
+        console.log(
+            'wait a minute',
+            record,
+            completed,
+            !completed && progress === 0 && mediaAvailable
+        );
         return (
             <Fragment>
-                <MaskContent hide={stage !== 'end'}>
+                {/* <MaskContent hide={stage !== 'end'}> */}
+
+                <MaskContent>
                     <SubmissionStatus
                         percentCompleted={progress}
                         timeRemaining={uploadTimeRemaining}
@@ -489,76 +555,81 @@ class App extends Component {
                     />
                 </MaskContent>
 
-                <AppContainer hide={stage === 'end' || completed}>
-                    <Fragment>
-                        <MediaVisualsContainer Height={mediaContainerHeight}>
-                            <WebcamContainer>
-                                <InterviewCam
-                                    height={mediaContainerHeight}
-                                    onScreenshot={data => {
-                                        console.log(data);
-                                        this.whammyEncoder.add(data);
-                                    }}
-                                    screenshotStreamInterval={
-                                        screenshotInterval
-                                    }
-                                />
-                            </WebcamContainer>
-                            <AudioVisualContainer>
-                                <ReactMic
-                                    record={
-                                        stage === 'during' || stage === 'last'
-                                    }
-                                    visualSetting="frequencyBars"
-                                    height={200}
-                                    width={window.screen.width}
-                                    onStop={this.onStop}
-                                    onData={this.onData}
-                                    strokeColor="black"
-                                    backgroundColor="lightgrey"
-                                />
-                            </AudioVisualContainer>
-                        </MediaVisualsContainer>
-
-                        <QuestionContainer>
-                            <TypedQuestion
+                {!completed && progress === 0 && mediaAvailable ? ( // if interview is not complete or upload has not started
+                    <AppContainer hide={stage === 'end' || completed}>
+                        <Fragment>
+                            <MediaVisualsContainer
                                 Height={mediaContainerHeight}
-                                question={question}
-                            />
-                        </QuestionContainer>
+                            >
+                                <WebcamContainer>
+                                    <InterviewCam
+                                        height={mediaContainerHeight}
+                                        onScreenshot={data => {
+                                            console.log(data);
+                                            // this.whammyEncoder.add(data);
+                                        }}
+                                        screenshotStreamInterval={
+                                            screenshotInterval
+                                        }
+                                    />
+                                </WebcamContainer>
+                                <AudioVisualContainer>
+                                    <ReactMic
+                                        record={
+                                            stage === 'during' ||
+                                            stage === 'last'
+                                        }
+                                        // visualSetting="frequencyBars"
+                                        height={200}
+                                        width={window.screen.width}
+                                        onStop={this.onStop}
+                                        onData={this.onData}
+                                        strokeColor="black"
+                                        backgroundColor="lightgrey"
+                                    />
+                                </AudioVisualContainer>
+                            </MediaVisualsContainer>
 
-                        {stage === 'during' || stage === 'last' ? (
-                            <CountdownContainer>
-                                <CoundownTitle>
-                                    {inGap
-                                        ? `Your ${stageReference} question will be shown in ...`
-                                        : ''}
-                                </CoundownTitle>
-                                <CountdownDisplay
-                                    changeHue={!inGap}
-                                    startTime={startTime}
-                                    time={time}
-                                    display={`${time}`}
+                            <QuestionContainer>
+                                <TypedQuestion
+                                    Height={mediaContainerHeight}
+                                    question={question}
                                 />
-                            </CountdownContainer>
-                        ) : (
-                            <ButtonsContainer>
-                                <Button
-                                    color="primary"
-                                    onClick={this.startInterview}
-                                >
-                                    Start Interview
-                                </Button>
-                                <Button
-                                    color="warning"
-                                    onClick={this.stopInterview}
-                                >
-                                    Stop Interview
-                                </Button>
-                            </ButtonsContainer>
-                        )}
-                    </Fragment>
-                </AppContainer>
+                            </QuestionContainer>
+
+                            {stage === 'during' || stage === 'last' ? (
+                                <CountdownContainer>
+                                    <CoundownTitle>
+                                        {inGap
+                                            ? `Your ${stageReference} question will be shown in ...`
+                                            : ''}
+                                    </CoundownTitle>
+                                    <CountdownDisplay
+                                        changeHue={!inGap}
+                                        startTime={startTime}
+                                        time={time}
+                                        display={`${time}`}
+                                    />
+                                </CountdownContainer>
+                            ) : (
+                                <ButtonsContainer>
+                                    <Button
+                                        color="primary"
+                                        onClick={this.startInterview}
+                                    >
+                                        Start Interview
+                                    </Button>
+                                </ButtonsContainer>
+                            )}
+                        </Fragment>
+                    </AppContainer>
+                ) : (
+                    ''
+                )}
+
+                {!completed && !mediaAvailable
+                    ? 'Please grant permissions'
+                    : ''}
             </Fragment>
         );
     }
@@ -576,6 +647,7 @@ App.propTypes = {
     saveQuestionsList: PropTypes.func.isRequired,
     completed: PropTypes.bool.isRequired,
     setCompletedTrue: PropTypes.func.isRequired,
+    screenshots: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 };
 
 App.defaultProps = {
@@ -590,6 +662,7 @@ export default withRouter(
             questionsList: state.questionsList,
             groups: state.groups,
             completed: state.completed,
+            screenshots: state.screenshots,
         }),
         {
             startRecording,

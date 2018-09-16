@@ -61,7 +61,6 @@ class Preview extends Component {
     render() {
         const { audioFilename, videoFilename } = this.props;
         const { playing, played } = this.state;
-        console.log(audioFilename, videoFilename);
 
         if (audioFilename !== null && videoFilename !== null) {
             return (
@@ -179,7 +178,7 @@ class Preview extends Component {
 
 Preview.propTypes = {
     audioFilename: PropTypes.string.isRequired,
-    videoFilename: PropTypes.string.isRequired,
+    videoFilename: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 Preview.defaultProps = {};

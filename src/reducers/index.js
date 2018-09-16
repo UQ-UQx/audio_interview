@@ -107,11 +107,14 @@ const maxAttemptsReducer = (state = 1, action) => {
 };
 
 const completedReducer = (state = false, action) => {
+    console.log('completed recuder ', action);
     switch (action.type) {
         case Actions.GET_SAVED_QUESTIONS_LIST_SUCCESS:
             return action.payload.data[Tables.QUESTIONS].length > 0
                 ? action.payload.data[Tables.QUESTIONS][0].completed === 1
                 : state;
+        case Actions.SET_COMPLETED_SUCCESS:
+            return true;
         default:
             return state;
     }

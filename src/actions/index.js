@@ -93,6 +93,7 @@ const setCompletedTrue = () => (dispatch, getState) => {
         },
     };
 
+    console.log('FIREED');
     return new Promise((resolve, reject) => {
         dispatch({
             types: [
@@ -104,9 +105,13 @@ const setCompletedTrue = () => (dispatch, getState) => {
             payload: request,
         })
             .then(response => {
+                console.log('RESOLVED');
+
                 resolve(response);
             })
             .catch(err => {
+                console.log('ERRORED');
+
                 reject(err);
             });
     });

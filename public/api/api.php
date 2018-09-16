@@ -74,7 +74,8 @@ class MyApi
             $ltiID = $_POST['ltiID'];
 
             $audio = $_POST['audio'];
-            $video = $_POST['video'];
+            // $video = $_POST['video'];
+            $images = json_decode($_POST['images']);
 
             $mediaDir = "../media";
             $recordingsDir = $mediaDir . "/recordings";
@@ -101,28 +102,54 @@ class MyApi
 
             // pull the raw binary data from the POST array
             $audioData = substr($audio, strpos($audio, ",") + 1);
-            $videoData = substr($video, strpos($video, ",") + 1);
+            // $videoData = substr($video, strpos($video, ",") + 1);
 
             // decode it
             $decodedAudioData = base64_decode($audioData);
-            $decodedVideoData = base64_decode($videoData);
+            // $decodedVideoData = base64_decode($videoData);
 
             // print out the raw data,
             $audioFilename = 'audio_recording_' . $userID . '.webm';
-            $videoFilename = 'video_recording_' . $userID . '.webm';
+            // $videoFilename = 'video_recording_' . $userID . '.webm';
 
             // write the data out to the file
             $fp = fopen($userDir . '/' . $audioFilename, 'wb');
             fwrite($fp, $decodedAudioData);
             fclose($fp);
 
-            $fp = fopen($userDir . '/' . $videoFilename, 'wb');
-            fwrite($fp, $decodedVideoData);
-            fclose($fp);
+            // $fp = fopen($userDir . '/' . $videoFilename, 'wb');
+            // fwrite($fp, $decodedVideoData);
+            // fclose($fp);
+
+            $filenames = array();
+            foreach ($images as $key => $image) {
+                //error_log(json_encode($image));
+                $filename =
+                    'time-' . $image->timestamp . '-time' . $image->filename;
+
+                $data = $image->data;
+                list($type, $data) = explode(';', $data);
+                list(, $data) = explode(',', $data);
+                $data = base64_decode($data);
+
+                error_log($data);
+
+                file_put_contents(
+                    $userDir . '/' . $userID . '_' . $filename . ".png",
+                    $data
+                );
+
+                // $fp = fopen($userDir . '/' . $userID . '_' . $filename, 'wb');
+                // fwrite($fp, base64_decode($image->data));
+                // fclose($fp);
+
+                array_push($filenames, $filename . ".png");
+            }
 
             $this->reply(array(
                 'audioFilename' => $audioFilename,
-                'videoFilename' => $videoFilename
+                'filenames' => $filenames
+                // 'videoFilename' => $videoFilename
             ));
         } catch (Exception $e) {
             $this->reply($e, 400);
@@ -168,6 +195,7 @@ class MyApi
      */
     private function _isAuthenticated()
     {
+        error_log(json_encode($this->request));
         try {
             $jwt_decoded = JWT::decode(
                 $this->request->jwt_token,
