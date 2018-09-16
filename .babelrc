@@ -1,7 +1,7 @@
 {
   "presets": ["env", "react", "stage-3"],
   "env": {
-    "production": {
+    "development": {
       "plugins": ["babel-plugin-styled-components"]
     }
   }

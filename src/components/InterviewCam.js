@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Webcam from 'react-webcam';
 import { connect } from 'react-redux';
+import moment from 'moment';
 import { getScreenshot } from '../actions';
 
 const Container = styled.div`
@@ -17,6 +18,7 @@ class InterviewCam extends Component {
 
         this.state = {
             interval: null,
+            startTime: null,
         };
         this.screenshotInterval = this.screenshotInterval.bind(this);
         this.onMedia = this.onMedia.bind(this);
@@ -28,6 +30,8 @@ class InterviewCam extends Component {
     }
 
     componentDidMount() {
+        this.ismounted = false;
+
         const { screenshotStreamInterval } = this.props;
         const interval = setInterval(
             this.screenshotInterval,
@@ -36,25 +40,39 @@ class InterviewCam extends Component {
         this.setState({ interval });
     }
 
+    componentWillUnmount() {
+        this.ismounted = false;
+    }
+
     onMedia(media) {
         const { height } = this.props;
         console.log('WOOOO', media, height);
     }
 
     screenshotInterval() {
+        const { startTime } = this.state;
         const { record, getScreenshot, onScreenshot } = this.props;
         if (record && this.webcam) {
+            if (startTime === null) this.setState({ startTime: moment() });
             const screenshot = this.webcam.getScreenshot();
-            onScreenshot(screenshot);
-            getScreenshot(screenshot);
-        }
+
+            const secondsElapsed = moment().diff(startTime, 'seconds', true);
+
+            const screenshotObj = {
+                data: screenshot,
+                timestamp: secondsElapsed,
+            };
+
+            onScreenshot(screenshotObj);
+            getScreenshot(screenshotObj);
+        } else if (this.ismounted) this.setState({ startTime: null });
     }
 
     render() {
         const { height } = this.props;
         const videoConstraints = {
-            // width: 1280,
-            // height: 720,
+            width: 1280,
+            height: 720,
             facingMode: 'user',
         };
 
@@ -67,7 +85,7 @@ class InterviewCam extends Component {
                     ref={webcam => {
                         this.webcam = webcam;
                     }}
-                    screenshotFormat="image/webp"
+                    screenshotFormat="image/png"
                     videoConstraints={videoConstraints}
                     onUserMedia={this.onMedia}
                 />
