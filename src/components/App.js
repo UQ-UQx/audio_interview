@@ -96,6 +96,13 @@ const MaskContent = styled.div`
         `};
 `;
 
+const Permissions = styled.div`
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 27;
+`;
+
 const gapTimeDefault = 10000;
 const screenshotInterval = 5000;
 
@@ -628,9 +635,13 @@ class App extends Component {
                     ''
                 )}
 
-                {!completed && !mediaAvailable
-                    ? 'Please grant permissions'
-                    : ''}
+                {!completed && !mediaAvailable ? (
+                    <Permissions>
+                        Please allow access to Microphone and Webcam
+                    </Permissions>
+                ) : (
+                    ''
+                )}
             </Fragment>
         );
     }
