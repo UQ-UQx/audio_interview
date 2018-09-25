@@ -104,27 +104,27 @@ const render = el => {
  */
 
 const getSavedData = () => {
-    if ($LTI.user_role === 'Instructor' || $LTI.user_role === 'Administrator') {
-        const InstructorData = Promise.all([
-            store.dispatch(getSavedGroups()),
-            store.dispatch(getSavedQuestionsList()),
-        ]);
+    // if ($LTI.user_role === 'Instructor' || $LTI.user_role === 'Administrator') {
+    const InstructorData = Promise.all([
+        store.dispatch(getSavedGroups()),
+        store.dispatch(getSavedQuestionsList()),
+    ]);
 
-        InstructorData.then(response => {
-            if (
-                response[0].type === Actions.GET_SAVED_GROUPS_SUCCESS &&
-                response[1].type === Actions.GET_SAVED_QUESTIONS_LIST_SUCCESS
-            ) {
-                console.log(store.getState());
-                render(renderApp());
-            } else {
-                render(error());
-            }
-        }).catch(err => {
-            console.log(err);
+    InstructorData.then(response => {
+        if (
+            response[0].type === Actions.GET_SAVED_GROUPS_SUCCESS &&
+            response[1].type === Actions.GET_SAVED_QUESTIONS_LIST_SUCCESS
+        ) {
+            console.log(store.getState());
+            render(renderApp());
+        } else {
             render(error());
-        });
-    }
+        }
+    }).catch(err => {
+        console.log(err);
+        render(error());
+    });
+    // }
 };
 
 /* Disable Activity when in studio view 
