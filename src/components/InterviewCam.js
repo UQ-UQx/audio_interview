@@ -21,7 +21,6 @@ class InterviewCam extends Component {
             startTime: null,
         };
         this.screenshotInterval = this.screenshotInterval.bind(this);
-        this.onMedia = this.onMedia.bind(this);
     }
 
     componentWillMount() {
@@ -42,11 +41,6 @@ class InterviewCam extends Component {
 
     componentWillUnmount() {
         this.ismounted = false;
-    }
-
-    onMedia(media) {
-        const { height } = this.props;
-        console.log('WOOOO', media, height);
     }
 
     screenshotInterval() {
@@ -87,7 +81,6 @@ class InterviewCam extends Component {
                     }}
                     screenshotFormat="image/png"
                     videoConstraints={videoConstraints}
-                    onUserMedia={this.onMedia}
                 />
             </Container>
         );

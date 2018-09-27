@@ -45,7 +45,7 @@ class InterviewStructure extends Component {
 
                     const computedTime = moment.duration(time * 1000);
 
-                    console.log(computedTime);
+                    // console.log(computedTime);
 
                     return (
                         <div key={question.id}>

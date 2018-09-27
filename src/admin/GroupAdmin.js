@@ -105,7 +105,7 @@ class GroupAdmin extends Component {
             );
         }
 
-        console.log(settings, numberOfQuestionsThatWantToBeAsked);
+        // console.log(settings, numberOfQuestionsThatWantToBeAsked);
 
         return (
             <Draggable
@@ -181,9 +181,9 @@ class GroupAdmin extends Component {
                                                         settings.numberOfQuestionsToAsk
                                                     }
                                                     onChange={event => {
-                                                        console.log(
-                                                            event.target.value
-                                                        );
+                                                        // console.log(
+                                                        //     event.target.value
+                                                        // );
                                                         onChangeHandler(
                                                             id,
                                                             'updateGroupSettings',
@@ -251,10 +251,10 @@ class GroupAdmin extends Component {
                                                         }
                                                     ).length;
 
-                                                    console.log(
-                                                        settings.numberOfQuestionsToAsk,
-                                                        numberOfQuestionsThatWantToBeAsked
-                                                    );
+                                                    // console.log(
+                                                    //     settings.numberOfQuestionsToAsk,
+                                                    //     numberOfQuestionsThatWantToBeAsked
+                                                    // );
                                                     if (
                                                         settings.numberOfQuestionsToAsk >
                                                         numberOfQuestionsThatWantToBeAsked

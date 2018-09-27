@@ -65,7 +65,7 @@ class Admin extends Component {
 
         saveGroups(groups)
             .then(response => {
-                console.log(response);
+                // console.log(response);
 
                 if (response.type === Actions.SAVE_GROUPS_SUCCESS) {
                     history.push('/');
@@ -76,8 +76,8 @@ class Admin extends Component {
                     setSaveFalse();
                 }
             })
-            .catch(error => {
-                console.log(error);
+            .catch(() => {
+                // console.log(error);
                 this.setState({
                     saveError: 'Something went wrong...',
                 });
