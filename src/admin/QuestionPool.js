@@ -63,7 +63,7 @@ class QuestionPool extends Component {
     onDragEnd(result) {
         const { source, destination } = result;
         const { groups, stateHandler } = this.props;
-        console.log(source, destination, this.props);
+        // console.log(source, destination, this.props);
 
         let reorderedGroup = [...groups];
         if (destination) {

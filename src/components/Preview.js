@@ -50,7 +50,7 @@ class Preview extends Component {
     }
 
     onProgress(state) {
-        console.log('onProgress', state);
+        // console.log('onProgress', state);
         const { seeking } = this.state;
         // We only want to update time slider if we are not currently seeking
         if (!seeking) {

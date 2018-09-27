@@ -117,16 +117,16 @@ class App extends Component {
             gapTime: gapTimeDefault,
             gapTimeRemaining: gapTimeDefault / 1000,
             timeRemaining: 0,
-            record: false,
+            // record: false,
             audioFilename: null,
             videoFilename: null,
             progress: 0,
             uploadStartMoment: null,
-            currentLoaded: 0,
+            // currentLoaded: 0,
             speed: 0,
             uploadTimeRemaining: 0,
             mediaAvailable: false,
-            mediaDenied: false,
+            // mediaDenied: false,
         };
 
         this.stopInterview = this.stopInterview.bind(this);
@@ -158,7 +158,7 @@ class App extends Component {
     }
 
     // onData(recordedBlob) {
-    //     // console.log(
+    //     // //console.log(
     //     //     'chunk of real-time data is: ',
     //     //     this.state,
     //     //     this.props,
@@ -167,7 +167,7 @@ class App extends Component {
     // }
 
     onStop(recordedBlob) {
-        console.log('recordedBlob is: ', recordedBlob);
+        // console.log('recordedBlob is: ', recordedBlob);
 
         axios({
             method: 'get',
@@ -190,20 +190,20 @@ class App extends Component {
 
                 // const output = this.whammyEncoder.compile();
 
-                // console.log(output);
+                // //console.log(output);
 
                 // const reader = new FileReader();
                 // reader.readAsDataURL(output);
                 // reader.onloadend = () => {
                 //     const videoBase64 = reader.result;
 
-                //     console.log('WOOAH', videoBase64);
+                //     //console.log('WOOAH', videoBase64);
 
                 // };
             })
 
-            .catch(error => {
-                console.log(error);
+            .catch(() => {
+                // console.log(error);
             });
     }
 
@@ -216,7 +216,7 @@ class App extends Component {
         const filename = encodeURIComponent(
             `audio_recording_${new Date().getTime()}.webm`
         );
-        console.log(`mp3name = ${filename}`);
+        // console.log(`mp3name = ${filename}`);
         fd.append('fname', filename);
         fd.append('action', 'uploadFile');
         fd.append('audio', audioBase64);
@@ -259,12 +259,12 @@ class App extends Component {
 
                 speed = parseInt(speed.toFixed(2), 10);
 
-                console.log(
-                    percentCompleted,
-                    speed,
-                    uploadTimeRemaining,
-                    currentMoment
-                );
+                // console.log(
+                //     percentCompleted,
+                //     speed,
+                //     uploadTimeRemaining,
+                //     currentMoment
+                // );
 
                 this.setState({
                     progress: percentCompleted,
@@ -283,25 +283,25 @@ class App extends Component {
         //     processData: false,
         //     ...config,
         // }).then(() => {
-        //     console.log('CALLING');
+        //     //console.log('CALLING');
         //     setCompletedTrue();
         // });
 
         axios
             .post('../public/api/api.php', fd, config)
-            .then(response => {
+            .then(() => {
                 setCompletedTrue();
-                console.log(response);
+                // console.log(response);
             })
-            .catch(error => {
-                console.log(error);
+            .catch(() => {
+                // console.log(error);
             });
 
         // .then(response => {
-        //     console.log(this.props, response);
+        //     //console.log(this.props, response);
         //     // const responseData = response[0];
         //     // const { audioFilename, filenames } = responseData.data;
-        //     // console.log(audioFilename, filenames);
+        //     // //console.log(audioFilename, filenames);
         //     // this.setState({
         //     //     audioFilename,
         //     //     videoFilename,
@@ -311,7 +311,7 @@ class App extends Component {
 
     startMediaRecording() {
         this.setState({
-            record: true,
+            // record: true,
         });
         const { startRecording } = this.props;
 
@@ -321,7 +321,7 @@ class App extends Component {
 
     stopMediaRecording() {
         this.setState({
-            record: false,
+            // record: false,
         });
         const { stopRecording } = this.props;
 
@@ -378,7 +378,7 @@ class App extends Component {
             currentQuestion: null,
             timeRemaining: 0,
             gapTimeRemaining: 0,
-            record: false,
+            // record: false,
         });
     }
 
@@ -417,7 +417,7 @@ class App extends Component {
             );
 
             this.setState({
-                record: true,
+                // record: true,
                 stage: 'during',
             });
 
@@ -465,32 +465,32 @@ class App extends Component {
     }
 
     checkIfMediaIsAvailable() {
-        console.log(this.state);
+        // console.log(this.state);
 
         const { completed } = this.props;
 
-        console.log('completed', completed);
+        // console.log('completed', completed);
         if (!completed) {
             navigator.mediaDevices
                 .getUserMedia({ audio: true, video: true })
-                .then(stream =>
+                .then(() =>
                     /* use the stream */
                     {
-                        console.log(stream);
+                        // console.log(stream);
                         // stream.stop();
                         this.setState({
                             mediaAvailable: true,
-                            mediaDenied: false,
+                            // mediaDenied: false,
                         });
                     }
                 )
-                .catch(err =>
+                .catch(() =>
                     /* handle the error */
                     {
-                        console.log(err);
+                        // console.log(err);
                         this.setState({
                             mediaAvailable: false,
-                            mediaDenied: true,
+                            // mediaDenied: true,
                         });
                     }
                 );
@@ -511,7 +511,7 @@ class App extends Component {
             progress,
             speed,
             uploadTimeRemaining,
-            record,
+            // record,
             mediaAvailable,
         } = this.state;
 
@@ -541,13 +541,13 @@ class App extends Component {
                 break;
         }
 
-        console.log(
-            'wait a minute',
-            stage,
-            record,
-            completed,
-            !completed && progress === 0 && mediaAvailable
-        );
+        // console.log(
+        //     'wait a minute',
+        //     stage,
+        //     record,
+        //     completed,
+        //     !completed && progress === 0 && mediaAvailable
+        // );
         return (
             <Fragment>
                 {/* <MaskContent hide={stage !== 'end'}> */}
@@ -572,10 +572,10 @@ class App extends Component {
                                 <WebcamContainer>
                                     <InterviewCam
                                         height={mediaContainerHeight}
-                                        onScreenshot={data => {
-                                            console.log(data);
-                                            // this.whammyEncoder.add(data);
-                                        }}
+                                        // onScreenshot={data => {
+                                        //     // console.log(data);
+                                        //     // this.whammyEncoder.add(data);
+                                        // }}
                                         screenshotStreamInterval={
                                             screenshotInterval
                                         }

@@ -17,9 +17,12 @@ import {
     faStop,
 } from '@fortawesome/free-solid-svg-icons';
 
-import axios from 'axios';
-
-import { getSavedGroups, getSavedQuestionsList, Actions } from './actions';
+import {
+    getSavedGroups,
+    getSavedQuestionsList,
+    Actions,
+    Tables,
+} from './actions';
 
 import store from './store';
 import App from './components/App';
@@ -40,26 +43,6 @@ library.add(
     faPause,
     faStop
 );
-
-axios({
-    method: 'get',
-    url: '../public/api/api.php',
-    params: {
-        action: 'hello',
-        jwt_token: $JWT_TOKEN,
-        data: {
-            name: $LTI.userID,
-        },
-    },
-})
-    .then(response => {
-        console.log(response);
-    })
-    .catch(error => {
-        console.log(error);
-    });
-
-console.log('woah');
 
 const renderApp = () => (
     <Provider store={store}>
@@ -83,53 +66,59 @@ const renderApp = () => (
     </Provider>
 );
 
-const error = () => (
-    <Alert color="danger">Something went wrong... Please contact UQx</Alert>
+const error = (
+    err = 'Something went wrong... Please contact UQx',
+    color = 'danger'
+) => (
+    <Alert color={color} style={{ textAlign: 'center', fontWeight: 'bold' }}>
+        {err}
+    </Alert>
 );
 
 const render = el => {
     ReactDOM.render(el, document.getElementById('app'));
 };
 
-/**
- 
-    if learner get questions list, 
-    
-        if questions, set questions to redux store
-            do magic
-
-        if no question 
-            use api to generate questions, save to db, then get questions list 
-
- */
-
 const getSavedData = () => {
-    // if ($LTI.user_role === 'Instructor' || $LTI.user_role === 'Administrator') {
-    const InstructorData = Promise.all([
+    const data = Promise.all([
         store.dispatch(getSavedGroups()),
         store.dispatch(getSavedQuestionsList()),
     ]);
 
-    InstructorData.then(response => {
+    data.then(response => {
         if (
             response[0].type === Actions.GET_SAVED_GROUPS_SUCCESS &&
             response[1].type === Actions.GET_SAVED_QUESTIONS_LIST_SUCCESS
         ) {
-            console.log(store.getState());
-            render(renderApp());
+            // const savedGroups = response[0].payload.data[Tables.GROUPS];
+            const savedQuestionsList =
+                response[1].payload.data[Tables.QUESTIONS];
+
+            console.log(savedQuestionsList);
+
+            if (savedQuestionsList.length > 0) {
+                if (savedQuestionsList[0].completed) {
+                    render(renderApp());
+                } else {
+                    render(
+                        error(
+                            'Our records indicate your interview was interrupted before submission, please contact the course team to reset this activity',
+                            'warning'
+                        )
+                    );
+                }
+            } else {
+                render(renderApp());
+            }
         } else {
             render(error());
         }
-    }).catch(err => {
-        console.log(err);
-        render(error());
     });
-    // }
 };
 
 /* Disable Activity when in studio view 
 (edX studio view sets userID as 'student') 
-as course ID is different in edX Live View */
+course ID is different in edX Live View */
 if ($LTI.userID === 'student') {
     const divStyle = {
         textAlign: 'center',

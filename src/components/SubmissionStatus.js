@@ -80,7 +80,7 @@ const SubmissionStatus = props => {
         audioFilename,
         videoFilename,
     } = props;
-    console.log(completed, percentCompleted);
+    // console.log(completed, percentCompleted);
     return (
         <React.Fragment>
             {completed ? (

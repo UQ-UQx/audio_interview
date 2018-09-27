@@ -93,7 +93,7 @@ const setCompletedTrue = () => (dispatch, getState) => {
         },
     };
 
-    console.log('FIREED');
+    // console.log('FIREED');
     return new Promise((resolve, reject) => {
         dispatch({
             types: [
@@ -105,12 +105,12 @@ const setCompletedTrue = () => (dispatch, getState) => {
             payload: request,
         })
             .then(response => {
-                console.log('RESOLVED');
+                // console.log('RESOLVED');
 
                 resolve(response);
             })
             .catch(err => {
-                console.log('ERRORED');
+                // console.log('ERRORED');
 
                 reject(err);
             });
@@ -269,12 +269,11 @@ const askQuestion = question => ({
     },
 });
 
-const clearQuestion = () => {
-    console.log('clearing');
-    return {
+const clearQuestion = () =>
+    // console.log('clearing');
+    ({
         type: Actions.CLEAR_QUESTION,
-    };
-};
+    });
 
 const startRecording = () => ({
     type: Actions.START_RECORDING,

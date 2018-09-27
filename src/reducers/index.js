@@ -35,7 +35,7 @@ const questionsListReducer = (state = [], action) => {
 const groupsRecordIDReducer = (state = null, action) => {
     switch (action.type) {
         case Actions.GET_SAVED_GROUPS_SUCCESS:
-            console.log(action);
+            // console.log(action);
             return action.payload.data[Tables.GROUPS].length > 0
                 ? action.payload.data[Tables.GROUPS][0].id
                 : state;
@@ -101,13 +101,12 @@ const saveReducer = (state = false, action) => {
     }
 };
 
-const maxAttemptsReducer = (state = 1, action) => {
-    console.log(action);
-    return state;
-};
+const maxAttemptsReducer = (state = 1) =>
+    // console.log(action);
+    state;
 
 const completedReducer = (state = false, action) => {
-    console.log('completed recuder ', action);
+    // console.log('completed recuder ', action);
     switch (action.type) {
         case Actions.GET_SAVED_QUESTIONS_LIST_SUCCESS:
             return action.payload.data[Tables.QUESTIONS].length > 0
