@@ -39,7 +39,7 @@ class Admin extends Component {
         super(props);
 
         this.state = {
-            tab: 'structure', // structure | pool
+            tab: 'submissions', // structure | pool | submissions
             saveError: '',
             groups: props.groups,
         };

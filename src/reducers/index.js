@@ -119,6 +119,15 @@ const completedReducer = (state = false, action) => {
     }
 };
 
+const submissionsReducer = (state = {}, action) => {
+    switch (action.type) {
+        case Actions.GET_SUBMISSIONS_SUCCESS:
+            return { ...action.payload.data };
+        default:
+            return state;
+    }
+};
+
 export default combineReducers({
     questionsListRecordID: questionsListRecordIDReducer,
     questionsList: questionsListReducer,
@@ -130,4 +139,5 @@ export default combineReducers({
     save: saveReducer,
     maxAttempts: maxAttemptsReducer,
     completed: completedReducer,
+    submissions: submissionsReducer,
 });

@@ -61,25 +61,65 @@ class MyApi
                 break;
             case "uploadFile":
                 $this->uploadFile();
+            case "getSubmissions":
+                $this->getSubmissions($this->request->data);
             default:
                 $this->reply("action switch failed", 400);
                 break;
         }
     }
 
+    private function getDirectories(string $path) : array
+    {
+        $directories = [];
+        $items = scandir($path);
+        foreach ($items as $item) {
+            if($item == '..' || $item == '.')
+                continue;
+            if(is_dir($path.'/'.$item))
+                $directories[] = $item;
+        }
+        return $directories;
+    }
+
+    public function getSubmissions($data){
+       $data = json_decode($data);
+        
+        $courseID = $data->courseID;
+        $ltiID = "courses.edx.org-e2c2357205ab4c6d85bacaa3c4466290"; //$data->ltiID;
+
+        $path = '../media/recordings/'.$courseID.'/'.$ltiID.'/';
+        
+        $dirs = $this->getDirectories($path);// glob('../media/recordings/'.$courseID.'/'.$ltiID.'/*', GLOB_ONLYDIR);
+        $submissions = array();
+        foreach ($dirs as $user) {
+            
+            $scanned_items = scandir($path.'/'.$user);
+
+            $submissions[$user] = $scanned_items;
+
+        }
+
+
+        $this->reply($submissions);
+    }
+
+    
+
     public function uploadFile()
     {
         try {
             $userID = $_POST['userID'];
             $ltiID = $_POST['ltiID'];
-
+            $courseID = $_POST['courseID'];
             $audio = $_POST['audio'];
             // $video = $_POST['video'];
             $images = json_decode($_POST['images']);
 
             $mediaDir = "../media";
             $recordingsDir = $mediaDir . "/recordings";
-            $ltiDir = $recordingsDir . "/" . $ltiID;
+            $courseDir = $recordingsDir. "/" . $courseID;
+            $ltiDir = $courseDir . "/" . $ltiID;
             $userDir = $ltiDir . "/" . $userID;
 
             if (!is_dir($mediaDir)) {
@@ -88,6 +128,10 @@ class MyApi
 
             if (!is_dir($recordingsDir)) {
                 $res = mkdir($recordingsDir, 0777);
+            }
+
+            if (!is_dir($courseDir)) {
+                $res = mkdir($courseDir, 0777);
             }
 
             if (!is_dir($ltiDir)) {
