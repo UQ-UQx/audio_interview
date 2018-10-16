@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import Dropzone from 'react-dropzone';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { connect } from 'react-redux';
+import { uploadStudentDataFiles } from '../actions';
 
 import datadownloadpng from '../assets/modal.png';
 
@@ -67,6 +69,7 @@ class SubmissionsStudentDataUpload extends Component {
 
         this.state = {
             selectedFiles: [],
+            error: '',
         };
 
         this.uploadFiles = this.uploadFiles.bind(this);
@@ -74,16 +77,37 @@ class SubmissionsStudentDataUpload extends Component {
 
     uploadFiles() {
         const { selectedFiles } = this.state;
-        const { toggleModal } = this.props;
+        const { toggleModal, uploadStudentDataFilesAction } = this.props;
 
         console.log('uploading', selectedFiles);
 
-        toggleModal();
+        const studentProfileFiles = selectedFiles.filter(file =>
+            /student_profile/.test(file.name)
+        );
+
+        const anonIDsFiles = selectedFiles.filter(file =>
+            /anon-ids/.test(file.name)
+        );
+
+        if (studentProfileFiles.length > 0 && anonIDsFiles.length > 0) {
+            uploadStudentDataFilesAction({
+                profile: studentProfileFiles[0],
+                anon: anonIDsFiles[0],
+            }).then(response => {
+                console.log(response);
+            });
+        } else {
+            this.setState({
+                error: 'Please upload BOTH student profile and anon IDs files',
+            });
+        }
+
+        // toggleModal();
     }
 
     render() {
         const { toggleModal } = this.props;
-        const { selectedFiles } = this.state;
+        const { selectedFiles, error } = this.state;
 
         const dropzoneContent = (
             <DropzoneContentContainer>
@@ -176,6 +200,7 @@ class SubmissionsStudentDataUpload extends Component {
                     </FileDropZone>
                 </ModalBody>
                 <ModalFooter>
+                    {error !== '' ? error : ''}
                     <Button color="primary" onClick={this.uploadFiles}>
                         <UploadIcon icon="cloud-upload-alt" />
                         {'  '}
@@ -194,4 +219,11 @@ SubmissionsStudentDataUpload.propTypes = {
     toggleModal: PropTypes.func.isRequired,
 };
 
-export default SubmissionsStudentDataUpload;
+export default connect(
+    state => ({
+        submissions: state.submissions,
+    }),
+    {
+        uploadStudentDataFilesAction: uploadStudentDataFiles,
+    }
+)(SubmissionsStudentDataUpload);

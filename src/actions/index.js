@@ -38,6 +38,10 @@ export const Actions = {
     GET_SUBMISSIONS_START: 'GET_SUBMISSIONS_START',
     GET_SUBMISSIONS_SUCCESS: 'GET_SUBMISSIONS_SUCCESS',
     GET_SUBMISSIONS_ERROR: 'GET_SUBMISSIONS_ERROR',
+
+    UPLOAD_STUDENT_DATA_FILES_START: 'UPLOAD_STUDENT_DATA_FILES_START',
+    UPLOAD_STUDENT_DATA_FILES_SUCCESS: 'UPLOAD_STUDENT_DATA_FILES_SUCCESS',
+    UPLOAD_STUDENT_DATA_FILES_ERROR: 'UPLOAD_STUDENT_DATA_FILES_ERROR',
 };
 
 export const Tables = {
@@ -45,27 +49,57 @@ export const Tables = {
     QUESTIONS: 'questions_list',
 };
 
-const getSubmissions = () => ({
-    types: [
-        Actions.GET_SUBMISSIONS_START,
-        Actions.GET_SUBMISSIONS_SUCCESS,
-        Actions.GET_SUBMISSIONS_ERROR,
-    ],
-    payload: {
-        client: 'activityAPI', // here you can define client used
-        request: {
-            method: 'get',
-            params: {
-                action: 'getSubmissions',
-                jwt_token: $JWT_TOKEN,
-                data: {
-                    courseID: $LTI.courseID,
-                    ltiID: $LTI.id,
+const uploadStudentDataFiles = ({ profile, anon }) => {
+    console.log('WOAH', $LTI.courseID);
+
+    const postData = new FormData();
+    postData.append('action', 'uploadStudentData');
+    postData.append('jwt_token', $JWT_TOKEN);
+    postData.append('file[profile]', profile);
+    postData.append('file[anon]', anon);
+    postData.append('ltiID', $LTI.id);
+    postData.append('courseID', $LTI.courseID);
+
+    return {
+        types: [
+            Actions.UPLOAD_STUDENT_DATA_FILES_START,
+            Actions.UPLOAD_STUDENT_DATA_FILES_SUCCESS,
+            Actions.UPLOAD_STUDENT_DATA_FILES_ERROR,
+        ],
+        payload: {
+            client: 'activityAPI', // here you can define client used
+            request: {
+                method: 'post',
+                data: postData,
+            },
+        },
+    };
+};
+
+const getSubmissions = () => {
+    console.log($LTI.courseID);
+    return {
+        types: [
+            Actions.GET_SUBMISSIONS_START,
+            Actions.GET_SUBMISSIONS_SUCCESS,
+            Actions.GET_SUBMISSIONS_ERROR,
+        ],
+        payload: {
+            client: 'activityAPI', // here you can define client used
+            request: {
+                method: 'get',
+                params: {
+                    action: 'getSubmissions',
+                    jwt_token: $JWT_TOKEN,
+                    data: {
+                        courseID: $LTI.courseID,
+                        ltiID: $LTI.id,
+                    },
                 },
             },
         },
-    },
-});
+    };
+};
 
 const getSavedQuestionsList = () => {
     const condition1 = `course_id,eq,${$LTI.courseID}`;
@@ -340,6 +374,7 @@ const setSaveFalse = () => ({
 
 // function are ordered as above
 export {
+    uploadStudentDataFiles,
     getSubmissions,
     getSavedQuestionsList,
     saveQuestionsList,

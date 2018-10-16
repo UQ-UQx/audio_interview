@@ -61,12 +61,48 @@ class MyApi
                 break;
             case "uploadFile":
                 $this->uploadFile();
+            case "uploadStudentData":
+                $this->uploadStudentData($this->request);
             case "getSubmissions":
                 $this->getSubmissions($this->request->data);
             default:
                 $this->reply("action switch failed", 400);
                 break;
         }
+    }
+
+    public function uploadStudentData($request){
+        //$request = json_decode($request);
+
+        $courseID = $request->courseID;
+        $ltiID = $request->ltiID;
+
+       
+        error_log(json_encode($_FILES, JSON_PRETTY_PRINT));
+
+        $anonPath = "../media/recordings/".$courseID."/anon.csv";
+        $profilePath = "../media/recordings/".$courseID."/profile.csv";
+        move_uploaded_file($_FILES["file"]["tmp_name"]["anon"],$anonPath );
+        move_uploaded_file($_FILES["file"]["tmp_name"]["profile"],$profilePath );
+
+        // $anonParsed = array_map('str_getcsv', file($anonPath));
+        // $profileParsed = array_map('str_getcsv', file($profilePath));
+
+
+        $anonParsed = array_map('str_getcsv', file($anonPath));
+        array_walk($anonParsed, function(&$a) use ($anonParsed) {
+          $a = array_combine($anonParsed[0], $a);
+        });
+        array_shift($anonParsed); # remove column header
+
+        $profileParsed = array_map('str_getcsv', file($profilePath));
+        array_walk($profileParsed, function(&$a) use ($profileParsed) {
+        $a = array_combine($profileParsed[0], $a);
+        });
+        array_shift($profileParsed); # remove column header
+
+        $this->reply(["anon"=>$anonParsed, "profile"=>$profileParsed]);
+
     }
 
     private function getDirectories(string $path) : array
@@ -86,6 +122,7 @@ class MyApi
        $data = json_decode($data);
         
         $courseID = $data->courseID;
+
         $ltiID = "courses.edx.org-e2c2357205ab4c6d85bacaa3c4466290"; //$data->ltiID;
 
         $path = '../media/recordings/'.$courseID.'/'.$ltiID.'/';
