@@ -132,7 +132,7 @@ class MyApi
         $ltiID = $request->ltiID;
 
        
-        error_log(json_encode($_FILES, JSON_PRETTY_PRINT));
+       // error_log(json_encode($_FILES, JSON_PRETTY_PRINT));
 
         $anonPath = "../media/recordings/".$courseID."/anon.csv";
         $profilePath = "../media/recordings/".$courseID."/profile.csv";
@@ -143,20 +143,10 @@ class MyApi
         // $profileParsed = array_map('str_getcsv', file($profilePath));
 
 
-        $anonParsed = array_map('str_getcsv', file($anonPath));
-        array_walk($anonParsed, function(&$a) use ($anonParsed) {
-          $a = array_combine($anonParsed[0], $a);
-        });
-        array_shift($anonParsed); # remove column header
+        $parsed = $this->parseStudentDataCSV($courseID);
+        $mapped = $this->mapStudentData($parsed);
 
-        $profileParsed = array_map('str_getcsv', file($profilePath));
-        array_walk($profileParsed, function(&$b) use ($profileParsed) {
-        $b = array_combine($profileParsed[0], $b);
-        });
-        array_shift($profileParsed); # remove column header
-
-
-        $this->reply(["anon"=>$anonParsed, "profile"=>$profileParsed]);
+        $this->reply($mapped);
 
     }
 

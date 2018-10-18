@@ -32,8 +32,6 @@ const SaveButton = styled(Button)`
     margin-left: 5px;
 `;
 
-var b = function() {};
-
 const AdminPageOptions = props => {
     const { setSaveTrue, history } = props;
 

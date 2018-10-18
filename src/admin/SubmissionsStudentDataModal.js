@@ -77,7 +77,10 @@ class SubmissionsStudentDataUpload extends Component {
 
     uploadFiles() {
         const { selectedFiles } = this.state;
-        const { toggleModal, uploadStudentDataFilesAction } = this.props;
+        const {
+            // toggleModal,
+            uploadStudentDataFilesAction,
+        } = this.props;
 
         console.log('uploading', selectedFiles);
 
@@ -217,6 +220,7 @@ class SubmissionsStudentDataUpload extends Component {
 
 SubmissionsStudentDataUpload.propTypes = {
     toggleModal: PropTypes.func.isRequired,
+    uploadStudentDataFilesAction: PropTypes.func.isRequired,
 };
 
 export default connect(
