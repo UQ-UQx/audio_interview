@@ -128,10 +128,12 @@ const submissionsReducer = (state = {}, action) => {
     }
 };
 
-const StudentDataReducer = (state = [], action) => {
+const StudentDataReducer = (state = {}, action) => {
     switch (action.type) {
-        case Actions.GET_STUDENT_DATA:
-            return [...action.payload.data];
+        case Actions.GET_SUBMISSIONS_SUCCESS:
+            return { ...action.payload.data.mapped_data };
+        case Actions.UPLOAD_STUDENT_DATA_FILES_SUCCESS:
+            return { ...action.payload.data };
         default:
             return state;
     }

@@ -70,6 +70,7 @@ class SubmissionsStudentDataUpload extends Component {
         this.state = {
             selectedFiles: [],
             error: '',
+            uploading: false,
         };
 
         this.uploadFiles = this.uploadFiles.bind(this);
@@ -77,10 +78,7 @@ class SubmissionsStudentDataUpload extends Component {
 
     uploadFiles() {
         const { selectedFiles } = this.state;
-        const {
-            // toggleModal,
-            uploadStudentDataFilesAction,
-        } = this.props;
+        const { toggleModal, uploadStudentDataFilesAction } = this.props;
 
         console.log('uploading', selectedFiles);
 
@@ -96,21 +94,31 @@ class SubmissionsStudentDataUpload extends Component {
             uploadStudentDataFilesAction({
                 profile: studentProfileFiles[0],
                 anon: anonIDsFiles[0],
-            }).then(response => {
-                console.log(response);
-            });
+            })
+                .then(response => {
+                    console.log(response);
+                    this.setState({
+                        uploading: true,
+                    });
+                    toggleModal();
+                })
+                .catch(() => {
+                    this.setState({
+                        uploading: false,
+                        error: 'Something went wrong, please try again.',
+                    });
+                });
         } else {
             this.setState({
                 error: 'Please upload BOTH student profile and anon IDs files',
+                uploading: false,
             });
         }
-
-        // toggleModal();
     }
 
     render() {
         const { toggleModal } = this.props;
-        const { selectedFiles, error } = this.state;
+        const { selectedFiles, error, uploading } = this.state;
 
         const dropzoneContent = (
             <DropzoneContentContainer>
@@ -167,6 +175,7 @@ class SubmissionsStudentDataUpload extends Component {
                 </DropzoneContent>
             </DropzoneContentContainer>
         );
+        console.log('test');
 
         return (
             <div>
@@ -205,9 +214,19 @@ class SubmissionsStudentDataUpload extends Component {
                 <ModalFooter>
                     {error !== '' ? error : ''}
                     <Button color="primary" onClick={this.uploadFiles}>
-                        <UploadIcon icon="cloud-upload-alt" />
-                        {'  '}
-                        Upload
+                        {uploading ? (
+                            <React.Fragment>
+                                <UploadIcon icon="spinner" pulse />
+                                {'  '}
+                                Uploading
+                            </React.Fragment>
+                        ) : (
+                            <React.Fragment>
+                                <UploadIcon icon="cloud-upload-alt" />
+                                {'  '}
+                                Upload
+                            </React.Fragment>
+                        )}
                     </Button>{' '}
                     <Button color="secondary" onClick={toggleModal}>
                         Cancel

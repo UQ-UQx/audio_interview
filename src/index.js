@@ -17,6 +17,7 @@ import {
     faStop,
     faCloudUploadAlt,
     faTimesCircle,
+    faVideo,
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -45,7 +46,8 @@ library.add(
     faPause,
     faStop,
     faCloudUploadAlt,
-    faTimesCircle
+    faTimesCircle,
+    faVideo
 );
 
 const renderApp = () => (
