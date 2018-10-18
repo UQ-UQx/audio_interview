@@ -71,6 +71,60 @@ class MyApi
         }
     }
 
+    private function parseStudentDataCSV($courseID){
+
+        $anonPath = "../media/recordings/".$courseID."/anon.csv";
+
+        $profilePath = "../media/recordings/".$courseID."/profile.csv";
+
+        $anonParsed = [];
+        $profileParsed = [];
+
+        if(file_exists($anonPath) && file_exists($profilePath)){
+
+            $anonParsed = $this->loadCSV($anonPath);
+
+            $profileParsed = $this->loadCSV($profilePath);
+            
+
+        }
+
+        return ["anon"=>$anonParsed, "profile"=>$profileParsed];
+    }
+
+    private function mapStudentData($parsed){
+        $anon = $parsed["anon"];
+        $profile = $parsed["profile"];
+
+        $anonMapped = [];
+
+        foreach ($anon as $value) {
+            $anonMapped[$value["User ID"]] = $value["Course Specific Anonymized User ID"];
+        }
+
+        $mappedData = [];
+        foreach ($profile as $profile) {
+            if(array_key_exists($profile["id"], $anonMapped)){
+                $valuesToGet = [
+                    1 => 'username', 
+                    2 => 'name', 
+                    3 => 'enrollment_mode', 
+                    4 => 'varification_status', 
+                ];
+                $mappedData[$anonMapped[$profile["id"]]] = [
+                    "username"=>$profile["username"],
+                    "name"=>$profile["name"],
+                    "enrollment_mode"=>$profile["enrollment_mode"],
+                    "verification_status"=>$profile["verification_status"],
+                ];
+            }
+        }
+
+
+        return $mappedData;
+
+    }
+
     public function uploadStudentData($request){
         //$request = json_decode($request);
 
@@ -96,10 +150,11 @@ class MyApi
         array_shift($anonParsed); # remove column header
 
         $profileParsed = array_map('str_getcsv', file($profilePath));
-        array_walk($profileParsed, function(&$a) use ($profileParsed) {
-        $a = array_combine($profileParsed[0], $a);
+        array_walk($profileParsed, function(&$b) use ($profileParsed) {
+        $b = array_combine($profileParsed[0], $b);
         });
         array_shift($profileParsed); # remove column header
+
 
         $this->reply(["anon"=>$anonParsed, "profile"=>$profileParsed]);
 
@@ -137,8 +192,12 @@ class MyApi
 
         }
 
+        $parsed = $this->parseStudentDataCSV($courseID);
+        $mapped = $this->mapStudentData($parsed);
 
-        $this->reply($submissions);
+        //error_log(json_encode(mapStudentData($anonParsed, $profileParsed)));
+
+        $this->reply(["submissions"=>$submissions, "mapped_data"=>$mapped]);
     }
 
     
@@ -320,6 +379,61 @@ class MyApi
     {
         $this->reply(true);
     }
+
+
+
+    private function loadCSV($file){
+        // Create an array to hold the data
+        $arrData = array();
+        
+        // Create a variable to hold the header information
+        $header = NULL;
+        
+        // Connect to the database
+        //$db = mysqli_connect('localhost','username','password','test') or die("Failed to connect to MySQL: " . mysqli_connect_error());
+        
+        // If the file can be opened as readable, bind a named resource
+        if (($handle = fopen($file, 'r')) !== FALSE)
+        {
+            // Loop through each row
+            while (($row = fgetcsv($handle)) !== FALSE)
+            {
+                // Loop through each field
+                foreach($row as &$field)
+                {
+                    // Remove any invalid or hidden characters
+                    $field = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $field);
+                    
+                    // Escape characters for MySQL (single quotes, double quotes, linefeeds, etc.)
+                    //$field = mysqli_escape_string($db, $field);
+                }
+                
+                // If the header has been stored
+                if ($header)
+                {
+                    // Create an associative array with the data
+                    $arrData[] = array_combine($header, $row);
+                }
+                // Else the header has not been stored
+                else
+                {
+                    // Store the current row as the header
+                    $header = $row;
+                }
+            }
+            
+            // Close the file pointer
+            fclose($handle);
+        }
+        
+        // Close the MySQL connection
+        //mysqli_close($db);
+        
+        return $arrData;
+    }
+
+
+
 } //MyApi class end
 
 require_once '../lib/db.php';
@@ -336,3 +450,5 @@ require_once '../lib/jwt.php';
 
 $db = null; //Db::instance(); //uncomment and enter db details in config to use database
 $MyApi = new MyApi($db, $config);
+
+

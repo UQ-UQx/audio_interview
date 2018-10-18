@@ -122,7 +122,16 @@ const completedReducer = (state = false, action) => {
 const submissionsReducer = (state = {}, action) => {
     switch (action.type) {
         case Actions.GET_SUBMISSIONS_SUCCESS:
-            return { ...action.payload.data };
+            return { ...action.payload.data.submissions };
+        default:
+            return state;
+    }
+};
+
+const StudentDataReducer = (state = [], action) => {
+    switch (action.type) {
+        case Actions.GET_STUDENT_DATA:
+            return [...action.payload.data];
         default:
             return state;
     }
@@ -140,4 +149,5 @@ export default combineReducers({
     maxAttempts: maxAttemptsReducer,
     completed: completedReducer,
     submissions: submissionsReducer,
+    studentData: StudentDataReducer,
 });
