@@ -19,8 +19,8 @@ class SubmissionsTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            submissionModal: false,
-            currentlyViewing: null,
+            submissionModal: true,
+            currentlyViewing: 'd8e6aa3c69b3185f4372295895808f5b',
         };
         this.toggleModal = this.toggleModal.bind(this);
     }
@@ -84,8 +84,11 @@ class SubmissionsTable extends Component {
                     }
                     student={
                         currentlyViewing !== null
-                            ? students[currentlyViewing]
-                            : {}
+                            ? {
+                                  ...students[currentlyViewing],
+                                  id: currentlyViewing,
+                              }
+                            : { id: currentlyViewing }
                     }
                 />
             </ComponentContainer>

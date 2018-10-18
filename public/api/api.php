@@ -168,7 +168,7 @@ class MyApi
         
         $courseID = $data->courseID;
 
-        $ltiID = "courses.edx.org-e2c2357205ab4c6d85bacaa3c4466290"; //$data->ltiID;
+        $ltiID = $data->ltiID;
 
         $path = '../media/recordings/'.$courseID.'/'.$ltiID.'/';
         

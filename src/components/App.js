@@ -541,13 +541,6 @@ class App extends Component {
                 break;
         }
 
-        // console.log(
-        //     'wait a minute',
-        //     stage,
-        //     record,
-        //     completed,
-        //     !completed && progress === 0 && mediaAvailable
-        // );
         return (
             <Fragment>
                 {/* <MaskContent hide={stage !== 'end'}> */}
