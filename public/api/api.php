@@ -301,9 +301,19 @@ class MyApi
     {
         $data = json_decode($this->request->data);
 
-        //error_log(json_encode($response));
+        $url = "../media/new.webm";
+        $audio = file_get_contents($url);
+        
+        //$newData = "data:audio/webm;base64,".base64_encode($audio);
 
-        $this->reply("Hello " . $data->name . ", I'm PHP :)");
+        file_put_contents('../media/newb.webm', $audio);
+        $newData = base64_decode($audio);
+
+        $fp = fopen("../media/newData.webm", 'wb');
+            fwrite($fp, $audio);
+            fclose($fp);
+
+        $this->reply($newData);
     }
 
     /**

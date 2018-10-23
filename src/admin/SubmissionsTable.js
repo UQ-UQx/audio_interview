@@ -56,10 +56,26 @@ class SubmissionsTable extends Component {
                         {Object.keys(submissions).map(userID => (
                             <tr key={userID}>
                                 <td>{userID}</td>
-                                <td>{students[userID].username}</td>
-                                <td>{students[userID].name}</td>
-                                <td>{students[userID].enrollment_mode}</td>
-                                <td>{students[userID].verification_status}</td>
+                                <td>
+                                    {students[userID]
+                                        ? students[userID].username
+                                        : 'Unknown'}
+                                </td>
+                                <td>
+                                    {students[userID]
+                                        ? students[userID].name
+                                        : 'Unknown'}
+                                </td>
+                                <td>
+                                    {students[userID]
+                                        ? students[userID].enrollment_mode
+                                        : 'Unknown'}
+                                </td>
+                                <td>
+                                    {students[userID]
+                                        ? students[userID].verification_status
+                                        : 'Unknown'}
+                                </td>
                                 <td>
                                     <Button
                                         color="info"

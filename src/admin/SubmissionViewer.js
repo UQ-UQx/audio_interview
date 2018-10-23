@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
+import InterviewPlayer from './InterviewPlayer';
+
 const ComponentContainer = styled(Modal)``;
 
 class SubmissionViewer extends Component {
@@ -47,49 +49,22 @@ class SubmissionViewer extends Component {
             ],
         };
 
-        this.startReplay = this.startReplay.bind(this);
+        // this.startReplay = this.startReplay.bind(this);
+        this.onPlayerProgress = this.onPlayerProgress.bind(this);
     }
 
-    startReplay() {
-        const { gapTime, captureInterval, session, question } = this.state;
+    componentWillUnmount() {
+        clearInterval(this.timer);
+    }
 
-        // let sessionCopy = [...session];
-        // this.replayInterval = setInterval(()=>{
-        //     if(sessionCopy.length > 0){
+    onPlayerProgress(progress) {
+        const { question } = this.state;
 
-        //     }
-
-        // },1000)
-
-        // 0 - 10
-        // 10 - 70
-        // 70 - 80
-        // 80 - 120
-        // 120 - 130
-        // 130 - 180
-        // 240 - 300
-        // 300 - 360
-
-        // gap
-        // question
-        // gap
-        // question
-        // gap
-
-        const timestamps = {};
-        let walkedTime = 0;
-
-        session.forEach((question, index) => {
-            walkedTime =
-                index === 0 ? 10 : walkedTime + 10 + question.settings.time;
-            timestamps[walkedTime] = question.question;
-        });
-
-        console.log(timestamps, gapTime, captureInterval, question);
+        console.log('CVALLING', progress, question);
     }
 
     render() {
-        const { error } = this.state;
+        const { error, playing, played, session } = this.state;
         const {
             submissionModal,
             toggleModal,
@@ -110,17 +85,36 @@ class SubmissionViewer extends Component {
             if (result) {
                 const timeStamp = result[3] === '' ? '0' : result[3];
 
-                webcamCaptures[timeStamp] = url;
+                const rounded = Math.round(parseFloat(timeStamp) * 10) / 10;
+
+                webcamCaptures[rounded.toString()] = url;
             }
         });
 
-        console.log(Object.keys(webcamCaptures).length);
+        // console.log(Object.keys(webcamCaptures).length);
 
         const audioFilename = audioFilenameFilter[0]
             ? audioFilenameFilter[0]
             : null;
 
-        console.log('OPENING', student, submission, audioFilename);
+        // console.log('OPENING', student, submission, audioFilename);
+
+        const audioURL = `./media/recordings/${$LTI.courseID}/${$LTI.id}/${
+            student.id
+        }/${audioFilename}`;
+
+        console.log(played);
+
+        const timestamps = {};
+        let walkedTime = 0;
+
+        session.forEach((question, index) => {
+            walkedTime =
+                index === 0 ? 10 : walkedTime + 10 + question.settings.time;
+            timestamps[walkedTime] = question.question;
+        });
+
+        // const audioURL = 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.webm';
         return (
             <ComponentContainer
                 size="lg"
@@ -131,8 +125,13 @@ class SubmissionViewer extends Component {
                     Submission From <b>{student.name}</b>
                 </ModalHeader>
                 <ModalBody>
-                    <div>Submission</div>
-                    <Button onClick={this.startReplay}>Start</Button>
+                    <h4>Submissions</h4>
+                    <InterviewPlayer
+                        audioURL={audioURL}
+                        images={webcamCaptures}
+                        questions={timestamps}
+                        student={student}
+                    />
                 </ModalBody>
                 <ModalFooter>
                     {error !== '' ? error : ''}
