@@ -5,7 +5,7 @@
     "gitlens.advanced.messages": {
         "suppressShowKeyBindingsNotice": true
     },
-    "window.zoomLevel": 1,
+    "window.zoomLevel": -1,
     "editor.formatOnSave": true,
     "[javascript]":{
         "editor.formatOnSave": false

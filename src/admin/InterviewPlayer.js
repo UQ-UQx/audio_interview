@@ -65,27 +65,79 @@ class InterviewPlayer extends Component {
         });
 
         this.seekTo = this.seekTo.bind(this);
+        this.play = this.play.bind(this);
     }
 
     componentWillUnmount() {
         if (this.time) this.timer = null;
     }
 
+    play() {
+        console.log('Play Clicked');
+        this.audioplayer.play();
+        this.setState({ playing: true, paused: false });
+        console.log('TIIIIIMMMERR', this.timer);
+        this.timer = setInterval(() => {
+            const { played, audioDuration, countdown } = this.state;
+            const { images, questions } = this.props;
+
+            let countdownRemaining = countdown;
+            const roundedPlayed = parseFloat(played.toFixed());
+
+            if (played === audioDuration) {
+                clearInterval(this.timer);
+                if (this.time) this.timer = null;
+
+                this.setState({
+                    playing: false,
+                    paused: false,
+                    currentImage: images[0],
+                    currentQuestion: questions[0],
+                });
+                this.audioplayer.pause();
+                this.audioplayer.currentTime = 0;
+            } else {
+                this.setState({
+                    ...(images[roundedPlayed]
+                        ? {
+                              currentImage: [images[roundedPlayed]],
+                          }
+                        : {}),
+                    ...(questions[roundedPlayed]
+                        ? {
+                              currentQuestion: questions[roundedPlayed],
+                              countdown: questions[roundedPlayed].settings.time,
+                          }
+                        : {
+                              countdown: (countdownRemaining -= 1),
+                          }),
+                    played: this.audioplayer.currentTime,
+                });
+            }
+        }, 1000);
+    }
+
     seekTo(time) {
         console.log(time);
 
+        const { playing } = this.state;
         const { images, questions } = this.props;
 
         console.log('SEEEK', questions[140].settings.time);
         this.audioplayer.pause();
+        clearInterval(this.timer);
+        if (this.time) this.timer = null;
+        this.audioplayer.currentTime = time;
         this.setState({
             playing: false,
             paused: true,
             played: time,
             currentImage: images[130],
             currentQuestion: questions[80],
-            countdown: questions[80].settings.time - (140 - time),
+            countdown: questions[140].settings.time - (time - 130),
         });
+        if (playing) this.play();
+        console.log(this.timer);
     }
 
     render() {
@@ -152,64 +204,7 @@ class InterviewPlayer extends Component {
                     <track kind="captions" />
                 </Video>
                 <div>
-                    <Play
-                        color="primary"
-                        onClick={() => {
-                            console.log('Play Clicked');
-                            this.audioplayer.play();
-                            this.setState({ playing: true, paused: false });
-                            this.timer = setInterval(() => {
-                                const {
-                                    played,
-                                    audioDuration,
-                                    countdown,
-                                } = this.state;
-                                const { images, questions } = this.props;
-
-                                console.log(startTime);
-
-                                let countdownRemaining = countdown;
-                                const roundedPlayed = parseFloat(
-                                    played.toFixed()
-                                );
-
-                                if (played === audioDuration) {
-                                    clearInterval(this.timer);
-
-                                    this.setState({
-                                        playing: false,
-                                        paused: false,
-                                        currentImage: images[0],
-                                        currentQuestion: questions[0],
-                                    });
-                                    this.audioplayer.pause();
-                                    this.audioplayer.currentTime = 0;
-                                } else {
-                                    this.setState({
-                                        ...(images[roundedPlayed]
-                                            ? {
-                                                  currentImage: [
-                                                      images[roundedPlayed],
-                                                  ],
-                                              }
-                                            : {}),
-                                        ...(questions[roundedPlayed]
-                                            ? {
-                                                  currentQuestion:
-                                                      questions[roundedPlayed],
-                                                  countdown:
-                                                      questions[roundedPlayed]
-                                                          .settings.time,
-                                              }
-                                            : {
-                                                  countdown: (countdownRemaining -= 1),
-                                              }),
-                                        played: this.audioplayer.currentTime,
-                                    });
-                                }
-                            }, 1000);
-                        }}
-                    >
+                    <Play color="primary" onClick={this.play}>
                         Play
                     </Play>
                     <Pause
@@ -218,6 +213,8 @@ class InterviewPlayer extends Component {
                             console.log('pause Clicked');
                             this.audioplayer.pause();
                             clearInterval(this.timer);
+                            if (this.time) this.timer = null;
+
                             let paused = true;
                             if (played === 0) {
                                 paused = false;
@@ -235,12 +232,15 @@ class InterviewPlayer extends Component {
                             this.audioplayer.currentTime = 0;
 
                             clearInterval(this.timer);
+                            if (this.time) this.timer = null;
+
                             this.setState({
                                 playing: false,
                                 paused: false,
                                 played: 0,
                                 currentImage: images[0],
                                 currentQuestion: questions[0],
+                                countdown: questions[0].settings.time,
                             });
                         }}
                     >
