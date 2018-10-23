@@ -2,7 +2,16 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Button } from 'reactstrap';
-import axios from 'axios';
+
+import { withStyles } from '@material-ui/core/styles';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import TypedQuestion from '../components/TypedQuestion';
+
+const styles = {
+    root: {
+        flexGrow: 1,
+    },
+};
 
 const Play = styled(Button)``;
 const Pause = styled(Button)``;
@@ -41,13 +50,12 @@ class InterviewPlayer extends Component {
         super(props);
 
         this.state = {
-            componentName: 'Interview Player',
-            audio: '',
             playing: false,
             paused: false,
             played: 0,
             audioDuration: 0,
             currentImage: props.images[0],
+            currentQuestion: props.questions[0],
         };
 
         getDuration(props.audioURL, duration => {
@@ -61,43 +69,52 @@ class InterviewPlayer extends Component {
 
     render() {
         const {
-            componentName,
             audioDuration,
             playing,
             paused,
             played,
             currentImage,
+            currentQuestion,
         } = this.state;
-        const { audioURL, images, questions, student } = this.props;
-        console.log(played, audioDuration, playing, paused);
+        const { audioURL, images, questions, student, classes } = this.props;
+        console.log(played, audioDuration, playing, paused, questions);
 
         const roundedPlayed = parseFloat(played.toFixed());
 
-        console.log(played, roundedPlayed);
+        console.log(played, roundedPlayed, currentQuestion);
 
         return (
             <div>
                 <p>
                     webcam capture of {student.name} at {roundedPlayed} seconds
                 </p>
-                <img
-                    src={`./media/recordings/${$LTI.courseID}/${$LTI.id}/${
-                        student.id
-                    }/${currentImage}`}
-                    alt={`webcam capture of ${
-                        student.name
-                    } at ${roundedPlayed} seconds`}
-                />
+                <div>
+                    <img
+                        src={`./media/recordings/${$LTI.courseID}/${$LTI.id}/${
+                            student.id
+                        }/${currentImage}`}
+                        alt={`webcam capture of ${
+                            student.name
+                        } at ${roundedPlayed} seconds`}
+                    />
+                    <TypedQuestion question={currentQuestion} />
+                </div>
+                <div className={classes.root}>
+                    <br />
+                    <LinearProgress
+                        variant="determinate"
+                        value={(played / audioDuration) * 100}
+                    />
+                </div>
                 <Video
                     preload="all"
-                    ref={el => {
+                    innerRef={el => {
                         if (el) this.audioplayer = el;
                     }}
                 >
                     <source src={audioURL} type="audio/webm" />
                     <track kind="captions" />
                 </Video>
-                {componentName} Component - {audioURL} -{' '}
                 <div>
                     <Play
                         color="primary"
@@ -107,7 +124,7 @@ class InterviewPlayer extends Component {
                             this.setState({ playing: true, paused: false });
                             this.timer = setInterval(() => {
                                 const { played, audioDuration } = this.state;
-                                const { images } = this.props;
+                                const { images, questions } = this.props;
 
                                 const roundedPlayed = parseFloat(
                                     played.toFixed()
@@ -120,6 +137,7 @@ class InterviewPlayer extends Component {
                                         playing: false,
                                         paused: false,
                                         currentImage: images[0],
+                                        currentQuestion: questions[0],
                                     });
                                     this.audioplayer.pause();
                                     this.audioplayer.currentTime = 0;
@@ -130,6 +148,13 @@ class InterviewPlayer extends Component {
                                                   currentImage: [
                                                       images[roundedPlayed],
                                                   ],
+                                              }
+                                            : {}),
+                                        ...(questions[roundedPlayed] ||
+                                        questions[roundedPlayed] === ''
+                                            ? {
+                                                  currentQuestion:
+                                                      questions[roundedPlayed],
                                               }
                                             : {}),
                                         played: this.audioplayer.currentTime,
@@ -168,12 +193,12 @@ class InterviewPlayer extends Component {
                                 paused: false,
                                 played: 0,
                                 currentImage: images[0],
+                                currentQuestion: questions[0],
                             });
                         }}
                     >
                         Stop
                     </Stop>
-                    <code>{JSON.stringify(images)}</code>
                 </div>
             </div>
         );
@@ -185,6 +210,7 @@ InterviewPlayer.propTypes = {
     images: PropTypes.shape({}).isRequired,
     questions: PropTypes.shape({}).isRequired,
     student: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
 
-export default InterviewPlayer;
+export default withStyles(styles)(InterviewPlayer);

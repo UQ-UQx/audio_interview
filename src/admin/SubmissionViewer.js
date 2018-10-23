@@ -13,8 +13,6 @@ class SubmissionViewer extends Component {
         this.state = {
             error: '',
             question: '',
-            gapTime: 10,
-            captureInterval: 5,
             session: [
                 {
                     id: '4518e12a-958c-4098-976a-9242c0d5b8ac',
@@ -64,7 +62,7 @@ class SubmissionViewer extends Component {
     }
 
     render() {
-        const { error, playing, played, session } = this.state;
+        const { error, session } = this.state;
         const {
             submissionModal,
             toggleModal,
@@ -103,15 +101,16 @@ class SubmissionViewer extends Component {
             student.id
         }/${audioFilename}`;
 
-        console.log(played);
-
         const timestamps = {};
         let walkedTime = 0;
+
+        timestamps[0] = '';
 
         session.forEach((question, index) => {
             walkedTime =
                 index === 0 ? 10 : walkedTime + 10 + question.settings.time;
             timestamps[walkedTime] = question.question;
+            timestamps[walkedTime + question.settings.time] = '';
         });
 
         // const audioURL = 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.webm';
