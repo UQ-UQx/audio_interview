@@ -6,6 +6,7 @@ import { Button } from 'reactstrap';
 import { withStyles } from '@material-ui/core/styles';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import TypedQuestion from '../components/TypedQuestion';
+import CountdownDisplay from '../components/CountdownDisplay';
 
 const styles = {
     root: {
@@ -56,15 +57,35 @@ class InterviewPlayer extends Component {
             audioDuration: 0,
             currentImage: props.images[0],
             currentQuestion: props.questions[0],
+            countdown: props.questions[0].settings.time,
         };
 
         getDuration(props.audioURL, duration => {
             this.setState({ audioDuration: duration });
         });
+
+        this.seekTo = this.seekTo.bind(this);
     }
 
     componentWillUnmount() {
         if (this.time) this.timer = null;
+    }
+
+    seekTo(time) {
+        console.log(time);
+
+        const { images, questions } = this.props;
+
+        console.log('SEEEK', questions[140].settings.time);
+        this.audioplayer.pause();
+        this.setState({
+            playing: false,
+            paused: true,
+            played: time,
+            currentImage: images[130],
+            currentQuestion: questions[80],
+            countdown: questions[80].settings.time - (140 - time),
+        });
     }
 
     render() {
@@ -75,13 +96,22 @@ class InterviewPlayer extends Component {
             played,
             currentImage,
             currentQuestion,
+            countdown,
         } = this.state;
         const { audioURL, images, questions, student, classes } = this.props;
-        console.log(played, audioDuration, playing, paused, questions);
 
         const roundedPlayed = parseFloat(played.toFixed());
 
-        console.log(played, roundedPlayed, currentQuestion);
+        console.log(
+            playing,
+            paused,
+            played,
+            roundedPlayed,
+            currentQuestion,
+            countdown
+        );
+
+        const startTime = currentQuestion.settings.time;
 
         return (
             <div>
@@ -97,8 +127,14 @@ class InterviewPlayer extends Component {
                             student.name
                         } at ${roundedPlayed} seconds`}
                     />
-                    <TypedQuestion question={currentQuestion} />
+                    <TypedQuestion question={currentQuestion.question} />
                 </div>
+                <CountdownDisplay
+                    time={countdown}
+                    startTime={startTime}
+                    changeHue={currentQuestion.question !== ''}
+                    display={countdown.toString()}
+                />
                 <div className={classes.root}>
                     <br />
                     <LinearProgress
@@ -123,9 +159,16 @@ class InterviewPlayer extends Component {
                             this.audioplayer.play();
                             this.setState({ playing: true, paused: false });
                             this.timer = setInterval(() => {
-                                const { played, audioDuration } = this.state;
+                                const {
+                                    played,
+                                    audioDuration,
+                                    countdown,
+                                } = this.state;
                                 const { images, questions } = this.props;
 
+                                console.log(startTime);
+
+                                let countdownRemaining = countdown;
                                 const roundedPlayed = parseFloat(
                                     played.toFixed()
                                 );
@@ -150,13 +193,17 @@ class InterviewPlayer extends Component {
                                                   ],
                                               }
                                             : {}),
-                                        ...(questions[roundedPlayed] ||
-                                        questions[roundedPlayed] === ''
+                                        ...(questions[roundedPlayed]
                                             ? {
                                                   currentQuestion:
                                                       questions[roundedPlayed],
+                                                  countdown:
+                                                      questions[roundedPlayed]
+                                                          .settings.time,
                                               }
-                                            : {}),
+                                            : {
+                                                  countdown: (countdownRemaining -= 1),
+                                              }),
                                         played: this.audioplayer.currentTime,
                                     });
                                 }
@@ -199,6 +246,13 @@ class InterviewPlayer extends Component {
                     >
                         Stop
                     </Stop>
+                    <Button
+                        onClick={() => {
+                            this.seekTo(134);
+                        }}
+                    >
+                        Seek
+                    </Button>
                 </div>
             </div>
         );

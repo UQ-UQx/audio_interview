@@ -13,6 +13,7 @@ class SubmissionViewer extends Component {
         this.state = {
             error: '',
             question: '',
+            gapTime: 10,
             session: [
                 {
                     id: '4518e12a-958c-4098-976a-9242c0d5b8ac',
@@ -62,7 +63,7 @@ class SubmissionViewer extends Component {
     }
 
     render() {
-        const { error, session } = this.state;
+        const { error, session, gapTime } = this.state;
         const {
             submissionModal,
             toggleModal,
@@ -104,13 +105,19 @@ class SubmissionViewer extends Component {
         const timestamps = {};
         let walkedTime = 0;
 
-        timestamps[0] = '';
+        const gap = {
+            question: '',
+            settings: {
+                time: gapTime,
+            },
+        };
+        timestamps[0] = { ...gap };
 
         session.forEach((question, index) => {
             walkedTime =
                 index === 0 ? 10 : walkedTime + 10 + question.settings.time;
-            timestamps[walkedTime] = question.question;
-            timestamps[walkedTime + question.settings.time] = '';
+            timestamps[walkedTime] = question;
+            timestamps[walkedTime + question.settings.time] = { ...gap };
         });
 
         // const audioURL = 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.webm';
@@ -124,7 +131,6 @@ class SubmissionViewer extends Component {
                     Submission From <b>{student.name}</b>
                 </ModalHeader>
                 <ModalBody>
-                    <h4>Submissions</h4>
                     <InterviewPlayer
                         audioURL={audioURL}
                         images={webcamCaptures}
