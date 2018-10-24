@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import uuidv4 from 'uuid/v4';
 
 import InterviewPlayer from './InterviewPlayer';
 
@@ -106,6 +107,7 @@ class SubmissionViewer extends Component {
         let walkedTime = 0;
 
         const gap = {
+            id: uuidv4(),
             question: '',
             settings: {
                 time: gapTime,

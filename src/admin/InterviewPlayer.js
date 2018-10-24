@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Button } from 'reactstrap';
 
 import { withStyles } from '@material-ui/core/styles';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import Stepper from '@material-ui/core/Stepper';
+import Step from '@material-ui/core/Step';
+import StepButton from '@material-ui/core/StepButton';
+import MUIButton from '@material-ui/core/Button';
+import Icon from '@material-ui/core/Icon';
+
 import TypedQuestion from '../components/TypedQuestion';
 import CountdownDisplay from '../components/CountdownDisplay';
 
@@ -12,15 +17,45 @@ const styles = {
     root: {
         flexGrow: 1,
     },
+    button: {
+        margin: 10,
+        outline: 'none',
+    },
 };
 
-const Play = styled(Button)``;
-const Pause = styled(Button)``;
-const Stop = styled(Button)``;
+// &&{} ensures that all styles defined here are !important
+const Play = styled(MUIButton)`
+    && {
+        margin: 10px;
+        :focus {
+            outline: none;
+        }
+    }
+`;
+
+const Stop = styled(MUIButton)`
+    && {
+        margin: 10px;
+        :focus {
+            outline: none;
+        }
+    }
+`;
+
+const StyledStepButton = styled(StepButton)`
+    && {
+        outline: none;
+    }
+`;
 
 const Video = styled.video`
     width: 0;
     height: 0;
+`;
+
+const ButtonsContainer = styled.div`
+    width: 100%;
+    text-align: center;
 `;
 
 const getDuration = (url, next) => {
@@ -56,7 +91,9 @@ class InterviewPlayer extends Component {
             played: 0,
             audioDuration: 0,
             currentImage: props.images[0],
+            currentImageKey: 0,
             currentQuestion: props.questions[0],
+            currentQuestionKey: 0,
             countdown: props.questions[0].settings.time,
         };
 
@@ -66,6 +103,8 @@ class InterviewPlayer extends Component {
 
         this.seekTo = this.seekTo.bind(this);
         this.play = this.play.bind(this);
+        this.pause = this.pause.bind(this);
+        this.stop = this.stop.bind(this);
     }
 
     componentWillUnmount() {
@@ -93,6 +132,8 @@ class InterviewPlayer extends Component {
                     paused: false,
                     currentImage: images[0],
                     currentQuestion: questions[0],
+                    currentImageKey: 0,
+                    currentQuestionKey: 0,
                 });
                 this.audioplayer.pause();
                 this.audioplayer.currentTime = 0;
@@ -101,11 +142,13 @@ class InterviewPlayer extends Component {
                     ...(images[roundedPlayed]
                         ? {
                               currentImage: [images[roundedPlayed]],
+                              currentImageKey: roundedPlayed,
                           }
                         : {}),
                     ...(questions[roundedPlayed]
                         ? {
                               currentQuestion: questions[roundedPlayed],
+                              currentQuestionKey: roundedPlayed,
                               countdown: questions[roundedPlayed].settings.time,
                           }
                         : {
@@ -117,24 +160,111 @@ class InterviewPlayer extends Component {
         }, 1000);
     }
 
-    seekTo(time) {
-        console.log(time);
-
-        const { playing } = this.state;
-        const { images, questions } = this.props;
-
-        console.log('SEEEK', questions[140].settings.time);
+    pause() {
+        const { played } = this.state;
+        console.log('pause Clicked');
         this.audioplayer.pause();
         clearInterval(this.timer);
         if (this.time) this.timer = null;
-        this.audioplayer.currentTime = time;
+
+        let paused = true;
+        if (played === 0) {
+            paused = false;
+        }
+        this.setState({ playing: false, paused });
+    }
+
+    stop() {
+        const { images, questions } = this.props;
+        console.log('Stop Clicked');
+        this.audioplayer.pause();
+        this.audioplayer.currentTime = 0;
+
+        clearInterval(this.timer);
+        if (this.time) this.timer = null;
+
+        this.setState({
+            playing: false,
+            paused: false,
+            played: 0,
+            currentImage: images[0],
+            currentQuestion: questions[0],
+            currentImageKey: 0,
+            currentQuestionKey: 0,
+            countdown: questions[0].settings.time,
+        });
+    }
+
+    seekTo(time) {
+        console.log(time); // 134
+
+        const { playing, audioDuration } = this.state;
+        const { images, questions } = this.props;
+
+        const questionsTimes = Object.keys(questions);
+        const imagesTimes = Object.keys(images);
+
+        let timeToSeek = time;
+        if (time === audioDuration) timeToSeek = parseFloat(time.toFixed());
+
+        let currentQuestionKey = questions[0];
+        const askedQuestions = questionsTimes.filter(
+            qtime => qtime < timeToSeek
+        );
+        switch (timeToSeek) {
+            case 0:
+                currentQuestionKey = 0;
+                break;
+            case audioDuration:
+                currentQuestionKey = questionsTimes.pop();
+                break;
+            default:
+                currentQuestionKey = askedQuestions.pop();
+                break;
+        }
+
+        let currentImageKey = images[0];
+        const shownImages = imagesTimes.filter(itime => itime < timeToSeek);
+        switch (timeToSeek) {
+            case 0:
+                currentImageKey = 0;
+                break;
+            case audioDuration:
+                currentImageKey = imagesTimes.pop();
+                break;
+            default:
+                currentImageKey = shownImages.pop();
+                break;
+        }
+
+        const currentQuestion = questions[currentQuestionKey];
+        const nextQuestionKey = (
+            parseInt(currentQuestionKey, 10) +
+            parseInt(currentQuestion.settings.time, 10)
+        ).toString();
+
+        // the key variables are just start times of the question/image
+
+        console.log(
+            'current question: ',
+            currentQuestionKey,
+            currentImageKey,
+            nextQuestionKey,
+            currentQuestion
+        );
+
+        this.audioplayer.pause();
+        clearInterval(this.timer);
+        if (this.timer) this.timer = null;
+        this.audioplayer.currentTime = timeToSeek;
         this.setState({
             playing: false,
             paused: true,
-            played: time,
-            currentImage: images[130],
-            currentQuestion: questions[80],
-            countdown: questions[140].settings.time - (time - 130),
+            played: timeToSeek,
+            currentImage: images[currentImageKey],
+            currentQuestion: questions[currentQuestionKey],
+            currentQuestionKey,
+            countdown: nextQuestionKey - timeToSeek,
         });
         if (playing) this.play();
         console.log(this.timer);
@@ -149,21 +279,31 @@ class InterviewPlayer extends Component {
             currentImage,
             currentQuestion,
             countdown,
+            currentQuestionKey,
+            currentImageKey,
         } = this.state;
-        const { audioURL, images, questions, student, classes } = this.props;
+        const { audioURL, questions, student, classes } = this.props;
 
+        console.log(currentImageKey);
         const roundedPlayed = parseFloat(played.toFixed());
 
-        console.log(
-            playing,
-            paused,
-            played,
-            roundedPlayed,
-            currentQuestion,
-            countdown
-        );
+        // console.log(
+        //     playing,
+        //     paused,
+        //     played,
+        //     roundedPlayed,
+        //     currentQuestion,
+        //     countdown,
+        //     currentImageKey
+        // );
 
         const startTime = currentQuestion.settings.time;
+
+        const fullQuestions = Object.keys(questions).filter(
+            time => questions[time].question !== ''
+        );
+
+        // console.log(fullQuestions, currentQuestionKey);
 
         return (
             <div>
@@ -193,6 +333,26 @@ class InterviewPlayer extends Component {
                         variant="determinate"
                         value={(played / audioDuration) * 100}
                     />
+                    <Stepper
+                        alternativeLabel
+                        nonLinear
+                        activeStep={fullQuestions.indexOf(
+                            currentQuestionKey.toString()
+                        )}
+                    >
+                        {fullQuestions.map((time, index) => (
+                            <Step key={questions[time].id}>
+                                <StyledStepButton
+                                    focusRipple
+                                    onClick={() => {
+                                        this.seekTo(parseInt(time, 10));
+                                    }}
+                                >
+                                    Question {index + 1}
+                                </StyledStepButton>
+                            </Step>
+                        ))}
+                    </Stepper>
                 </div>
                 <Video
                     preload="all"
@@ -203,57 +363,49 @@ class InterviewPlayer extends Component {
                     <source src={audioURL} type="audio/webm" />
                     <track kind="captions" />
                 </Video>
-                <div>
-                    <Play color="primary" onClick={this.play}>
-                        Play
-                    </Play>
-                    <Pause
-                        color="info"
+                <ButtonsContainer>
+                    <Play
+                        variant="extendedFab"
+                        color={playing ? 'primary' : 'default'}
+                        aria-label={
+                            playing ? 'Pause Interview' : 'Play Interview'
+                        }
+                        // className={classes.button}
                         onClick={() => {
-                            console.log('pause Clicked');
-                            this.audioplayer.pause();
-                            clearInterval(this.timer);
-                            if (this.time) this.timer = null;
-
-                            let paused = true;
-                            if (played === 0) {
-                                paused = false;
+                            if (playing) {
+                                this.pause();
+                            } else {
+                                this.play();
                             }
-                            this.setState({ playing: false, paused });
                         }}
                     >
-                        Pause
-                    </Pause>
-                    <Stop
-                        color="danger"
-                        onClick={() => {
-                            console.log('Stop Clicked');
-                            this.audioplayer.pause();
-                            this.audioplayer.currentTime = 0;
+                        <Icon>{playing ? 'pause' : 'play_arrow'}</Icon>
+                        {playing ? 'pause interview' : 'play interview'}
+                    </Play>
 
-                            clearInterval(this.timer);
-                            if (this.time) this.timer = null;
+                    {playing || paused ? (
+                        <Stop
+                            variant="extendedFab"
+                            color="secondary"
+                            aria-label="Stop Interview"
+                            onClick={this.stop}
+                        >
+                            <Icon>replay</Icon>
+                            Reset
+                        </Stop>
+                    ) : (
+                        ''
+                    )}
 
-                            this.setState({
-                                playing: false,
-                                paused: false,
-                                played: 0,
-                                currentImage: images[0],
-                                currentQuestion: questions[0],
-                                countdown: questions[0].settings.time,
-                            });
-                        }}
-                    >
-                        Stop
-                    </Stop>
-                    <Button
+                    {/* <Button
                         onClick={() => {
-                            this.seekTo(134);
+                            console.log(audioDuration);
+                            this.seekTo(246);
                         }}
                     >
                         Seek
-                    </Button>
-                </div>
+                    </Button> */}
+                </ButtonsContainer>
             </div>
         );
     }
