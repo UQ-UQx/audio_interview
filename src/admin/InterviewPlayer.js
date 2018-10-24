@@ -10,8 +10,15 @@ import StepButton from '@material-ui/core/StepButton';
 import MUIButton from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 
-import TypedQuestion from '../components/TypedQuestion';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+
+import Typography from '@material-ui/core/Typography';
+
+import moment from 'moment';
+
 import CountdownDisplay from '../components/CountdownDisplay';
+import TypedQuestion from '../components/TypedQuestion';
 
 const styles = {
     root: {
@@ -21,21 +28,47 @@ const styles = {
         margin: 10,
         outline: 'none',
     },
+    card: {
+        display: 'flex',
+    },
+    details: {
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    content: {
+        flex: '1 0 auto',
+    },
+    cover: {
+        width: 255,
+        height: 191,
+    },
 };
 
-// &&{} ensures that all styles defined here are !important
-const Play = styled(MUIButton)`
+const StyledMUIButton = styled(MUIButton)`
     && {
         margin: 10px;
+    }
+`;
+
+// &&{} ensures that all styles defined here are !important
+const Play = styled(StyledMUIButton)`
+    && {
         :focus {
             outline: none;
         }
     }
 `;
 
-const Stop = styled(MUIButton)`
+const Stop = styled(StyledMUIButton)`
     && {
-        margin: 10px;
+        :focus {
+            outline: none;
+        }
+    }
+`;
+
+const SeekToButton = styled(StyledMUIButton)`
+    && {
         :focus {
             outline: none;
         }
@@ -48,7 +81,7 @@ const StyledStepButton = styled(StepButton)`
     }
 `;
 
-const Video = styled.video`
+const AudioPlayer = styled.audio`
     width: 0;
     height: 0;
 `;
@@ -56,6 +89,13 @@ const Video = styled.video`
 const ButtonsContainer = styled.div`
     width: 100%;
     text-align: center;
+`;
+
+const StyledCardMedia = styled.img`
+    && {
+        width: 280px;
+        height: 211px;
+    }
 `;
 
 const getDuration = (url, next) => {
@@ -115,7 +155,6 @@ class InterviewPlayer extends Component {
         console.log('Play Clicked');
         this.audioplayer.play();
         this.setState({ playing: true, paused: false });
-        console.log('TIIIIIMMMERR', this.timer);
         this.timer = setInterval(() => {
             const { played, audioDuration, countdown } = this.state;
             const { images, questions } = this.props;
@@ -196,16 +235,16 @@ class InterviewPlayer extends Component {
     }
 
     seekTo(time) {
-        console.log(time); // 134
-
         const { playing, audioDuration } = this.state;
         const { images, questions } = this.props;
 
         const questionsTimes = Object.keys(questions);
         const imagesTimes = Object.keys(images);
 
-        let timeToSeek = time;
+        let timeToSeek = parseFloat(time.toFixed());
+
         if (time === audioDuration) timeToSeek = parseFloat(time.toFixed());
+        console.log('TIIIIIIIIIMMEE', time, timeToSeek); // 134
 
         let currentQuestionKey = questions[0];
         const askedQuestions = questionsTimes.filter(
@@ -282,9 +321,9 @@ class InterviewPlayer extends Component {
             currentQuestionKey,
             currentImageKey,
         } = this.state;
-        const { audioURL, questions, student, classes } = this.props;
+        const { audioURL, questions, student, classes, submitted } = this.props;
 
-        console.log(currentImageKey);
+        console.log(currentImageKey, moment(submitted).format('LLLL'));
         const roundedPlayed = parseFloat(played.toFixed());
 
         // console.log(
@@ -303,22 +342,67 @@ class InterviewPlayer extends Component {
             time => questions[time].question !== ''
         );
 
-        // console.log(fullQuestions, currentQuestionKey);
+        console.log(moment(submitted));
+
+        console.log(
+            moment()
+                .utc()
+                .format('YYYY-MM-DD HH:mm:ss'),
+            moment().format('YYYY-MM-DD HH:mm:ss')
+        );
 
         return (
             <div>
-                <p>
-                    webcam capture of {student.name} at {roundedPlayed} seconds
-                </p>
+                <Card className={classes.card}>
+                    <div>
+                        <StyledCardMedia
+                            className={classes.cover}
+                            src={`./media/recordings/${$LTI.courseID}/${
+                                $LTI.id
+                            }/${student.id}/${currentImage}`}
+                            alt={`webcam capture of ${
+                                student.name
+                            } at ${roundedPlayed} seconds`}
+                        />
+                    </div>
+                    <div className={classes.details}>
+                        <CardContent className={classes.content}>
+                            <Typography
+                                gutterBottom
+                                variant="h5"
+                                component="h5"
+                            >
+                                {student.name}
+                            </Typography>
+                            <div>
+                                <Typography variant="body2" component="p">
+                                    username:
+                                    <Typography
+                                        variant="body1"
+                                        component="span"
+                                    >
+                                        {student.username}
+                                    </Typography>
+                                </Typography>
+
+                                <Typography variant="body2" component="p">
+                                    Interview Submitted
+                                </Typography>
+                                <Typography variant="body1">
+                                    {student.email}
+                                </Typography>
+
+                                <Typography variant="body2" component="p">
+                                    Interview Submitted
+                                </Typography>
+                                <Typography variant="body1">
+                                    {moment(submitted).format('LLLL')} UTC
+                                </Typography>
+                            </div>{' '}
+                        </CardContent>
+                    </div>
+                </Card>
                 <div>
-                    <img
-                        src={`./media/recordings/${$LTI.courseID}/${$LTI.id}/${
-                            student.id
-                        }/${currentImage}`}
-                        alt={`webcam capture of ${
-                            student.name
-                        } at ${roundedPlayed} seconds`}
-                    />
                     <TypedQuestion question={currentQuestion.question} />
                 </div>
                 <CountdownDisplay
@@ -354,7 +438,7 @@ class InterviewPlayer extends Component {
                         ))}
                     </Stepper>
                 </div>
-                <Video
+                <AudioPlayer
                     preload="all"
                     innerRef={el => {
                         if (el) this.audioplayer = el;
@@ -362,7 +446,7 @@ class InterviewPlayer extends Component {
                 >
                     <source src={audioURL} type="audio/webm" />
                     <track kind="captions" />
-                </Video>
+                </AudioPlayer>
                 <ButtonsContainer>
                     <Play
                         variant="extendedFab"
@@ -384,15 +468,72 @@ class InterviewPlayer extends Component {
                     </Play>
 
                     {playing || paused ? (
-                        <Stop
-                            variant="extendedFab"
-                            color="secondary"
-                            aria-label="Stop Interview"
-                            onClick={this.stop}
-                        >
-                            <Icon>replay</Icon>
-                            Reset
-                        </Stop>
+                        <React.Fragment>
+                            <Stop
+                                variant="extendedFab"
+                                color="secondary"
+                                aria-label="Stop Interview"
+                                onClick={this.stop}
+                            >
+                                <Icon>replay</Icon>
+                                Reset
+                            </Stop>
+
+                            <SeekToButton
+                                variant="extendedFab"
+                                color="default"
+                                aria-label="Stop Interview"
+                                onClick={() => {
+                                    this.seekTo(
+                                        played - 30 < 0 ? 0 : played - 30
+                                    );
+                                }}
+                            >
+                                <Icon fontSize="large">replay_30</Icon>
+                                30
+                            </SeekToButton>
+                            <SeekToButton
+                                variant="extendedFab"
+                                color="default"
+                                aria-label="Stop Interview"
+                                onClick={() => {
+                                    this.seekTo(
+                                        played - 5 < 0 ? 0 : played - 5
+                                    );
+                                }}
+                            >
+                                <Icon fontSize="large">replay_5</Icon>5
+                            </SeekToButton>
+                            <SeekToButton
+                                variant="extendedFab"
+                                color="default"
+                                aria-label="Stop Interview"
+                                onClick={() => {
+                                    this.seekTo(
+                                        played + 5 > audioDuration
+                                            ? audioDuration
+                                            : played + 5
+                                    );
+                                }}
+                            >
+                                <Icon fontSize="large">forward_5</Icon>5
+                            </SeekToButton>
+                            <SeekToButton
+                                variant="extendedFab"
+                                color="default"
+                                aria-label="Stop Interview"
+                                onClick={() => {
+                                    this.seekTo(
+                                        played + 30 > audioDuration
+                                            ? audioDuration
+                                            : played + 30
+                                    );
+                                }}
+                            >
+                                <Icon fontSize="large">forward_30</Icon>
+                                30
+                            </SeekToButton>
+                        </React.Fragment>
                     ) : (
                         ''
                     )}
@@ -417,6 +558,7 @@ InterviewPlayer.propTypes = {
     questions: PropTypes.shape({}).isRequired,
     student: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
+    submitted: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles)(InterviewPlayer);

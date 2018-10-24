@@ -93,6 +93,13 @@ class MyApi
     }
 
     private function mapStudentData($parsed){
+
+        $data = json_decode($this->request->data);
+        
+        $courseID = $data->courseID;
+
+        $ltiID = $data->ltiID;
+
         $anon = $parsed["anon"];
         $profile = $parsed["profile"];
 
@@ -102,6 +109,9 @@ class MyApi
             $anonMapped[$value["User ID"]] = $value["Course Specific Anonymized User ID"];
         }
 
+
+       
+
         $mappedData = [];
         foreach ($profile as $profile) {
             if(array_key_exists($profile["id"], $anonMapped)){
@@ -110,12 +120,14 @@ class MyApi
                     2 => 'name', 
                     3 => 'enrollment_mode', 
                     4 => 'varification_status', 
+                    5 => 'email'
                 ];
                 $mappedData[$anonMapped[$profile["id"]]] = [
                     "username"=>$profile["username"],
                     "name"=>$profile["name"],
                     "enrollment_mode"=>$profile["enrollment_mode"],
                     "verification_status"=>$profile["verification_status"],
+                    "email"=>$profile["email"]
                 ];
             }
         }
@@ -185,9 +197,19 @@ class MyApi
         $parsed = $this->parseStudentDataCSV($courseID);
         $mapped = $this->mapStudentData($parsed);
 
-        //error_log(json_encode(mapStudentData($anonParsed, $profileParsed)));
+        $metaData = [];
+        $select = $this->db->query( 'SELECT * FROM questions_list WHERE resource_id = :resource_id AND course_id = :course_id', array( 'resource_id' => $ltiID, 'course_id' => $courseID) );
+        while ( $row = $select->fetch() ) {
+          $meta = $row;
+          if($meta->completed){
+            $metaData[$meta->user_id] = [
+                "questions"=>$meta->questions,
+                "submitted"=>$meta->updated
+            ];
+          }
+        }
 
-        $this->reply(["submissions"=>$submissions, "mapped_data"=>$mapped]);
+        $this->reply(["submissions"=>$submissions, "mapped_data"=>$mapped, "meta_data"=>$metaData]);
     }
 
     
@@ -440,15 +462,17 @@ require_once '../lib/db.php';
 require_once '../config.php';
 require_once '../lib/jwt.php';
 
-// if(isset($config['use_db']) && $config['use_db']) {
-// 	Db::config( 'driver',   'mysql' );
-// 	Db::config( 'host',     $config['db']['hostname'] );
-// 	Db::config( 'database', $config['db']['dbname'] );
-// 	Db::config( 'user',     $config['db']['username'] );
-// 	Db::config( 'password', $config['db']['password'] );
-// }
+if(isset($config['use_db']) && $config['use_db']) {
+	Db::config( 'driver',   'mysql' );
+	Db::config( 'host',     $config['db']['hostname'] );
+	Db::config( 'database', $config['db']['database'] );
+	Db::config( 'user',     $config['db']['username'] );
+    Db::config( 'password', $config['db']['password'] );
+    
+   
+}
 
-$db = null; //Db::instance(); //uncomment and enter db details in config to use database
+$db = Db::instance(); //uncomment and enter db details in config to use database
 $MyApi = new MyApi($db, $config);
 
 

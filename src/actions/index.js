@@ -130,7 +130,9 @@ const getSavedQuestionsList = () => {
 const setCompletedTrue = () => (dispatch, getState) => {
     const { questionsListRecordID } = getState();
 
-    const updated = moment().format('YYYY-MM-DD HH:mm:ss');
+    const updated = moment()
+        .utc()
+        .format('YYYY-MM-DD HH:mm:ss');
 
     const recordDoesNotExist =
         questionsListRecordID === null || questionsListRecordID === undefined;
@@ -180,8 +182,12 @@ const setCompletedTrue = () => (dispatch, getState) => {
 const saveQuestionsList = (list = []) => (dispatch, getState) => {
     const { questionsListRecordID } = getState();
 
-    const created = moment().format('YYYY-MM-DD HH:mm:ss');
-    const updated = moment().format('YYYY-MM-DD HH:mm:ss');
+    const created = moment()
+        .utc()
+        .format('YYYY-MM-DD HH:mm:ss');
+    const updated = moment()
+        .utc()
+        .format('YYYY-MM-DD HH:mm:ss');
 
     const recordDoesNotExist =
         questionsListRecordID === null || questionsListRecordID === undefined;
@@ -257,8 +263,12 @@ const getSavedGroups = () => {
 const saveGroups = (groups = []) => (dispatch, getState) => {
     const { groupsRecordID } = getState();
 
-    const created = moment().format('YYYY-MM-DD HH:mm:ss');
-    const updated = moment().format('YYYY-MM-DD HH:mm:ss');
+    const created = moment()
+        .utc()
+        .format('YYYY-MM-DD HH:mm:ss');
+    const updated = moment()
+        .utc()
+        .format('YYYY-MM-DD HH:mm:ss');
 
     const recordExists =
         groupsRecordID === null || groupsRecordID === undefined;

@@ -19,8 +19,8 @@ class SubmissionsTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            submissionModal: true,
-            currentlyViewing: 'd8e6aa3c69b3185f4372295895808f5b',
+            submissionModal: false,
+            currentlyViewing: null,
         };
         this.toggleModal = this.toggleModal.bind(this);
     }
@@ -36,7 +36,7 @@ class SubmissionsTable extends Component {
 
     render() {
         const { submissionModal, currentlyViewing } = this.state;
-        const { submissions, students } = this.props;
+        const { submissions, students, submissionsMetaData } = this.props;
 
         console.log(submissionModal);
         return (
@@ -90,23 +90,32 @@ class SubmissionsTable extends Component {
                         ))}
                     </tbody>
                 </Table>
-                <SubmissionViewer
-                    submissionModal={submissionModal}
-                    toggleModal={this.toggleModal}
-                    submission={
-                        currentlyViewing !== null
-                            ? submissions[currentlyViewing]
-                            : []
-                    }
-                    student={
-                        currentlyViewing !== null
-                            ? {
-                                  ...students[currentlyViewing],
-                                  id: currentlyViewing,
-                              }
-                            : { id: currentlyViewing }
-                    }
-                />
+                {currentlyViewing ? (
+                    <SubmissionViewer
+                        submissionModal={submissionModal}
+                        toggleModal={this.toggleModal}
+                        submissionMetaData={
+                            currentlyViewing !== null
+                                ? submissionsMetaData[currentlyViewing]
+                                : { questions: '[]', submitted: '' }
+                        }
+                        submission={
+                            currentlyViewing !== null
+                                ? submissions[currentlyViewing]
+                                : []
+                        }
+                        student={
+                            currentlyViewing !== null
+                                ? {
+                                      ...students[currentlyViewing],
+                                      id: currentlyViewing,
+                                  }
+                                : { id: currentlyViewing }
+                        }
+                    />
+                ) : (
+                    ''
+                )}
             </ComponentContainer>
         );
     }
@@ -115,6 +124,7 @@ class SubmissionsTable extends Component {
 SubmissionsTable.propTypes = {
     submissions: PropTypes.shape({}).isRequired,
     students: PropTypes.shape({}).isRequired,
+    submissionsMetaData: PropTypes.shape({}).isRequired,
 };
 
 export default SubmissionsTable;

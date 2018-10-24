@@ -49,7 +49,7 @@ class Submissions extends Component {
     render() {
         console.log('wow');
 
-        const { submissions, studentData } = this.props;
+        const { submissions, studentData, submissionsMetaData } = this.props;
         const { uploadmodal } = this.state;
 
         console.log(submissions, studentData);
@@ -73,6 +73,7 @@ class Submissions extends Component {
                                 <SubmissionsTable
                                     submissions={submissions}
                                     students={studentData}
+                                    submissionsMetaData={submissionsMetaData}
                                 />
                             ) : (
                                 <Warning color="warning">
@@ -112,17 +113,20 @@ Submissions.propTypes = {
     getSubmissionsList: PropTypes.func.isRequired,
     submissions: PropTypes.shape({}),
     studentData: PropTypes.shape({}),
+    submissionsMetaData: PropTypes.shape({}),
 };
 
 Submissions.defaultProps = {
     submissions: {},
     studentData: {},
+    submissionsMetaData: {},
 };
 
 export default connect(
     state => ({
         submissions: state.submissions,
         studentData: state.studentData,
+        submissionsMetaData: state.submissionsMetaData,
     }),
 
     { getSubmissionsList: getSubmissions }

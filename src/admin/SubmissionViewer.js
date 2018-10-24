@@ -15,38 +15,6 @@ class SubmissionViewer extends Component {
             error: '',
             question: '',
             gapTime: 10,
-            session: [
-                {
-                    id: '4518e12a-958c-4098-976a-9242c0d5b8ac',
-                    question:
-                        'From your own experience and perspective, what is leadership?',
-                    settings: { ask: true, time: 60 },
-                },
-                {
-                    id: '62a2046d-45db-4061-85b6-5574732d2956',
-                    question:
-                        'What should a leader understand about change in organizations?',
-                    settings: { ask: true, time: 60 },
-                },
-                {
-                    id: '8ee94fd9-7567-4790-bdea-3a396e63a80f',
-                    question:
-                        'At your most recent workplace, what is one thing that could be done to better motivate and engage people?',
-                    settings: { ask: true, time: 60 },
-                },
-                {
-                    id: '47927955-34fd-48f6-9d6c-b0d280b5e5bb',
-                    question:
-                        'Wise leadership requires intellectual virtues and moral virtues. What do these terms mean, and how are they important to being an outstanding leader?',
-                    settings: { ask: true, time: 60 },
-                },
-                {
-                    id: '18ebf13b-7444-4965-9b92-975ff89e4741',
-                    question:
-                        'What are the key processes of Leadership Development?',
-                    settings: { ask: true, time: 60 },
-                },
-            ],
         };
 
         // this.startReplay = this.startReplay.bind(this);
@@ -64,12 +32,13 @@ class SubmissionViewer extends Component {
     }
 
     render() {
-        const { error, session, gapTime } = this.state;
+        const { error, gapTime } = this.state;
         const {
             submissionModal,
             toggleModal,
             student,
             submission,
+            submissionMetaData,
         } = this.props;
 
         // (([-_]time[-_]))(.*)(([-_]time[-_])) regex to capture time
@@ -115,7 +84,7 @@ class SubmissionViewer extends Component {
         };
         timestamps[0] = { ...gap };
 
-        session.forEach((question, index) => {
+        JSON.parse(submissionMetaData.questions).forEach((question, index) => {
             walkedTime =
                 index === 0 ? 10 : walkedTime + 10 + question.settings.time;
             timestamps[walkedTime] = question;
@@ -138,6 +107,7 @@ class SubmissionViewer extends Component {
                         images={webcamCaptures}
                         questions={timestamps}
                         student={student}
+                        submitted={submissionMetaData.submitted}
                     />
                 </ModalBody>
                 <ModalFooter>
@@ -157,6 +127,7 @@ SubmissionViewer.propTypes = {
     submission: PropTypes.arrayOf(PropTypes.string).isRequired,
     submissionModal: PropTypes.bool.isRequired,
     toggleModal: PropTypes.func.isRequired,
+    submissionMetaData: PropTypes.shape({}).isRequired,
 };
 
 export default SubmissionViewer;
