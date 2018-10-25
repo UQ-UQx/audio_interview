@@ -148,7 +148,8 @@ class InterviewPlayer extends Component {
     }
 
     componentWillUnmount() {
-        if (this.time) this.timer = null;
+        clearInterval(this.timer);
+        if (this.timer) this.timer = null;
     }
 
     play() {
@@ -164,7 +165,7 @@ class InterviewPlayer extends Component {
 
             if (played === audioDuration) {
                 clearInterval(this.timer);
-                if (this.time) this.timer = null;
+                if (this.timer) this.timer = null;
 
                 this.setState({
                     playing: false,
@@ -204,7 +205,7 @@ class InterviewPlayer extends Component {
         console.log('pause Clicked');
         this.audioplayer.pause();
         clearInterval(this.timer);
-        if (this.time) this.timer = null;
+        if (this.timer) this.timer = null;
 
         let paused = true;
         if (played === 0) {
@@ -220,7 +221,7 @@ class InterviewPlayer extends Component {
         this.audioplayer.currentTime = 0;
 
         clearInterval(this.timer);
-        if (this.time) this.timer = null;
+        if (this.timer) this.timer = null;
 
         this.setState({
             playing: false,
@@ -295,6 +296,7 @@ class InterviewPlayer extends Component {
         this.audioplayer.pause();
         clearInterval(this.timer);
         if (this.timer) this.timer = null;
+
         this.audioplayer.currentTime = timeToSeek;
         this.setState({
             playing: false,
@@ -326,15 +328,15 @@ class InterviewPlayer extends Component {
         console.log(currentImageKey, moment(submitted).format('LLLL'));
         const roundedPlayed = parseFloat(played.toFixed());
 
-        // console.log(
-        //     playing,
-        //     paused,
-        //     played,
-        //     roundedPlayed,
-        //     currentQuestion,
-        //     countdown,
-        //     currentImageKey
-        // );
+        console.log(
+            playing,
+            paused,
+            played,
+            roundedPlayed,
+            currentQuestion,
+            countdown,
+            currentImageKey
+        );
 
         const startTime = currentQuestion.settings.time;
 
@@ -342,14 +344,14 @@ class InterviewPlayer extends Component {
             time => questions[time].question !== ''
         );
 
-        console.log(moment(submitted));
+        // console.log(moment(submitted));
 
-        console.log(
-            moment()
-                .utc()
-                .format('YYYY-MM-DD HH:mm:ss'),
-            moment().format('YYYY-MM-DD HH:mm:ss')
-        );
+        // console.log(
+        //     moment()
+        //         .utc()
+        //         .format('YYYY-MM-DD HH:mm:ss'),
+        //     moment().format('YYYY-MM-DD HH:mm:ss')
+        // );
 
         return (
             <div>
