@@ -20,6 +20,8 @@ import moment from 'moment';
 import CountdownDisplay from '../components/CountdownDisplay';
 import TypedQuestion from '../components/TypedQuestion';
 
+// #region styles
+
 const styles = {
     root: {
         flexGrow: 1,
@@ -97,6 +99,7 @@ const StyledCardMedia = styled.img`
         height: 211px;
     }
 `;
+// #endregion styles
 
 const getDuration = (url, next) => {
     const player = new Audio(url);
@@ -148,34 +151,37 @@ class InterviewPlayer extends Component {
     }
 
     componentWillUnmount() {
-        if (this.time) this.timer = null;
+        if (this.timer) clearInterval(this.timer);
     }
 
     play() {
+        if (this.audioplayer.currentTime === 0) {
+            this.audioplayer.currentTime = 1;
+            this.audioplayer.currentTime = 0;
+        }
         console.log('Play Clicked');
         this.audioplayer.play();
         this.setState({ playing: true, paused: false });
         this.timer = setInterval(() => {
-            const { played, audioDuration, countdown } = this.state;
+            const { audioDuration, countdown } = this.state;
             const { images, questions } = this.props;
 
+            const roundedPlayed = parseInt(
+                this.audioplayer.currentTime.toFixed(),
+                10
+            ); // Math.floor(this.audioplayer.currentTime);
+
             let countdownRemaining = countdown;
-            const roundedPlayed = parseFloat(played.toFixed());
 
-            if (played === audioDuration) {
-                clearInterval(this.timer);
-                if (this.time) this.timer = null;
+            console.log(
+                this.audioplayer.currentTime,
+                roundedPlayed,
+                audioDuration,
+                countdown
+            );
 
-                this.setState({
-                    playing: false,
-                    paused: false,
-                    currentImage: images[0],
-                    currentQuestion: questions[0],
-                    currentImageKey: 0,
-                    currentQuestionKey: 0,
-                });
-                this.audioplayer.pause();
-                this.audioplayer.currentTime = 0;
+            if (this.audioplayer.currentTime === audioDuration) {
+                this.stop();
             } else {
                 this.setState({
                     ...(images[roundedPlayed]
@@ -193,24 +199,18 @@ class InterviewPlayer extends Component {
                         : {
                               countdown: (countdownRemaining -= 1),
                           }),
-                    played: this.audioplayer.currentTime,
+                    played: roundedPlayed,
                 });
             }
         }, 1000);
     }
 
     pause() {
-        const { played } = this.state;
         console.log('pause Clicked');
+        if (this.timer) clearInterval(this.timer);
         this.audioplayer.pause();
-        clearInterval(this.timer);
-        if (this.time) this.timer = null;
 
-        let paused = true;
-        if (played === 0) {
-            paused = false;
-        }
-        this.setState({ playing: false, paused });
+        this.setState({ playing: false, paused: true });
     }
 
     stop() {
@@ -219,8 +219,7 @@ class InterviewPlayer extends Component {
         this.audioplayer.pause();
         this.audioplayer.currentTime = 0;
 
-        clearInterval(this.timer);
-        if (this.time) this.timer = null;
+        if (this.timer) clearInterval(this.timer);
 
         this.setState({
             playing: false,
@@ -235,77 +234,78 @@ class InterviewPlayer extends Component {
     }
 
     seekTo(time) {
+        // 0 x x.xxx
+        console.log(time);
+
         const { playing, audioDuration } = this.state;
         const { images, questions } = this.props;
-
         const questionsTimes = Object.keys(questions);
         const imagesTimes = Object.keys(images);
 
-        let timeToSeek = parseFloat(time.toFixed());
-
-        if (time === audioDuration) timeToSeek = parseFloat(time.toFixed());
-        console.log('TIIIIIIIIIMMEE', time, timeToSeek); // 134
-
-        let currentQuestionKey = questions[0];
         const askedQuestions = questionsTimes.filter(
-            qtime => qtime < timeToSeek
+            qtime => parseInt(qtime, 10) <= time
         );
-        switch (timeToSeek) {
-            case 0:
-                currentQuestionKey = 0;
-                break;
-            case audioDuration:
-                currentQuestionKey = questionsTimes.pop();
-                break;
-            default:
-                currentQuestionKey = askedQuestions.pop();
-                break;
-        }
+        const shownImages = imagesTimes.filter(
+            itime => parseInt(itime, 10) <= time
+        );
 
-        let currentImageKey = images[0];
-        const shownImages = imagesTimes.filter(itime => itime < timeToSeek);
-        switch (timeToSeek) {
+        console.log(askedQuestions, images);
+
+        let currentQuestionKey = 0;
+        let currentImageKey = 0;
+
+        switch (time) {
             case 0:
-                currentImageKey = 0;
-                break;
+                this.stop();
+                return;
             case audioDuration:
-                currentImageKey = imagesTimes.pop();
-                break;
+                this.stop();
+                return;
             default:
-                currentImageKey = shownImages.pop();
+                if (askedQuestions.length > 0 && shownImages.length > 0) {
+                    console.log('working');
+                    currentQuestionKey = askedQuestions.pop();
+                    currentImageKey = shownImages.pop();
+                }
+                console.log('nope');
+
                 break;
         }
 
         const currentQuestion = questions[currentQuestionKey];
-        const nextQuestionKey = (
-            parseInt(currentQuestionKey, 10) +
-            parseInt(currentQuestion.settings.time, 10)
-        ).toString();
+        const currentImage = images[currentImageKey];
 
-        // the key variables are just start times of the question/image
-
-        console.log(
-            'current question: ',
-            currentQuestionKey,
-            currentImageKey,
-            nextQuestionKey,
-            currentQuestion
+        const nextQuestionKey = parseInt(
+            questionsTimes[
+                questionsTimes.indexOf(currentQuestionKey.toString()) + 1
+            ],
+            10
         );
 
-        this.audioplayer.pause();
-        clearInterval(this.timer);
-        if (this.timer) this.timer = null;
-        this.audioplayer.currentTime = timeToSeek;
-        this.setState({
-            playing: false,
-            paused: true,
-            played: timeToSeek,
-            currentImage: images[currentImageKey],
-            currentQuestion: questions[currentQuestionKey],
+        console.log(
+            questionsTimes,
+            questionsTimes.indexOf(currentQuestionKey.toString()),
             currentQuestionKey,
-            countdown: nextQuestionKey - timeToSeek,
+            nextQuestionKey,
+            time
+        );
+
+        const countdown = nextQuestionKey - time;
+
+        const wasPlaying = playing;
+
+        this.pause();
+        if (this.timer) clearInterval(this.timer);
+        this.audioplayer.currentTime = time;
+        this.setState({
+            played: time,
+            currentImage,
+            currentQuestion,
+            currentQuestionKey,
+            countdown,
         });
-        if (playing) this.play();
+        if (wasPlaying && time > 0) this.play();
+
         console.log(this.timer);
     }
 
@@ -319,11 +319,10 @@ class InterviewPlayer extends Component {
             currentQuestion,
             countdown,
             currentQuestionKey,
-            currentImageKey,
+            currentImageKey, // eslint-disable-line no-unused-vars
         } = this.state;
         const { audioURL, questions, student, classes, submitted } = this.props;
 
-        console.log(currentImageKey, moment(submitted).format('LLLL'));
         const roundedPlayed = parseFloat(played.toFixed());
 
         // console.log(
@@ -340,15 +339,6 @@ class InterviewPlayer extends Component {
 
         const fullQuestions = Object.keys(questions).filter(
             time => questions[time].question !== ''
-        );
-
-        console.log(moment(submitted));
-
-        console.log(
-            moment()
-                .utc()
-                .format('YYYY-MM-DD HH:mm:ss'),
-            moment().format('YYYY-MM-DD HH:mm:ss')
         );
 
         return (
@@ -376,7 +366,7 @@ class InterviewPlayer extends Component {
                             </Typography>
                             <div>
                                 <Typography variant="body2" component="p">
-                                    username:
+                                    Username:
                                     <Typography
                                         variant="body1"
                                         component="span"
@@ -386,14 +376,14 @@ class InterviewPlayer extends Component {
                                 </Typography>
 
                                 <Typography variant="body2" component="p">
-                                    Interview Submitted
+                                    Email:
                                 </Typography>
                                 <Typography variant="body1">
                                     {student.email}
                                 </Typography>
 
                                 <Typography variant="body2" component="p">
-                                    Interview Submitted
+                                    Interview submitted
                                 </Typography>
                                 <Typography variant="body1">
                                     {moment(submitted).format('LLLL')} UTC
@@ -485,7 +475,7 @@ class InterviewPlayer extends Component {
                                 aria-label="Stop Interview"
                                 onClick={() => {
                                     this.seekTo(
-                                        played - 30 < 0 ? 0 : played - 30
+                                        played - 30 <= 0 ? 0 : played - 30
                                     );
                                 }}
                             >
@@ -498,7 +488,7 @@ class InterviewPlayer extends Component {
                                 aria-label="Stop Interview"
                                 onClick={() => {
                                     this.seekTo(
-                                        played - 5 < 0 ? 0 : played - 5
+                                        played - 5 <= 0 ? 0 : played - 5
                                     );
                                 }}
                             >

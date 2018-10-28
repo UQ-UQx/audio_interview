@@ -54,7 +54,8 @@ class SubmissionViewer extends Component {
             if (result) {
                 const timeStamp = result[3] === '' ? '0' : result[3];
 
-                const rounded = Math.round(parseFloat(timeStamp) * 10) / 10;
+                const rounded =
+                    Math.round(parseFloat(timeStamp).toFixed() * 10) / 10;
 
                 webcamCaptures[rounded.toString()] = url;
             }
@@ -99,7 +100,7 @@ class SubmissionViewer extends Component {
                 toggle={() => toggleModal(null)}
             >
                 <ModalHeader toggle={() => toggleModal(null)}>
-                    Submission From <b>{student.name}</b>
+                    Submission Player
                 </ModalHeader>
                 <ModalBody>
                     <InterviewPlayer
