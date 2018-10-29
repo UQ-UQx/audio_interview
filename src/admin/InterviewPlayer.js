@@ -17,6 +17,9 @@ import Typography from '@material-ui/core/Typography';
 
 import moment from 'moment';
 
+import Tooltip from '@material-ui/core/Tooltip';
+
+import CircularProgress from '@material-ui/core/CircularProgress';
 import CountdownDisplay from '../components/CountdownDisplay';
 import TypedQuestion from '../components/TypedQuestion';
 
@@ -44,7 +47,16 @@ const styles = {
         width: 255,
         height: 191,
     },
+    toolTip: {
+        fontSize: 20,
+    },
 };
+
+const Loading = styled(CircularProgress)`
+    && {
+        margin: 60px;
+    }
+`;
 
 const StyledMUIButton = styled(MUIButton)`
     && {
@@ -99,6 +111,14 @@ const StyledCardMedia = styled.img`
         height: 211px;
     }
 `;
+
+const QuestionToolTip = styled(Tooltip)`
+    && {
+        /* width: 50px; */
+        font-size: 20px !important;
+    }
+`;
+
 // #endregion styles
 
 const getDuration = (url, next) => {
@@ -138,10 +158,11 @@ class InterviewPlayer extends Component {
             currentQuestion: props.questions[0],
             currentQuestionKey: 0,
             countdown: props.questions[0].settings.time,
+            loading: true,
         };
 
         getDuration(props.audioURL, duration => {
-            this.setState({ audioDuration: duration });
+            this.setState({ audioDuration: duration, loading: false });
         });
 
         this.seekTo = this.seekTo.bind(this);
@@ -320,6 +341,7 @@ class InterviewPlayer extends Component {
             countdown,
             currentQuestionKey,
             currentImageKey, // eslint-disable-line no-unused-vars
+            loading,
         } = this.state;
         const { audioURL, questions, student, classes, submitted } = this.props;
 
@@ -341,7 +363,11 @@ class InterviewPlayer extends Component {
             time => questions[time].question !== ''
         );
 
-        return (
+        return loading ? (
+            <React.Fragment>
+                <Loading /> Loading Recorded Interview...
+            </React.Fragment>
+        ) : (
             <div>
                 <Card className={classes.card}>
                     <div>
@@ -416,14 +442,22 @@ class InterviewPlayer extends Component {
                     >
                         {fullQuestions.map((time, index) => (
                             <Step key={questions[time].id}>
-                                <StyledStepButton
-                                    focusRipple
-                                    onClick={() => {
-                                        this.seekTo(parseInt(time, 10));
+                                <QuestionToolTip
+                                    placement="top"
+                                    title={questions[time].question}
+                                    classes={{
+                                        ...{ tooltip: '150' },
                                     }}
                                 >
-                                    Question {index + 1}
-                                </StyledStepButton>
+                                    <StyledStepButton
+                                        focusRipple
+                                        onClick={() => {
+                                            this.seekTo(parseInt(time, 10));
+                                        }}
+                                    >
+                                        Question {index + 1}
+                                    </StyledStepButton>
+                                </QuestionToolTip>
                             </Step>
                         ))}
                     </Stepper>

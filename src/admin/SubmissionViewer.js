@@ -85,11 +85,14 @@ class SubmissionViewer extends Component {
         };
         timestamps[0] = { ...gap };
 
-        JSON.parse(submissionMetaData.questions).forEach((question, index) => {
+        const questions = JSON.parse(submissionMetaData.questions);
+        questions.forEach((question, index) => {
             walkedTime =
                 index === 0 ? 10 : walkedTime + 10 + question.settings.time;
             timestamps[walkedTime] = question;
+            // if (index !== Object.keys(questions).length - 1) {
             timestamps[walkedTime + question.settings.time] = { ...gap };
+            // }
         });
 
         // const audioURL = 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.webm';
