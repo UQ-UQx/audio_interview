@@ -61,25 +61,173 @@ class MyApi
                 break;
             case "uploadFile":
                 $this->uploadFile();
+            case "uploadStudentData":
+                $this->uploadStudentData($this->request);
+            case "getSubmissions":
+                $this->getSubmissions($this->request->data);
             default:
                 $this->reply("action switch failed", 400);
                 break;
         }
     }
 
+    private function parseStudentDataCSV($courseID){
+
+        $anonPath = "../media/recordings/".$courseID."/anon.csv";
+
+        $profilePath = "../media/recordings/".$courseID."/profile.csv";
+
+        $anonParsed = [];
+        $profileParsed = [];
+
+        if(file_exists($anonPath) && file_exists($profilePath)){
+
+            $anonParsed = $this->loadCSV($anonPath);
+
+            $profileParsed = $this->loadCSV($profilePath);
+            
+
+        }
+
+        return ["anon"=>$anonParsed, "profile"=>$profileParsed];
+    }
+
+    private function mapStudentData($parsed){
+
+        $data = json_decode($this->request->data);
+        
+        $courseID = $data->courseID;
+
+        $ltiID = $data->ltiID;
+
+        $anon = $parsed["anon"];
+        $profile = $parsed["profile"];
+
+        $anonMapped = [];
+
+        foreach ($anon as $value) {
+            $anonMapped[$value["User ID"]] = $value["Course Specific Anonymized User ID"];
+        }
+
+
+       
+
+        $mappedData = [];
+        foreach ($profile as $profile) {
+            if(array_key_exists($profile["id"], $anonMapped)){
+                $valuesToGet = [
+                    1 => 'username', 
+                    2 => 'name', 
+                    3 => 'enrollment_mode', 
+                    4 => 'varification_status', 
+                    5 => 'email'
+                ];
+                $mappedData[$anonMapped[$profile["id"]]] = [
+                    "username"=>$profile["username"],
+                    "name"=>$profile["name"],
+                    "enrollment_mode"=>$profile["enrollment_mode"],
+                    "verification_status"=>$profile["verification_status"],
+                    "email"=>$profile["email"]
+                ];
+            }
+        }
+
+
+        return $mappedData;
+
+    }
+
+    public function uploadStudentData($request){
+        //$request = json_decode($request);
+
+        $courseID = $request->courseID;
+        $ltiID = $request->ltiID;
+
+       
+       // error_log(json_encode($_FILES, JSON_PRETTY_PRINT));
+
+        $anonPath = "../media/recordings/".$courseID."/anon.csv";
+        $profilePath = "../media/recordings/".$courseID."/profile.csv";
+        move_uploaded_file($_FILES["file"]["tmp_name"]["anon"],$anonPath );
+        move_uploaded_file($_FILES["file"]["tmp_name"]["profile"],$profilePath );
+
+        // $anonParsed = array_map('str_getcsv', file($anonPath));
+        // $profileParsed = array_map('str_getcsv', file($profilePath));
+
+
+        $parsed = $this->parseStudentDataCSV($courseID);
+        $mapped = $this->mapStudentData($parsed);
+
+        $this->reply($mapped);
+
+    }
+
+    private function getDirectories(string $path) : array
+    {
+        $directories = [];
+        $items = scandir($path);
+        foreach ($items as $item) {
+            if($item == '..' || $item == '.')
+                continue;
+            if(is_dir($path.'/'.$item))
+                $directories[] = $item;
+        }
+        return $directories;
+    }
+
+    public function getSubmissions($data){
+       $data = json_decode($data);
+        
+        $courseID = $data->courseID;
+
+        $ltiID = $data->ltiID;
+
+        $path = '../media/recordings/'.$courseID.'/'.$ltiID.'/';
+        
+        $dirs = $this->getDirectories($path);// glob('../media/recordings/'.$courseID.'/'.$ltiID.'/*', GLOB_ONLYDIR);
+        $submissions = array();
+        foreach ($dirs as $user) {
+            
+            $scanned_items = scandir($path.'/'.$user);
+
+            $submissions[$user] = $scanned_items;
+
+        }
+
+        $parsed = $this->parseStudentDataCSV($courseID);
+        $mapped = $this->mapStudentData($parsed);
+
+        $metaData = [];
+        $select = $this->db->query( 'SELECT * FROM questions_list WHERE resource_id = :resource_id AND course_id = :course_id', array( 'resource_id' => $ltiID, 'course_id' => $courseID) );
+        while ( $row = $select->fetch() ) {
+          $meta = $row;
+          if($meta->completed){
+            $metaData[$meta->user_id] = [
+                "questions"=>$meta->questions,
+                "submitted"=>$meta->updated
+            ];
+          }
+        }
+
+        $this->reply(["submissions"=>$submissions, "mapped_data"=>$mapped, "meta_data"=>$metaData]);
+    }
+
+    
+
     public function uploadFile()
     {
         try {
             $userID = $_POST['userID'];
             $ltiID = $_POST['ltiID'];
-
+            $courseID = $_POST['courseID'];
             $audio = $_POST['audio'];
             // $video = $_POST['video'];
             $images = json_decode($_POST['images']);
 
             $mediaDir = "../media";
             $recordingsDir = $mediaDir . "/recordings";
-            $ltiDir = $recordingsDir . "/" . $ltiID;
+            $courseDir = $recordingsDir. "/" . $courseID;
+            $ltiDir = $courseDir . "/" . $ltiID;
             $userDir = $ltiDir . "/" . $userID;
 
             if (!is_dir($mediaDir)) {
@@ -88,6 +236,10 @@ class MyApi
 
             if (!is_dir($recordingsDir)) {
                 $res = mkdir($recordingsDir, 0777);
+            }
+
+            if (!is_dir($courseDir)) {
+                $res = mkdir($courseDir, 0777);
             }
 
             if (!is_dir($ltiDir)) {
@@ -171,9 +323,19 @@ class MyApi
     {
         $data = json_decode($this->request->data);
 
-        //error_log(json_encode($response));
+        $url = "../media/new.webm";
+        $audio = file_get_contents($url);
+        
+        //$newData = "data:audio/webm;base64,".base64_encode($audio);
 
-        $this->reply("Hello " . $data->name . ", I'm PHP :)");
+        file_put_contents('../media/newb.webm', $audio);
+        $newData = base64_decode($audio);
+
+        $fp = fopen("../media/newData.webm", 'wb');
+            fwrite($fp, $audio);
+            fclose($fp);
+
+        $this->reply($newData);
     }
 
     /**
@@ -239,19 +401,78 @@ class MyApi
     {
         $this->reply(true);
     }
+
+
+
+    private function loadCSV($file){
+        // Create an array to hold the data
+        $arrData = array();
+        
+        // Create a variable to hold the header information
+        $header = NULL;
+        
+        // Connect to the database
+        //$db = mysqli_connect('localhost','username','password','test') or die("Failed to connect to MySQL: " . mysqli_connect_error());
+        
+        // If the file can be opened as readable, bind a named resource
+        if (($handle = fopen($file, 'r')) !== FALSE)
+        {
+            // Loop through each row
+            while (($row = fgetcsv($handle)) !== FALSE)
+            {
+                // Loop through each field
+                foreach($row as &$field)
+                {
+                    // Remove any invalid or hidden characters
+                    $field = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $field);
+                    
+                    // Escape characters for MySQL (single quotes, double quotes, linefeeds, etc.)
+                    //$field = mysqli_escape_string($db, $field);
+                }
+                
+                // If the header has been stored
+                if ($header)
+                {
+                    // Create an associative array with the data
+                    $arrData[] = array_combine($header, $row);
+                }
+                // Else the header has not been stored
+                else
+                {
+                    // Store the current row as the header
+                    $header = $row;
+                }
+            }
+            
+            // Close the file pointer
+            fclose($handle);
+        }
+        
+        // Close the MySQL connection
+        //mysqli_close($db);
+        
+        return $arrData;
+    }
+
+
+
 } //MyApi class end
 
 require_once '../lib/db.php';
 require_once '../config.php';
 require_once '../lib/jwt.php';
 
-// if(isset($config['use_db']) && $config['use_db']) {
-// 	Db::config( 'driver',   'mysql' );
-// 	Db::config( 'host',     $config['db']['hostname'] );
-// 	Db::config( 'database', $config['db']['dbname'] );
-// 	Db::config( 'user',     $config['db']['username'] );
-// 	Db::config( 'password', $config['db']['password'] );
-// }
+if(isset($config['use_db']) && $config['use_db']) {
+	Db::config( 'driver',   'mysql' );
+	Db::config( 'host',     $config['db']['hostname'] );
+	Db::config( 'database', $config['db']['database'] );
+	Db::config( 'user',     $config['db']['username'] );
+    Db::config( 'password', $config['db']['password'] );
+    
+   
+}
 
-$db = null; //Db::instance(); //uncomment and enter db details in config to use database
+$db = Db::instance(); //uncomment and enter db details in config to use database
 $MyApi = new MyApi($db, $config);
+
+

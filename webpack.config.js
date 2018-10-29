@@ -38,6 +38,8 @@ module.exports = (env, argv) => {
  
 
     new BrowserSyncPlugin({
+      open: false,
+      
       host: 'localhost',
       port: 3000,
       proxy: 'http://localhost:80/',
@@ -55,7 +57,7 @@ module.exports = (env, argv) => {
   var chalkMessage = 'Happy Coding! 😄';
   if(argv.mode === "production") chalkMessage = "🎉  Woo! ready for production 🎉 "
  
-  if(argv.mode === "development") plugins.push(new BundleAnalyzerPlugin());
+  // if(argv.mode === "development") plugins.push(new BundleAnalyzerPlugin());
 
 
     showMessage(chalkMessage);
@@ -97,8 +99,8 @@ return {
             {
               loader: 'file-loader',
               options: {
-                name: '[path][name].[ext]',
-                publicPath: 'assets/'
+                //name: '[path][name].[ext]',
+                publicPath: 'dist'
               }
             }
           ]

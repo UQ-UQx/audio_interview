@@ -15,6 +15,9 @@ import {
     faPlay,
     faPause,
     faStop,
+    faCloudUploadAlt,
+    faTimesCircle,
+    faVideo,
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -41,10 +44,22 @@ library.add(
     faSpinner,
     faPlay,
     faPause,
-    faStop
+    faStop,
+    faCloudUploadAlt,
+    faTimesCircle,
+    faVideo
 );
 
-const renderApp = () => (
+const error = (
+    err = 'Something went wrong... Please contact UQx',
+    color = 'danger'
+) => (
+    <Alert color={color} style={{ textAlign: 'center', fontWeight: 'bold' }}>
+        {err}
+    </Alert>
+);
+
+const renderApp = (loadApp = true) => (
     <Provider store={store}>
         <Router>
             <Fragment>
@@ -59,20 +74,23 @@ const renderApp = () => (
                         path="/edit"
                         render={props => <Admin {...props} />}
                     />
-                    <Route path="/" render={props => <App {...props} />} />
+                    <Route
+                        path="/"
+                        render={props =>
+                            !loadApp ? (
+                                error(
+                                    'Our records indicate your interview was interrupted before submission, please contact the course team to reset this activity',
+                                    'warning'
+                                )
+                            ) : (
+                                <App {...props} />
+                            )
+                        }
+                    />
                 </Switch>
             </Fragment>
         </Router>
     </Provider>
-);
-
-const error = (
-    err = 'Something went wrong... Please contact UQx',
-    color = 'danger'
-) => (
-    <Alert color={color} style={{ textAlign: 'center', fontWeight: 'bold' }}>
-        {err}
-    </Alert>
 );
 
 const render = el => {
@@ -100,12 +118,7 @@ const getSavedData = () => {
                 if (savedQuestionsList[0].completed) {
                     render(renderApp());
                 } else {
-                    render(
-                        error(
-                            'Our records indicate your interview was interrupted before submission, please contact the course team to reset this activity',
-                            'warning'
-                        )
-                    );
+                    render(renderApp(false));
                 }
             } else {
                 render(renderApp());

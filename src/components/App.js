@@ -233,7 +233,7 @@ class App extends Component {
         // fd.append('video', videoBase64);
         fd.append('userID', $LTI.userID);
         fd.append('ltiID', $LTI.id);
-
+        fd.append('courseID', $LTI.courseID);
         fd.append('jwt_token', $JWT_TOKEN);
 
         const config = {
@@ -541,13 +541,6 @@ class App extends Component {
                 break;
         }
 
-        // console.log(
-        //     'wait a minute',
-        //     stage,
-        //     record,
-        //     completed,
-        //     !completed && progress === 0 && mediaAvailable
-        // );
         return (
             <Fragment>
                 {/* <MaskContent hide={stage !== 'end'}> */}

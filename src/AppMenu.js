@@ -36,7 +36,7 @@ const AdminPageOptions = props => {
     const { setSaveTrue, history } = props;
 
     return (
-        <AdminPageOptionsContainer>
+        <AdminPageOptionsContainer height={400}>
             <CancelButton
                 color="link danger"
                 type="button"
@@ -62,6 +62,7 @@ const AdminPageOptions = props => {
 const AppMenu = props => {
     const { location } = props;
     const admin = location.pathname === '/edit';
+
     return (
         <Container admin={admin}>
             {admin ? (

@@ -119,6 +119,36 @@ const completedReducer = (state = false, action) => {
     }
 };
 
+const submissionsReducer = (state = {}, action) => {
+    switch (action.type) {
+        case Actions.GET_SUBMISSIONS_SUCCESS:
+            console.log(action);
+            return { ...action.payload.data.submissions };
+        default:
+            return state;
+    }
+};
+
+const StudentDataReducer = (state = {}, action) => {
+    switch (action.type) {
+        case Actions.GET_SUBMISSIONS_SUCCESS:
+            return { ...action.payload.data.mapped_data };
+        case Actions.UPLOAD_STUDENT_DATA_FILES_SUCCESS:
+            return { ...action.payload.data };
+        default:
+            return state;
+    }
+};
+
+const submissionsMetaDataReducer = (state = {}, action) => {
+    switch (action.type) {
+        case Actions.GET_SUBMISSIONS_SUCCESS:
+            return { ...action.payload.data.meta_data };
+        default:
+            return state;
+    }
+};
+
 export default combineReducers({
     questionsListRecordID: questionsListRecordIDReducer,
     questionsList: questionsListReducer,
@@ -130,4 +160,7 @@ export default combineReducers({
     save: saveReducer,
     maxAttempts: maxAttemptsReducer,
     completed: completedReducer,
+    submissions: submissionsReducer,
+    studentData: StudentDataReducer,
+    submissionsMetaData: submissionsMetaDataReducer,
 });
