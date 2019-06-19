@@ -23,7 +23,7 @@
          $user_id = $lti->user_id();
          $course_id = $lti->course_id();
          $user_roles = $lti->user_roles();
-
+         
 /*
 
 				$calldata = $lti->calldata();
