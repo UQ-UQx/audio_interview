@@ -13,15 +13,26 @@ const Display = styled.div`
     font-size: 20px;
 `;
 
+const displayByMinute = secondValue => {
+    const minute = Math.floor(secondValue / 60);
+    const second = secondValue % 60;
+
+    if (minute === 0) return `${second}"`;
+    return `${minute}'${second}"`;
+};
+
 const CountdownDisplay = props => {
     const { time, startTime, changeHue, display } = props;
     const timeRemainingPercentage = (time / startTime) * 100;
 
+    console.log('CountdownDisplay', time, startTime, changeHue, display);
+    const newDisplay = displayByMinute(time);
+    console.log('newDisplay', newDisplay);
     return (
         <Display changeHue={changeHue} time={time} startTime={startTime}>
             <CircularProgressbar
                 percentage={timeRemainingPercentage}
-                text={display}
+                text={newDisplay}
                 styles={{
                     path: {
                         stroke: changeHue

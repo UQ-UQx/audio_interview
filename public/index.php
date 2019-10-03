@@ -24,8 +24,8 @@
          $course_id = $lti->course_id();
          $user_roles = $lti->user_roles();
          
-/*
 
+/*
 				$calldata = $lti->calldata();
 				$lti_grade_url = $lti->grade_url();
 				$lti_consumer_key = $lti->lti_consumer_key();
@@ -41,7 +41,7 @@
 				if(isset($calldata{'custom_variable_by_user_bool'})){
 					$custom_variable_by_user_bool = json_decode($calldata{'custom_variable_by_user_bool'});
 				} 
-			*/
+*/			
 ?>
 
 		<style>
@@ -67,7 +67,7 @@
 		$JWT_TOKEN = '<?php echo $jwt_encode_token; ?>';
 		
 	</script>
-    <div id="app"></div>
+    <div id="app">Experiencing technical problems, please contact UQx team</div>
     <script type="text/javascript" src="./dist/bundle.js"></script>
     </body>
 </html>
