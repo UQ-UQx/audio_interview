@@ -20,6 +20,9 @@ import moment from 'moment';
 import Tooltip from '@material-ui/core/Tooltip';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
+// import Popper from '@material-ui/core/Popper';
+// import Fade from '@material-ui/core/Fade';
+// import Paper from '@material-ui/core/Paper';
 import CountdownDisplay from '../components/CountdownDisplay';
 import TypedQuestion from '../components/TypedQuestion';
 
@@ -60,7 +63,7 @@ const Loading = styled(CircularProgress)`
 
 const StyledMUIButton = styled(MUIButton)`
     && {
-        margin: 10px;
+        margin: 2px;
     }
 `;
 
@@ -82,6 +85,14 @@ const Stop = styled(StyledMUIButton)`
 `;
 
 const SeekToButton = styled(StyledMUIButton)`
+    && {
+        :focus {
+            outline: none;
+        }
+    }
+`;
+
+const PlaybackSettingButton = styled(StyledMUIButton)`
     && {
         :focus {
             outline: none;
@@ -159,6 +170,8 @@ class InterviewPlayer extends Component {
             currentQuestionKey: 0,
             countdown: props.questions[0].settings.time,
             loading: true,
+            //            playbackSettingOpen: false,
+            playbackSpeed: 1,
         };
 
         getDuration(props.audioURL, duration => {
@@ -169,13 +182,15 @@ class InterviewPlayer extends Component {
         this.play = this.play.bind(this);
         this.pause = this.pause.bind(this);
         this.stop = this.stop.bind(this);
+        //        this.togglePlaybackSetting = this.togglePlaybackSetting.bind(this);
+        this.playbackSpeed = this.playbackSpeed.bind(this);
     }
 
     componentWillUnmount() {
         if (this.timer) clearInterval(this.timer);
     }
 
-    play() {
+    play(speed = 1) {
         if (this.audioplayer.currentTime === 0) {
             this.audioplayer.currentTime = 1;
             this.audioplayer.currentTime = 0;
@@ -183,6 +198,38 @@ class InterviewPlayer extends Component {
         console.log('Play Clicked');
         this.audioplayer.play();
         this.setState({ playing: true, paused: false });
+        /*        
+        const { playbackSpeed } = this.state;
+        let interval = 1000;
+        switch (playbackSpeed) {
+            case 1.5:
+                interval = 3000;
+                break;
+            case 2:
+                interval = 2000;
+                break;
+            default:
+                interval = 1000;
+        }
+        console.log('interval', playbackSpeed, interval);
+        */
+        let interval = 1000;
+        //        let remove = 1;
+        switch (speed) {
+            case 1.5:
+                interval = 667;
+                //                remove = 3;
+                break;
+            case 2:
+                interval = 500;
+                //                remove = 2;
+                break;
+            default:
+                interval = 1000;
+            //                remove = 1;
+        }
+        console.log('interval', speed, interval);
+
         this.timer = setInterval(() => {
             const { audioDuration, countdown } = this.state;
             const { images, questions } = this.props;
@@ -223,7 +270,7 @@ class InterviewPlayer extends Component {
                     played: roundedPlayed,
                 });
             }
-        }, 1000);
+        }, interval);
     }
 
     pause() {
@@ -253,6 +300,15 @@ class InterviewPlayer extends Component {
             countdown: questions[0].settings.time,
         });
     }
+
+    /*    
+    togglePlaybackSetting() {
+        console.log('togglePlaybackSetting', this.state);
+        this.setState(state => ({
+            playbackSettingOpen: !state.playbackSettingOpen,
+        }));
+    }
+*/
 
     seekTo(time) {
         // 0 x x.xxx
@@ -330,6 +386,30 @@ class InterviewPlayer extends Component {
         console.log(this.timer);
     }
 
+    playbackSpeed(speed) {
+        //
+        const { playbackSpeed } = this.state;
+        let newSpeed = 1;
+        if (playbackSpeed !== speed) {
+            newSpeed = speed;
+        }
+        console.log('playback speed', newSpeed);
+        this.audioplayer.playbackRate = newSpeed;
+        this.setState({ playbackSpeed: newSpeed });
+        //        this.stop();
+        this.pause();
+        this.play(newSpeed);
+        /*
+        if (playbackSpeed === speed) {
+            this.audioplayer.playbackRate = 1;
+            this.setState({ playbackSpeed: 1 });
+        } else {
+            this.audioplayer.playbackRate = speed;
+            this.setState({ playbackSpeed: speed });
+        }
+*/
+    }
+
     render() {
         const {
             audioDuration,
@@ -342,6 +422,7 @@ class InterviewPlayer extends Component {
             currentQuestionKey,
             currentImageKey, // eslint-disable-line no-unused-vars
             loading,
+            playbackSpeed,
         } = this.state;
         const { audioURL, questions, student, classes, submitted } = this.props;
 
@@ -514,7 +595,6 @@ class InterviewPlayer extends Component {
                                 }}
                             >
                                 <Icon fontSize="large">replay_30</Icon>
-                                30
                             </SeekToButton>
                             <SeekToButton
                                 variant="extendedFab"
@@ -526,7 +606,7 @@ class InterviewPlayer extends Component {
                                     );
                                 }}
                             >
-                                <Icon fontSize="large">replay_5</Icon>5
+                                <Icon fontSize="large">replay_5</Icon>
                             </SeekToButton>
                             <SeekToButton
                                 variant="extendedFab"
@@ -540,7 +620,7 @@ class InterviewPlayer extends Component {
                                     );
                                 }}
                             >
-                                <Icon fontSize="large">forward_5</Icon>5
+                                <Icon fontSize="large">forward_5</Icon>
                             </SeekToButton>
                             <SeekToButton
                                 variant="extendedFab"
@@ -555,8 +635,59 @@ class InterviewPlayer extends Component {
                                 }}
                             >
                                 <Icon fontSize="large">forward_30</Icon>
-                                30
                             </SeekToButton>
+                            <PlaybackSettingButton
+                                variant="extendedFab"
+                                color={
+                                    playbackSpeed === 1.5
+                                        ? 'primary'
+                                        : 'default'
+                                }
+                                aria-label="Setting Playback Speed 1.5"
+                                onClick={() => {
+                                    this.playbackSpeed(1.5);
+                                }}
+                            >
+                                <Icon fontSize="large">speed</Icon>
+                                1.5
+                            </PlaybackSettingButton>
+                            <PlaybackSettingButton
+                                variant="extendedFab"
+                                color={
+                                    playbackSpeed === 2 ? 'primary' : 'default'
+                                }
+                                aria-label="Setting Playback Speed 2"
+                                onClick={() => {
+                                    this.playbackSpeed(2);
+                                }}
+                            >
+                                <Icon fontSize="large">speed</Icon>
+                                2.0
+                            </PlaybackSettingButton>
+                            {/*
+                            <PlaybackSettingButton
+                                variant="extendedFab"
+                                color="default"
+                                aria-label="Setting Playback Speed"
+                                onClick={() => {
+                                    this.togglePlaybackSetting();
+                                }}
+                            >
+                                <Icon fontSize="large">
+                                    settings_applications
+                                </Icon>
+                                Playback
+                            </PlaybackSettingButton>
+                            <Popper open={playbackSettingOpen} transition>
+                                <Fade timeout={350}>
+                                    <Paper>
+                                        <Typography>
+                                            The content of the Popper.
+                                        </Typography>
+                                    </Paper>
+                                </Fade>
+                            </Popper>
+                        */}
                         </React.Fragment>
                     ) : (
                         ''

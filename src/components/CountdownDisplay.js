@@ -25,9 +25,9 @@ const CountdownDisplay = props => {
     const { time, startTime, changeHue, display } = props;
     const timeRemainingPercentage = (time / startTime) * 100;
 
-    console.log('CountdownDisplay', time, startTime, changeHue, display);
+    //    console.log('CountdownDisplay', time, startTime, changeHue, display);
     const newDisplay = displayByMinute(time);
-    console.log('newDisplay', newDisplay);
+    //    console.log('newDisplay', newDisplay);
     return (
         <Display changeHue={changeHue} time={time} startTime={startTime}>
             <CircularProgressbar
