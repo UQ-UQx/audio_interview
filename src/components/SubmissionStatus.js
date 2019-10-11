@@ -132,7 +132,7 @@ const SubmissionStatus = props => {
                             />
 
                             <TimeRemainingContainer>
-                                Estimated Time Reaining:{' '}
+                                Estimated Time Remaining:{' '}
                                 {moment
                                     .duration(timeRemaining, 'seconds')
                                     .format('hh:mm:ss', {
