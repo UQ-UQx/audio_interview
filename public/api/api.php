@@ -265,8 +265,17 @@ class MyApi
 
       // write the data out to the file
       $fp = fopen($userDir . '/' . $audioFilename, 'wb');
-      fwrite($fp, $decodedAudioData);
+
+      // Split the data if it is too large.
+      // Check the size
+      //$sizeDecodedAudioData = strlen($decodedAudioData);
+      $pieces = str_split($decodedAudioData, 1024 * 4);
+      foreach ($pieces as $piece) {
+        fwrite($fp, $piece, strlen($piece));
+      }
       fclose($fp);
+      //      fwrite($fp, $decodedAudioData);
+      //      fclose($fp);
 
       // $fp = fopen($userDir . '/' . $videoFilename, 'wb');
       // fwrite($fp, $decodedVideoData);
