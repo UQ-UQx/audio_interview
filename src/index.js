@@ -35,6 +35,9 @@ import AppMenu from './AppMenu';
 import 'normalize.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+import Msg from './components/Msg';
+// import SubmitAudio from './components/SubmitAudio';
+
 library.add(
     faStroopwafel,
     faTrash,
@@ -77,14 +80,7 @@ const renderApp = (loadApp = true) => (
                     <Route
                         path="/"
                         render={props =>
-                            !loadApp ? (
-                                error(
-                                    'Our records indicate your interview was interrupted before submission, please contact the course team to reset this activity',
-                                    'warning'
-                                )
-                            ) : (
-                                <App {...props} />
-                            )
+                            !loadApp ? <Msg /> : <App {...props} />
                         }
                     />
                 </Switch>
@@ -104,6 +100,7 @@ const getSavedData = () => {
     ]);
 
     data.then(response => {
+        console.log('response', response);
         if (
             response[0].type === Actions.GET_SAVED_GROUPS_SUCCESS &&
             response[1].type === Actions.GET_SAVED_QUESTIONS_LIST_SUCCESS
@@ -132,6 +129,7 @@ const getSavedData = () => {
 /* Disable Activity when in studio view 
 (edX studio view sets userID as 'student') 
 course ID is different in edX Live View */
+console.log('LTI', $LTI);
 if ($LTI.userID === 'student') {
     const divStyle = {
         textAlign: 'center',
