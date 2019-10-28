@@ -58,8 +58,9 @@ class Msg extends Component {
                     <p>
                         Our records indicate your interview was interrupted
                         before submission, please contact the course team to
-                        reset this activity or
+                        reset this activity or email your downloaded files to the course team.
                     </p>
+                    {/*
                     <Button
                         color="primary"
                         onClick={() => {
@@ -68,6 +69,7 @@ class Msg extends Component {
                     >
                         Click to upload your Recorded Audio File
                     </Button>
+                    */}
                 </Alert>
             </div>
         );

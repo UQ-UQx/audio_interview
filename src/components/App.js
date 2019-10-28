@@ -106,6 +106,21 @@ const Permissions = styled.div`
 const gapTimeDefault = 10000;
 const screenshotInterval = 5000;
 
+const u_btoa = (buffer) => {
+//    console.log('u_btoa');
+    var binary = [];
+    var bytes = new Uint8Array(buffer);
+    for (var i = 0, il = bytes.byteLength; i < il; i++) {
+        binary.push(String.fromCharCode(bytes[i]));
+    }
+    return window.btoa(binary.join(''));
+};
+
+const u_atob = (ascii) => {
+    console.log('u_atob');
+    return Uint8Array.from(window.atob(ascii), c => c.charCodeAt(0));
+};
+
 class App extends Component {
     constructor(props) {
         super(props);
@@ -167,7 +182,7 @@ class App extends Component {
     // }
 
     onStop(recordedBlob) {
-        // console.log('recordedBlob is: ', recordedBlob);
+        console.log('recordedBlob is: ', recordedBlob);
 
         axios({
             method: 'get',
@@ -187,7 +202,6 @@ class App extends Component {
             )
             .then(audioBase64 => {
                 this.saveInterview({ audioBase64 });
-
                 // const output = this.whammyEncoder.compile();
 
                 // //console.log(output);
@@ -208,6 +222,7 @@ class App extends Component {
     }
 
     saveInterview({ audioBase64 }) {
+        console.log('saveInterview is called');
         const { uploadStartMoment } = this.state;
         const { setCompletedTrue, screenshots } = this.props;
         const currentMoment = moment();
@@ -235,6 +250,31 @@ class App extends Component {
         fd.append('ltiID', $LTI.id);
         fd.append('courseID', $LTI.courseID);
         fd.append('jwt_token', $JWT_TOKEN);
+
+        // force audio file download
+        const audio = audioBase64.substr(audioBase64.indexOf(',') + 1);
+        // const audioBase64Decode = window.atob(audio);
+        const audioBase64Decode = u_atob(audio);
+        // console.log('audio', audioBase64Decode, audio);
+        const file = new Blob([audioBase64Decode]);
+        if (window.navigator.msSaveOrOpenBlob) {
+            // IE10+
+            console.log('Windows IE');
+            window.navigator.msSaveOrOpenBlob(file, filename);
+        } else {
+            // Others
+            console.log('Other Browser');
+            const a = document.createElement('a');
+            const url = URL.createObjectURL(file);
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+        }
 
         const config = {
             onUploadProgress: progressEvent => {
