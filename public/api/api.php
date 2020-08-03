@@ -65,6 +65,8 @@ class MyApi
         $this->uploadStudentData($this->request);
       case "getSubmissions":
         $this->getSubmissions($this->request->data);
+      case "resetSubmission":
+        $this->resetSubmission($this->request->data);
       default:
         $this->reply("action switch failed", 400);
         break;
@@ -197,12 +199,13 @@ class MyApi
     );
     while ($row = $select->fetch()) {
       $meta = $row;
-      if ($meta->completed) {
-        $metaData[$meta->user_id] = [
-          "questions" => $meta->questions,
-          "submitted" => $meta->updated
-        ];
-      }
+      // temperarily don't check if completed, so can have a list to see what onces didn't upload properly.
+      //if ($meta->completed) {
+      $metaData[$meta->user_id] = [
+        "questions" => $meta->questions,
+        "submitted" => $meta->updated
+      ];
+      //}
     }
 
     $this->reply([
@@ -210,6 +213,56 @@ class MyApi
       "mapped_data" => $mapped,
       "meta_data" => $metaData
     ]);
+  }
+
+  public function resetSubmission($data)
+  {
+    $data = json_decode($data);
+
+    $courseID = $data->courseID;
+    $ltiID = $data->ltiID;
+
+    $studentID = $data->studentID;
+    $submission = $data->submission;
+    $metaData = $data->submissionMetaData;
+
+    if (!$submission) {
+      try {
+        $select = $this->db->query(
+          'SELECT * FROM questions_list
+        WHERE resource_id = :resource_id AND user_id = :student_id',
+          array('resource_id' => $ltiID, 'student_id' => $studentID)
+        );
+
+        $result = $select->fetch();
+        if ($result && !$select->fetch()) {
+          $delete = $this->db->query(
+            'DELETE FROM questions_list WHERE id = :delete_id',
+            array('delete_id' => $result->id)
+          );
+
+          $this->reply([
+            "resource_id" => $ltiID,
+            "course_id" => $courseID,
+            "student_id" => $studentID,
+            "result" => $result,
+            "delete" => true
+          ]);
+        } else {
+          $this->reply([
+            "error" => "Returned more or less than one row"
+          ]);
+        }
+      } catch (Exception $e) {
+        $this->reply([
+          "error" => $e
+        ]);
+      }
+    } else {
+      $this->reply([
+        "error" => "submission found"
+      ]);
+    }
   }
 
   public function uploadFile()

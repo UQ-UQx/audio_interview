@@ -101,6 +101,41 @@ const getSubmissions = () => {
     };
 };
 
+const resetSubmission = ({student, submission, submissionMetaData}) => {
+    console.log($LTI.courseID);
+    console.log('Reset submission');
+
+    let data = {
+        courseID: $LTI.courseID,
+        ltiID: $LTI.id,
+        studentID: student.id,
+        submission,
+        submissionMetaData
+    }
+
+    console.log('data ', data)
+
+    return {
+        types: [
+            Actions.GET_SUBMISSIONS_START,
+            Actions.GET_SUBMISSIONS_SUCCESS,
+            Actions.GET_SUBMISSIONS_ERROR,
+        ],
+        payload: {
+            client: 'activityAPI', // here you can define client used
+            request: {
+                method: 'get',
+                params: {
+                    action: 'resetSubmission',
+                    jwt_token: $JWT_TOKEN,
+                    data,
+                },
+            },
+        },
+    };
+};
+
+
 const getSavedQuestionsList = () => {
     const condition1 = `course_id,eq,${$LTI.courseID}`;
     const condition2 = `resource_id,eq,${$LTI.id}`;
@@ -386,6 +421,7 @@ const setSaveFalse = () => ({
 export {
     uploadStudentDataFiles,
     getSubmissions,
+    resetSubmission,
     getSavedQuestionsList,
     saveQuestionsList,
     getSavedGroups,

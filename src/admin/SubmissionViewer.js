@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Container } from 'reactstrap';
 import uuidv4 from 'uuid/v4';
 
 import InterviewPlayer from './InterviewPlayer';
@@ -31,6 +31,17 @@ class SubmissionViewer extends Component {
         console.log('CVALLING', progress, question);
     }
 
+    deleteStudentMeta(student, submission, submissionMetaData) {
+
+        const { resetStudent } = this.props;
+        console.log('delete student submission')
+        console.log({student, submission, submissionMetaData})
+        if (!submission) {
+            let result = resetStudent({student, submission, submissionMetaData});
+            console.log('resetSubmission result ', result);
+        }
+    }
+
     render() {
         const { error, gapTime } = this.state;
         const {
@@ -42,6 +53,34 @@ class SubmissionViewer extends Component {
         } = this.props;
 
         // (([-_]time[-_]))(.*)(([-_]time[-_])) regex to capture time
+
+        if (!submission) {
+            return (
+                <ComponentContainer
+                    size="lg"
+                    isOpen={submissionModal}
+                    toggle={() => toggleModal(null)}
+                >
+                    <ModalHeader toggle={() => toggleModal(null)}>
+                        Submission upload not found
+                    </ModalHeader>
+                    <ModalBody>
+                        <p>The students upload for this submission was not found. Contact the student to send the downloaded recording file.</p>
+
+                        <p>Downloaded file not found? Click to reset so they can redo the recording.<br/>
+                            <Button color="danger" onClick={() => this.deleteStudentMeta(student, submission, submissionMetaData)}>Reset</Button>
+                        </p>
+                    </ModalBody>
+                    <ModalFooter>
+                        {error !== '' ? error : ''}
+    
+                        <Button color="secondary" onClick={() => toggleModal(null)}>
+                            Close
+                        </Button>
+                    </ModalFooter>
+                </ComponentContainer>
+            );
+        }
 
         const audioFilenameFilter = submission.filter(
             url => url === `audio_recording_${student.id}.webm`

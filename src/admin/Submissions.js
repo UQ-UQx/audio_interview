@@ -6,7 +6,7 @@ import { Button, Modal, Alert } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import SubmissionsStudentDataModal from './SubmissionsStudentDataModal';
 import SubmissionsTable from './SubmissionsTable';
-import { getSubmissions } from '../actions';
+import { getSubmissions, resetSubmission } from '../actions';
 
 const UploadDataButton = styled(Button)``;
 
@@ -49,13 +49,13 @@ class Submissions extends Component {
     render() {
         console.log('wow');
 
-        const { submissions, studentData, submissionsMetaData } = this.props;
+        const { submissions, studentData, submissionsMetaData, resetStudent } = this.props;
         const { uploadmodal } = this.state;
 
-        console.log(submissions, studentData);
+        console.log(submissions, studentData, submissionsMetaData);
         return (
             <div>
-                {Object.keys(submissions).length > 0 ? (
+                {Object.keys(submissionsMetaData).length > 0 ? (
                     <React.Fragment>
                         {' '}
                         <FileUploadModal
@@ -68,12 +68,15 @@ class Submissions extends Component {
                             />
                         </FileUploadModal>
                         <div>
-                            {Object.keys(submissions).length > 0 &&
+                            { // Make sure there is meta data, not nessesarily an uploaded recording. (So can display ones that the upload failed)    
+                            //Object.keys(submissions).length > 0 &&
+                            Object.keys(submissionsMetaData).length > 0 &&
                             Object.keys(studentData).length > 0 ? (
                                 <SubmissionsTable
                                     submissions={submissions}
                                     students={studentData}
                                     submissionsMetaData={submissionsMetaData}
+                                    resetStudent={resetStudent}
                                 />
                             ) : (
                                 <Warning color="warning">
@@ -129,5 +132,5 @@ export default connect(
         submissionsMetaData: state.submissionsMetaData,
     }),
 
-    { getSubmissionsList: getSubmissions }
+    { getSubmissionsList: getSubmissions, resetStudent: resetSubmission }
 )(Submissions);

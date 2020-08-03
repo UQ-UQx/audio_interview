@@ -36,7 +36,7 @@ class SubmissionsTable extends Component {
 
     render() {
         const { submissionModal, currentlyViewing } = this.state;
-        const { submissions, students, submissionsMetaData } = this.props;
+        const { submissions, students, submissionsMetaData, resetStudent } = this.props;
 
         console.log(submissionModal);
         return (
@@ -53,7 +53,7 @@ class SubmissionsTable extends Component {
                         </tr>
                     </thead>
                     <tbody>
-                        {Object.keys(submissions).map(userID => (
+                        {Object.keys(submissionsMetaData).map(userID => (
                             <tr key={userID}>
                                 <td>{userID}</td>
                                 <td>
@@ -77,14 +77,17 @@ class SubmissionsTable extends Component {
                                         : 'Unknown'}
                                 </td>
                                 <td>
+                                    
                                     <Button
                                         color="info"
                                         onClick={() => {
                                             this.toggleModal(userID);
                                         }}
                                     >
-                                        Click To View <VideoIcon icon="video" />
+                                        {// Check if submission has a corresponding upload
+                                        submissions[userID] ? (`Click To View ${<VideoIcon icon="video" />}`) : 'No Upload found'}
                                     </Button>
+                                    
                                 </td>
                             </tr>
                         ))}
@@ -94,6 +97,7 @@ class SubmissionsTable extends Component {
                     <SubmissionViewer
                         submissionModal={submissionModal}
                         toggleModal={this.toggleModal}
+                        resetStudent={resetStudent}
                         submissionMetaData={
                             currentlyViewing !== null
                                 ? submissionsMetaData[currentlyViewing]
