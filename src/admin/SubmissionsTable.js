@@ -38,6 +38,7 @@ class SubmissionsTable extends Component {
         const { submissionModal, currentlyViewing } = this.state;
         const { submissions, students, submissionsMetaData, resetStudent } = this.props;
 
+        console.log('submissionsMeta: ', submissions, submissionsMetaData);
         console.log(submissionModal);
         return (
             <ComponentContainer>
