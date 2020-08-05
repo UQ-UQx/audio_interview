@@ -11,126 +11,123 @@ import { getSubmissions, resetSubmission } from '../actions';
 const UploadDataButton = styled(Button)``;
 
 const FileUploadModal = styled(Modal)`
-    width: 80%;
+  width: 80%;
 `;
 
 const Warning = styled(Alert)`
-    margin-top: 20px;
+  margin-top: 20px;
 `;
 
 const UploadIcon = styled(FontAwesomeIcon)`
-    margin-bottom: 5px;
-    margin-right: 5px;
+  margin-bottom: 5px;
+  margin-right: 5px;
 `;
 class Submissions extends Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.state = {
-            uploadmodal: false,
-        };
+    this.state = {
+      uploadmodal: false,
+    };
 
-        this.toggleModal = this.toggleModal.bind(this);
-    }
+    this.toggleModal = this.toggleModal.bind(this);
+  }
 
-    componentDidMount() {
-        const { getSubmissionsList } = this.props;
-        getSubmissionsList();
-    }
+  componentDidMount() {
+    const { getSubmissionsList } = this.props;
+    getSubmissionsList();
+  }
 
-    toggleModal() {
-        const { uploadmodal } = this.state;
+  toggleModal() {
+    const { uploadmodal } = this.state;
 
-        this.setState({
-            uploadmodal: !uploadmodal,
-        });
-    }
+    this.setState({
+      uploadmodal: !uploadmodal,
+    });
+  }
 
-    render() {
-        console.log('wow');
+  render() {
+    console.log('wow');
 
-        const { submissions, studentData, submissionsMetaData, resetStudent } = this.props;
-        const { uploadmodal } = this.state;
+    const {
+      submissions,
+      studentData,
+      submissionsMetaData,
+      resetStudent,
+    } = this.props;
+    const { uploadmodal } = this.state;
 
-        console.log(submissions, studentData, submissionsMetaData);
-        return (
+    console.log(submissions, studentData, submissionsMetaData);
+    return (
+      <div>
+        {Object.keys(submissionsMetaData).length > 0 ? (
+          <React.Fragment>
+            {' '}
+            <FileUploadModal
+              size='lg'
+              isOpen={uploadmodal}
+              toggle={this.toggleModal}
+            >
+              <SubmissionsStudentDataModal toggleModal={this.toggleModal} />
+            </FileUploadModal>
             <div>
-                {Object.keys(submissionsMetaData).length > 0 ? (
-                    <React.Fragment>
-                        {' '}
-                        <FileUploadModal
-                            size="lg"
-                            isOpen={uploadmodal}
-                            toggle={this.toggleModal}
-                        >
-                            <SubmissionsStudentDataModal
-                                toggleModal={this.toggleModal}
-                            />
-                        </FileUploadModal>
-                        <div>
-                            { // Make sure there is meta data, not nessesarily an uploaded recording. (So can display ones that the upload failed)    
-                            //Object.keys(submissions).length > 0 &&
-                            Object.keys(submissionsMetaData).length > 0 &&
-                            Object.keys(studentData).length > 0 ? (
-                                <SubmissionsTable
-                                    submissions={submissions}
-                                    students={studentData}
-                                    submissionsMetaData={submissionsMetaData}
-                                    resetStudent={resetStudent}
-                                />
-                            ) : (
-                                <Warning color="warning">
-                                    <p>
-                                        {Object.keys(submissions).length}{' '}
-                                        learners have submitted their interview
-                                    </p>
-                                    <p>
-                                        <b>
-                                            Please upload student data to view
-                                            submissions
-                                        </b>
-                                    </p>
-                                    <UploadDataButton
-                                        onClick={() => {
-                                            this.setState({
-                                                uploadmodal: true,
-                                            });
-                                        }}
-                                    >
-                                        <UploadIcon icon="cloud-upload-alt" />
-                                        Upload Student Data
-                                    </UploadDataButton>
-                                </Warning>
-                            )}
-                        </div>
-                    </React.Fragment>
-                ) : (
-                    'No submissions available'
-                )}
+              {Object.keys(submissionsMetaData).length > 0 &&
+              Object.keys(studentData).length > 0 ? (
+                <Warning color='warning'>
+                  <p>
+                    {Object.keys(submissions).length} learners have submitted
+                    their interview
+                  </p>
+                  <p>
+                    <b>Please upload student data to view submissions</b>
+                  </p>
+                  <UploadDataButton
+                    onClick={() => {
+                      this.setState({
+                        uploadmodal: true,
+                      });
+                    }}
+                  >
+                    <UploadIcon icon='cloud-upload-alt' />
+                    Upload Student Data
+                  </UploadDataButton>
+                </Warning>
+              ) : null}
+              <SubmissionsTable
+                submissions={submissions}
+                students={studentData}
+                submissionsMetaData={submissionsMetaData}
+                resetStudent={resetStudent}
+              />
             </div>
-        );
-    }
+          </React.Fragment>
+        ) : (
+          'No submissions available'
+        )}
+      </div>
+    );
+  }
 }
 
 Submissions.propTypes = {
-    getSubmissionsList: PropTypes.func.isRequired,
-    submissions: PropTypes.shape({}),
-    studentData: PropTypes.shape({}),
-    submissionsMetaData: PropTypes.shape({}),
+  getSubmissionsList: PropTypes.func.isRequired,
+  submissions: PropTypes.shape({}),
+  studentData: PropTypes.shape({}),
+  submissionsMetaData: PropTypes.shape({}),
 };
 
 Submissions.defaultProps = {
-    submissions: {},
-    studentData: {},
-    submissionsMetaData: {},
+  submissions: {},
+  studentData: {},
+  submissionsMetaData: {},
 };
 
 export default connect(
-    state => ({
-        submissions: state.submissions,
-        studentData: state.studentData,
-        submissionsMetaData: state.submissionsMetaData,
-    }),
+  (state) => ({
+    submissions: state.submissions,
+    studentData: state.studentData,
+    submissionsMetaData: state.submissionsMetaData,
+  }),
 
-    { getSubmissionsList: getSubmissions, resetStudent: resetSubmission }
+  { getSubmissionsList: getSubmissions, resetStudent: resetSubmission }
 )(Submissions);
